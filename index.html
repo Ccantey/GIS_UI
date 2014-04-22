@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="shortcut icon" href="../../assets/ico/favicon.ico"> -->
+
+    <title>Wisconsin Rapids</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/style.css" rel="stylesheet">
+	<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
+
+
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <!-- <div class="container"> -->
+        <div class="navbar-header">
+<!--           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button> -->
+          <a class="navbar-brand" href="http://www.wirapids.org" target="blank">Wisconsin Rapids </a><font class="navbar-brand" style="color:#ff6600">City Viewer</font> 
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+      <!-- </div> -->
+    </div>
+
+<!--     <End Top Navbar> -->
+
+
+	  <a id="menu-toggle" href="#" class="btn btn-primary btn-lg toggle"><i class="glyphicon glyphicon-forward"></i></a> 
+	  
+	<div id="sidebar-wrapper">
+	
+
+	<ul id="myTab" class="nav nav-tabs">
+		<li class="active">
+			<a class="tabtext" data-toggle="tab" href="#searchTab">Search</a>
+		</li>
+		<li>
+			<a class="tabtext" data-toggle="tab" href="#layersTab">Layers</a>
+		</li>
+		<li>
+			<a class="tabtext" data-toggle="tab" href="#toolsTab">Tools</a>
+		</li>
+		<li>
+			<a class="tabtext" data-toggle="tab" href="#drawTab">Draw</a>
+		</li>
+	</ul>
+	<a id="menu-close" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
+	<div id="myTabContent" class="tab-content">
+	<!--Begin Search Tab Content-->
+		<div id="searchTab" class="tab-pane fade  active in">
+		  <div id="searchForm">
+			<form class="form-horizontal" role="form">
+			
+			  <div class="form-group">
+				<label for="inputEmail3" class="col-sm-4 control-label">Owner:</label>
+				<div class="col-sm-6">
+				  <input type="text" class="form-control" id="inputEmail3" placeholder="Owner Name">
+				</div>
+			  </div>
+			  
+			  <div class="form-group">
+				<label for="inputPassword3" class="col-sm-4 control-label">Address:</label>
+				<div class="col-sm-6">
+				  <input type="text" class="form-control" id="inputPassword3" placeholder="Street Address">
+				</div>
+			  </div>
+			  
+			  <div class="form-group">
+				<label for="inputPassword4" class="col-sm-4 control-label">Parcel No:</label>
+				<div class="col-sm-6">
+				  <input type="text" class="form-control" id="inputPassword4" placeholder="Parcel Number">
+				</div>
+			  </div>
+
+			</form>
+
+          </div>
+		  
+		  <section class="results identify">
+						    <!--<div class="process-results searchClass"><a class="mailOption" ><i class="icon-envelope-alt"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://dev.wsbinfolink.wsbeng.com/SouthStPaul-DataLink/outputs/parcelInfo.csv" target="_blank"><i class="icon-share"></i> Export</a></div>-->
+                            <!-- <div id="append" class="section-header">Results</div>
+							<select name="type" id="multipleSelect" class="selectmenu" onchange="updateIdentify(this.value)">       
+							</select> -->
+							</br></br>
+                            <div class="section-sub-header">Property Information</div>
+                            <table class="data" id="singleItem1"> 
+							</table>
+						
+                            <div class="section-sub-header2">Tax Districts</div>
+                            <table class="data" id="singleItem2">		
+                            </table>
+
+
+							
+                            
+                        </section>
+		  
+		  
+		</div>
+		
+		<!--Begin Layers Tab Content-->
+		
+		<div id="layersTab" class="tab-pane fade ">
+		
+			  <div id="layerChecks">
+			  <strong>Utility Layers</strong>
+				  <div class="checkbox">
+						<div class="utilities">									
+							<label>
+							  <input type="checkbox"> Sanitary Sewer
+							</label>
+						</div>
+						<div class="utilities">					
+							<label>
+							  <input type="checkbox"> Storm Sewer
+							</label>
+						</div>
+						<div class="utilities">					
+							<label>
+							  <input type="checkbox"> Water
+							</label>
+						</div>
+						<div class="utilities">					
+							<label>
+							  <input type="checkbox"> A-Drawings
+							</label>
+						</div>
+					</div>			
+				</div>
+				
+				<div id="layerChecks2">
+			      <strong>Basemap Layers</strong>
+				  <div class="checkbox">
+				  <div class="utilities">					
+							<label>
+							  <input type="checkbox"> Address Labels
+							</label>
+						</div>
+						<div class="utilities">					
+							<label>
+							  <input type="checkbox"> Aerial Photograph (2015)
+							</label>
+						</div>
+						<div class="utilities">					
+							<label>
+							  <input type="checkbox"> FEMA Floodplain
+							</label>
+						</div>
+						<div class="utilities">					
+							<label>
+							  <input type="checkbox"> Five Foot Contours
+							</label>
+						</div>
+					</div>			
+				</div>
+		</div>
+		
+		
+		
+		<div id="toolsTab" class="tab-pane fade">
+
+                        <table class="tools">
+                        <tr>
+                        	<th>Select From</th>
+                        	<td>
+                            	<select id="BufferLayer" class="selectmenu">
+									<!-- Change the value to the corresponding index at REST : Perhaps pass these strings to variable down the road -->
+                                    <option value=36>Parcels</option>  
+                                    <option value="Drawing">Drawing</option>                                           
+                                    <option value=17>Sanitary Gravity Mains</option>
+                                    <option value=24>Storm Gravity Mains</option>
+                                    <option value=11>Water Mains</option>
+                                                                       
+                            	</select>
+                            </td>
+                        </tr>
+                        <tr>
+                        	<th>Select By</th>
+                            <td>
+                            	<div class="radioset">
+                                    <input type="radio"  id="drawPoint" name="radio" class="selectDraw"><label for="drawPoint" class="dDot sprite">Point</label>
+                                    <input type="radio" id="drawLine" name="radio" class="selectDraw"><label for="drawLine" class="drawLine sprite">Line</label>
+                                    <input type="radio" id="Extent" name="radio" class="selectDraw"><label for="Extent" class="Extent sprite">Polygon</label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                        	<th>Buffer</th>
+                            <td>
+                            	<input type="text" name="Buffer" value="100" size="3" id="distance">
+                                <select id="unitBuff" class="selectmenu">
+                                    <option value="UNIT_FOOT">Feet</option>
+                                    <option value="UNIT_STATUTE_MILE">Miles</option>                                           
+                                </select>
+                                <button id="Buffer" class="transition btn">Go</button>
+                            </td>
+							
+							    
+							
+                        </tr>
+                        <tr>
+                        	<th>Measure</th>
+                            <td>
+                            	<div class="radioset" id="measure-set">
+                                    <input type="radio" name="radio" class="selectDraw" id="measureLength"><label for="measureLength" class="measureLength sprite">Length</label>
+                                    <input type="radio" name="radio" class="selectDraw" id="measureArea"><label for="measureArea" class="measureArea sprite">Area</label>
+								</div>
+                                <select id="measureUnit" class="selectmenu">
+                                    <option value="UNIT_SQUARE_FEET">Feet</option>
+                                    <option value="UNIT_ACRES">Acres</option>
+                                    <option value="UNIT_SQUARE_MILES">Miles</option>
+                                </select>
+                        	</td>
+                        </tr>
+                        </table>
+		</div>
+	
+	<div id="drawTab" class="tab-pane fade">
+
+                        <table class="tools">
+                        <tr>
+                        	<th>Shape</th>
+                        	<td>
+                            	<div class="radioset" id="shape-set">
+                                    <input type="radio" name="radio" id="dPoint"><label for="dPoint" class="dDot sprite">Point</label>
+                                    <input type="radio" name="radio" id="dFreeLine"><label for="dFreeLine" class="dFreeLine sprite">Free Line</label>
+                                    <input type="radio" name="radio" id="dFreePoly"><label for="dFreePoly" class="dFreePoly sprite">Free Poly</label>
+                                    <input type="radio" name="radio" id="dText"><label for="dText" class="dText sprite" >Text</label>
+								</div>	
+                            </td>
+                        </tr>
+<!--                         <tr>
+                        	<th>Select By</th>
+                            <td>
+                            	<div class="radioset">
+                                    <input type="radio"  id="drawPoint" name="radio" class="selectDraw"><label for="drawPoint" class="dPoint sprite">Point</label>
+                                    <input type="radio" id="drawLine" name="radio" class="selectDraw"><label for="drawLine" class="drawLine sprite">Line</label>
+                                    <input type="radio" id="Extent" name="radio" class="selectDraw"><label for="Extent" class="Extent sprite">Polygon</label>
+                                </div>
+                            </td>
+                        </tr> -->
+                        <tr>
+                        	<th>Buffer</th>
+                            <td>
+                            	<input type="text" name="Buffer" value="100" size="3" id="distance">
+                                <select id="unitBuff" class="selectmenu">
+                                    <option value="UNIT_FOOT">Feet</option>
+                                    <option value="UNIT_STATUTE_MILE">Miles</option>                                           
+                                </select>
+                                <button id="Buffer" class="transition btn">Go</button>
+                            </td>
+							
+							    
+							
+                        </tr>
+                        <tr>
+                        	<th>Measure</th>
+                            <td>
+                            	<div class="radioset" id="measure-set">
+                                    <input type="radio" name="radio" class="selectDraw" id="measureLength"><label for="measureLength" class="measureLength sprite">Length</label>
+                                    <input type="radio" name="radio" class="selectDraw" id="measureArea"><label for="measureArea" class="measureArea sprite">Area</label>
+								</div>
+                                <select id="measureUnit" class="selectmenu">
+                                    <option value="UNIT_SQUARE_FEET">Feet</option>
+                                    <option value="UNIT_ACRES">Acres</option>
+                                    <option value="UNIT_SQUARE_MILES">Miles</option>
+                                </select>
+                        	</td>
+                        </tr>
+                        </table>
+		</div>
+	</div>
+</div><!--Sidebar wrapper-->
+
+
+	<div id="map">
+	Map goes here
+	</div>
+
+<!--     </div> --><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/jquery-ui-1.10.2.min.js"></script>
+
+
+  </body>
+</html>
