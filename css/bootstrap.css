@@ -1695,7 +1695,7 @@ output {
 /* altered */
 .form-control {
   display: block;
-  width: 100%;
+  width: 95%;
   height: 34px;
   padding: 6px 12px;
   font-size: 14px;
@@ -1999,9 +1999,9 @@ select[multiple].input-lg {
 }
 .btn {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 1px 12px;
   margin-bottom: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: normal;
   line-height: 1.42857143;
   text-align: center;
