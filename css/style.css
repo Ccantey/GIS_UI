@@ -275,5 +275,5 @@ table.tools input, .selectboxit-container { margin-right:5px;}
 	background-color: #eee;
 	text-decoration: none;
 	color: #ff6600;
-	border: 1px solid #ff6600;
+	/* border: 1px solid #ff6600; */
 }
