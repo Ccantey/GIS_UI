@@ -297,9 +297,9 @@ a:focus {
   text-decoration: underline;
 }
 a:focus {
-  outline: thin dotted;
-  outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
+  /* outline: thin dotted; */
+  /* outline: 5px auto -webkit-focus-ring-color; */
+  /* outline-offset: -2px; */
 }
 figure {
   margin: 0;
@@ -1681,9 +1681,9 @@ select[size] {
 input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: thin dotted;
+/*   outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
+  outline-offset: -2px; */
 }
 output {
   display: block;
@@ -2019,13 +2019,14 @@ select[multiple].input-lg {
 .btn:focus,
 .btn:active:focus,
 .btn.active:focus {
-  outline: thin dotted;
+/*   outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
+  outline-offset: -2px; */
 }
+/* altered */
 .btn:hover,
 .btn:focus {
-  color: #333;
+  color: #ff6600;
   text-decoration: none;
 }
 .btn:active,
@@ -2326,12 +2327,17 @@ fieldset[disabled] .btn-link:focus {
   color: #999;
   text-decoration: none;
 }
+/* altered */
 .btn-lg,
 .btn-group-lg > .btn {
-  padding: 10px 16px;
-  font-size: 18px;
-  line-height: 1.33;
+  padding: 10px 10px;
+  font-size: 15px;
+  line-height: .8;
   border-radius: 6px;
+  background-color: #404040;
+  color: #aaa;
+  border: 1px solid #aaa
+
 }
 .btn-sm,
 .btn-group-sm > .btn {
@@ -3475,6 +3481,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .nav > li > a:focus {
   text-decoration: none;
   background-color: #eee;
+  color:#ff6600;
 }
 .nav > li.disabled > a {
   color: #999;
@@ -4095,12 +4102,15 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   color: #999;
 }
 .navbar-inverse .navbar-nav > li > a {
-  color: #999;
+  color: #000;
+  background-color:#ff6600;
+  border: 1px solid;
 }
 .navbar-inverse .navbar-nav > li > a:hover,
 .navbar-inverse .navbar-nav > li > a:focus {
-  color: #fff;
-  background-color: transparent;
+  color: #ff6600;
+  background-color: #fff;
+  border: 1px solid #101010
 }
 .navbar-inverse .navbar-nav > .active > a,
 .navbar-inverse .navbar-nav > .active > a:hover,
