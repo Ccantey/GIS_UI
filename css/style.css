@@ -54,7 +54,7 @@ body {
     border-left-width:3px;
     border-left-color:#101010;
     position: fixed;
-    overflow-y: auto;
+    /* overflow-y: auto; */
     z-index: 1000;
     transition: all 0.5s ease-in 0s;
     -webkit-transition: all 0.5s ease-in 0s;
@@ -62,7 +62,28 @@ body {
     -ms-transition: all 0.5s ease-in 0s;
     -o-transition: all 0.5s ease-in 0s;
   }
-
+  
+  #cityviewer{
+    /* color: #ff6600; */
+  }
+  
+  #cityviewerSMALL{
+    display: none;
+	/* color: #ff6600; */
+  }
+  @media (max-width: 480px) { 
+    #cityviewerSMALL{
+        display: table;
+    }
+	#cityviewer{
+         display: none;
+    }
+	#sidebar-wrapper {
+	   overflow-y: scroll;
+	   width: 100%;
+	}
+  
+  }
   .sidebar-nav {
     position: absolute;
     top: 0;
@@ -143,7 +164,7 @@ body {
 	  margin-right:1%;
 	  /* margin-bottom:2px; */
 	  margin-left:1%;
-	  height: 90%;
+	  height: 100%;
 	  border: 1px solid #101010;
    }
    #myTab{
