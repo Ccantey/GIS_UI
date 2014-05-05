@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <!-- <link rel="shortcut icon" href="../../assets/ico/favicon.ico"> -->
+    <link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
 
     <title>Wisconsin Rapids</title>
 
@@ -16,11 +17,6 @@
     <!-- Custom styles for this template -->
     <link href="css/starter-template.css" rel="stylesheet">
 	<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
-
-
-
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -275,7 +271,7 @@
                         <tr>
                         	<th>Select By</th>
                             <td>
-                            	<div class="radioset">
+                            	<div class="radioset" id="toolsShape">
                                     <input type="radio"  id="drawPoint" name="radio" class="selectDraw"><label for="drawPoint" class="dDot sprite">Point</label>
                                     <input type="radio" id="drawLine" name="radio" class="selectDraw"><label for="drawLine" class="drawLine sprite">Line</label>
                                     <input type="radio" id="Extent" name="radio" class="selectDraw"><label for="Extent" class="Extent sprite">Polygon</label>
@@ -299,9 +295,9 @@
                         <tr>
                         	<th>Measure</th>
                             <td>
-                            	<div class="radioset" id="measure-set">
-                                    <input type="radio" name="radio" class="selectDraw" id="measureLength"><label for="measureLength" class="measureLength sprite">Length</label>
-                                    <input type="radio" name="radio" class="selectDraw" id="measureArea"><label for="measureArea" class="measureArea sprite">Area</label>
+                            	<div class="radioset" id="toolsMeasure">
+                                    <input type="radio" id="measureLength" name="radio" class="selectDraw" ><label for="measureLength" class="measureLength sprite">Length</label>
+                                    <input type="radio" id="measureArea" name="radio" class="selectDraw" ><label for="measureArea" class="measureArea sprite">Area</label>
 								</div>
                                 <select id="measureUnit" class="selectmenu">
                                     <option value="UNIT_SQUARE_FEET">Feet</option>
@@ -327,16 +323,6 @@
 								</div>	
                             </td>
                         </tr>
-<!--                         <tr>
-                        	<th>Select By</th>
-                            <td>
-                            	<div class="radioset">
-                                    <input type="radio"  id="drawPoint" name="radio" class="selectDraw"><label for="drawPoint" class="dPoint sprite">Point</label>
-                                    <input type="radio" id="drawLine" name="radio" class="selectDraw"><label for="drawLine" class="drawLine sprite">Line</label>
-                                    <input type="radio" id="Extent" name="radio" class="selectDraw"><label for="Extent" class="Extent sprite">Polygon</label>
-                                </div>
-                            </td>
-                        </tr> -->
                         <tr>
                         	<th>Buffer</th>
                             <td>
@@ -355,10 +341,10 @@
                         	<th>Measure</th>
                             <td>
                             	<div class="radioset" id="measure-set">
-                                    <input type="radio" name="radio" class="selectDraw" id="measureLength"><label for="measureLength" class="measureLength sprite">Length</label>
-                                    <input type="radio" name="radio" class="selectDraw" id="measureArea"><label for="measureArea" class="measureArea sprite">Area</label>
+                                    <input type="radio" name="radio" class="selectDraw" id="measureLength2"><label for="measureLength2" class="measureLength sprite">Length</label>
+                                    <input type="radio" name="radio" class="selectDraw" id="measureArea2"><label for="measureArea2" class="measureArea sprite">Area</label>
 								</div>
-                                <select id="measureUnit" class="selectmenu">
+                                <select id="measureUnit2" class="selectmenu">
                                     <option value="UNIT_SQUARE_FEET">Feet</option>
                                     <option value="UNIT_ACRES">Acres</option>
                                     <option value="UNIT_SQUARE_MILES">Miles</option>
