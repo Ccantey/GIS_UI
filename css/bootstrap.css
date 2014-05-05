@@ -284,8 +284,11 @@ button,
 select,
 textarea {
   font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
+  font-size: 16px;
+  line-height: 16px;
+}
+select:focus{
+ font-size:16px;
 }
 a {
   color: #428bca;
@@ -1582,10 +1585,11 @@ table th[class*="col-"] {
 .table-hover > tbody > tr.danger:hover > th {
   background-color: #ebcccc;
 }
+/*SMALL DEVICE*/
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .table-responsive {
     width: 100%;
@@ -1698,7 +1702,7 @@ output {
   width: 95%;
   height: 34px;
   padding: 6px 12px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.42857143;
   color: #555;
   background-color: #fff;
@@ -1713,6 +1717,7 @@ output {
 /* altered */
 .form-control:focus {
   border-color: #ff6600;
+  font-size:16px;
   outline: 0;
   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(255, 102, 0, .4);
           box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(255, 102, 0, .4);
@@ -3844,8 +3849,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .navbar-nav .open .dropdown-menu {
     position: static;
@@ -3941,8 +3946,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .navbar-form .form-group {
     margin-bottom: 5px;
@@ -4055,8 +4060,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .navbar-default .navbar-nav .open .dropdown-menu > li > a {
     color: #777;
@@ -4146,8 +4151,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
     border-color: #080808;
@@ -5754,8 +5759,8 @@ button.close {
 }
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .visible-xs {
     display: block !important;
@@ -5818,18 +5823,20 @@ button.close {
 }
 @media (max-width: 767px) {
   #menu-close{
-    margin-right: 20px;
-	margin-top: 5px;
+/*     margin-right: 20px;
+	margin-top: 5px; */
   }
   .hidden-xs {
     display: none !important;
   }
 }
+/*MEDIUM DEVICE*/
 @media (min-width: 768px) and (max-width: 991px) {
   .hidden-sm {
     display: none !important;
   }
 }
+/*LARGE DEVICE*/
 @media (min-width: 992px) and (max-width: 1199px) {
   .hidden-md {
     display: none !important;
