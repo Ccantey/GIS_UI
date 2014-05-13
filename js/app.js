@@ -13,4 +13,6 @@ $("#sidebar-wrapper").toggleClass("active");
 
 $('.radioset').buttonset();
 
+$('a[data-toggle="tooltip"]').tooltip();
+
 });
