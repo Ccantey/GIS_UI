@@ -3,9 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Controls the dimensions and scaling of the browser this in iOS,
+    Android, webOS, Opera Mini, Opera Mobile and Blackberry. width: controls
+    the width of the viewport initial-scale: controls the zoom level when the
+    page is first loaded maximum-scale: control how users are allowed to zoom
+    the page in or out user-scalable: control how users are allowed to zoom
+    the page in or out -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <!-- Sets the style of the status bar for a web application when in standalone mode -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="description" content="Municipal GIS">
+    <meta name="author" content="Chris Cantey, GIS developer, City of Wisconsin Rapids">
     <link rel="shortcut icon" href="images/favicon.ico">
 	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
 
@@ -32,7 +41,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <!-- <div class="container"> -->
         <div class="navbar-header">
-<!--           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+<!--      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> 
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -49,72 +58,11 @@
       <!-- </div> -->
     </div>
 	
-<!-- MODAL #1: About -->	
-	<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h4 class="modal-title" id="myModalLabel">About City Viewer</h4>
-		  </div>
-		  <div class="modal-body">
-			Wisconsin Rapids City Viewer was developed by Chris Cantey, GIS Specialist. <br><br> This application was built on top of the Bootstrap front-end framework to create a browser-agnostic application, meaning this app is available across all browsers and all browser sizes (including mobile).<br><br>The data that drives the app was produced by the City of Wisconsin Rapids and stored inside of an ESRI LocalGovernment Information Data Model. Interaction with the data, including maps, geometry and calculations are served up using ArcGIS Server and REST endpoints called through the ArcGIS for JavaScript API. <br><br>The data is expected to be the most recent available to GIS.
-		  </div>
-		  <div class="modal-footer">
-<!-- 			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-primary">Save changes</button> -->
-		  </div>
-		</div>
-	  </div>
-	</div>
-	
-<!-- MODAL #2: Contact -->	
-	<div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h4 class="modal-title" id="myModalLabel">Contact GIS Services</h4>
-		  </div>
-		  <div class="modal-body">
-			<form class="form-horizontal" role="form">
-			  <div class="form-group">
-				<label for="contactName" class="col-sm-2 control-label">Name</label>
-				<div class="col-sm-7">
-				  <input type="email" class="form-control" id="contactName" placeholder="Your Name">
-				</div>
-			  </div>
-			  <div class="form-group">
-				<label for="contactEmail" class="col-sm-2 control-label">Email</label>
-				<div class="col-sm-7">
-				  <input type="email" class="form-control" id="contactEmail" placeholder="Your Email">
-				</div>
-			  </div>
-			  <div class="form-group">
-				<label for="contactMessage" class="col-sm-2 control-label" >Message</label>
-				<div class="col-sm-10">
-				   <textarea class="form-control" rows="4" id="contactMessage" placeholder="We will use PHP to send form data to my email... here is a boring example that should work http://www.youtube.com/watch?v=-DIcrdW56MA"></textarea>
-				</div>
-			  </div>			 
-			</form>
-			 <div class="modal-footer">
-
-				<button type="button" class="btn btn-primary">Send</button>
-			 </div>
-		  </div>
-<!-- 		  <div class="modal-footer">
-			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-primary">Save changes</button>
-		  </div> -->
-		</div>
-	  </div>
-	</div>
-
 <!--     <End Top Navbar> -->
 
 
 	<a id="menu-toggle" href="#" class="btn btn-primary btn-lg toggle"><i class="glyphicon glyphicon-forward"></i></a> 
-	  
+	<!--Begin SIDEBAR-->  
 	<div id="sidebar-wrapper">
 	
 
@@ -316,7 +264,7 @@
                         	<th>Shape</th>
                         	<td>
                             	<div class="radioset" id="shape-set">
-                                    <input type="radio" name="radio" id="dPoint"><label for="dPoint" class="dDot sprite">Point</label>
+                                    <input type="radio" name="radio" id="dPoint"><label for="dPoint" class="dPoint sprite">Point</label>
                                     <input type="radio" name="radio" id="dFreeLine"><label for="dFreeLine" class="dFreeLine sprite">Free Line</label>
                                     <input type="radio" name="radio" id="dFreePoly"><label for="dFreePoly" class="dFreePoly sprite">Free Poly</label>
                                     <input type="radio" name="radio" id="dText"><label for="dText" class="dText sprite" >Text</label>
@@ -356,7 +304,7 @@
 	</div>
 </div><!--Sidebar wrapper-->
 
-
+    <!-- Begin MAP-->
     <div id="map" >
 	Map goes here
 	  <!-- <img id="loading" src="images/loading.gif" style="position:absolute;top:50%;left:50%;z-index:1111;width:32px;height:32px;" > -->
@@ -365,12 +313,76 @@
     	<img src="images/temporary-placeholders/placeholder-map-zoom-slider.png" alt="Placeholder" title="Placeholder" />
     </div>-->
 
+	
+	
+	
     <div id="map-tools">
-    	<a href="#" class="first" title="Zoom to GPS Location"><i class="glyphicon glyphicon-globe"></i></a>
-    	<a href="#" class="middle" title="Reset Map"><i class="glyphicon glyphicon-refresh"></i></a>
+    	<a href="#" class="first" data-toggle="tooltip" title="Zoom to GPS Location"><i class="glyphicon glyphicon-globe"></i></a>
+    	<a href="#" class="middle" data-toggle="tooltip" title="Reset Map"><i class="glyphicon glyphicon-refresh"></i></a>
         <!-- <a href="#" class="middle" title="Add Request" id="add-request"><i class="icon-edit"></i></a>		 -->
-    	<a href="#" class="last" title="Print" id="print"><i class="glyphicon glyphicon-print"></i></a>
+    	<a href="#" class="last" data-toggle="tooltip" title="Print" id="print"><i class="glyphicon glyphicon-print"></i></a>
     </div>
+	
+	<!-- MODAL #1: About -->	
+	<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="myModalLabel">About City Viewer</h4>
+		  </div>
+		  <div class="modal-body">
+			Wisconsin Rapids City Viewer was developed by Chris Cantey, GIS Specialist. <br><br> This application was built on top of the Bootstrap front-end framework to create a browser-agnostic application, meaning this app is available across all browsers and all browser sizes (including mobile).<br><br>The data that drives the app was produced by the City of Wisconsin Rapids and stored inside of an ESRI LocalGovernment Information Data Model. Interaction with the data, including maps, geometry and calculations are served up using ArcGIS Server and REST endpoints called through the ArcGIS for JavaScript API. <br><br>The data is expected to be the most recent available to GIS.
+		  </div>
+		  <div class="modal-footer">
+<!-- 			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary">Save changes</button> -->
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+<!-- MODAL #2: Contact -->	
+	<div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title" id="myModalLabel">Contact GIS Services</h4>
+		  </div>
+		  <div class="modal-body">
+			<form class="form-horizontal" role="form">
+			  <div class="form-group">
+				<label for="contactName" class="col-sm-2 control-label">Name</label>
+				<div class="col-sm-7">
+				  <input type="email" class="form-control" id="contactName" placeholder="Your Name">
+				</div>
+			  </div>
+			  <div class="form-group">
+				<label for="contactEmail" class="col-sm-2 control-label">Email</label>
+				<div class="col-sm-7">
+				  <input type="email" class="form-control" id="contactEmail" placeholder="Your Email">
+				</div>
+			  </div>
+			  <div class="form-group">
+				<label for="contactMessage" class="col-sm-2 control-label" >Message</label>
+				<div class="col-sm-10">
+				   <textarea class="form-control" rows="4" id="contactMessage" placeholder="We will use PHP to send form data to my email... here is a boring example that should work http://www.youtube.com/watch?v=-DIcrdW56MA"></textarea>
+				</div>
+			  </div>			 
+			</form>
+			 <div class="modal-footer">
+
+				<button type="button" class="btn btn-primary">Send</button>
+			 </div>
+		  </div>
+<!-- 		  <div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary">Save changes</button>
+		  </div> -->
+		</div>
+	  </div>
+	</div>
 
 <!--     </div> --><!-- /.container -->
 
