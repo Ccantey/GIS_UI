@@ -1,13 +1,15 @@
 body {
   padding-top: 50px;
+  height:100%
 }
 .starter-template {
   padding: 40px 15px;
   text-align: center;
 }
   #map{
-  padding-top:50px;
-  padding-left:350px;
+/*   padding-top:50px;
+  padding-left:350px; */
+  height:100%;
   }
   
   .utilities{
@@ -140,8 +142,13 @@ body {
   }
   
   #menu-close{
-/*     margin-right: 10px;
-	margin-top: 5px; */
+    border: none;
+	background-color: transparent;
+  }
+  #menu-close:hover{
+    border: none;
+	/* background-color: #404040; */
+	color: #ff6600;
   }
 
   #sidebar-wrapper.active {
@@ -297,4 +304,24 @@ table.tools input, .selectboxit-container { margin-right:5px;}
 	text-decoration: none;
 	color: #ff6600;
 	/* border: 1px solid #ff6600; */
+}
+
+#map-zoom-slider,.esriSimpleSlider {
+	position: absolute;
+	z-index: 30;
+	top: 10px;
+	left: 360px;
+	/* display:none; */
+}
+
+body#map-root {
+	/* Start of temporary background will be replaced with a real map */
+	/*background: url(../images/login-background.jpg) no-repeat center center fixed;*/
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	/* End of temporary code */
+	
+	margin-left: 87px;  /* Should match with nav width */
 }
