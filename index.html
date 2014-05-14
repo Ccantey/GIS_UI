@@ -22,7 +22,8 @@
 
     <!-- Bootstrap core CSS. Heavily modified -->
     <link href="css/bootstrap.css" rel="stylesheet">
-
+<link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/js/dojo/dijit/themes/claro/claro.css">
+<link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/js/esri/css/esri.css">
     <!-- Custom styles for this template -->
     <link href="css/starter-template.css" rel="stylesheet">
 	<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
@@ -32,6 +33,34 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+	
+	<!-- Custom JS -->
+	<script  type="text/javascript"  src="js/config.js"></script>
+	<script type="text/javascript" src="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/"></script>
+
+
+<script type="text/javascript">
+	  dojo.require("dijit.dijit"); // optimize: load dijit layer
+      dojo.require("esri.map");   
+var map;
+function init() {
+    map = new esri.Map("map");
+          var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://gis.wirapids.org/arcgis/rest/services/VectorBasemap2/MapServer");
+          map.addLayer(layer);
+    var resizeTimer;
+    dojo.connect(map, 'onLoad', function(theMap) {
+      dojo.connect(dijit.byId('map'), 'resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          map.resize();
+          map.reposition();
+         }, 500);
+       });
+     });
+    }
+dojo.addOnLoad(init);
+
+</script>
 
 
   </head>
@@ -131,6 +160,7 @@
                             <div class="section-sub-header2">Tax Districts</div>
                             <table class="data" id="singleItem2">		
                             </table>
+
 
 
 							
@@ -305,8 +335,9 @@
 </div><!--Sidebar wrapper-->
 
     <!-- Begin MAP-->
+	
     <div id="map" >
-	Map goes here
+
 	  <!-- <img id="loading" src="images/loading.gif" style="position:absolute;top:50%;left:50%;z-index:1111;width:32px;height:32px;" > -->
     </div>
     <!--<div id="map-zoom-slider">
