@@ -37,19 +37,34 @@
 	<!-- Custom JS -->
 	<script  type="text/javascript"  src="js/config.js"></script>
 	<script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
-
+    <style>
+      html {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
 
 <script>
     require(["dojo/dom",
+	      "dojo/on",
           "esri/map",
           "esri/layers/ArcGISTiledMapServiceLayer",
           "esri/geometry/Geometry",
           "esri/geometry/Extent",
           "esri/SpatialReference"],
-    function(dom,  Map, ArcGISTiledMapServiceLayer, Geometry, Extent, SpatialReference){
+    function(dom, on, Map, ArcGISTiledMapServiceLayer, Geometry, Extent, SpatialReference){
       var map = new Map("map", {
-        extent: new Extent({xmin:-1.000647919766419E7,ymin:5525319.431128474,xmax:-9991497.502634134,ymax:5530765.583020778,spatialReference:{wkid:102100}})
+        extent: new Extent({xmin:-1.000647919766419E7,ymin:5525319.431128474,xmax:-9991497.502634134,ymax:5530765.583020778,spatialReference:{wkid:102100}}),
+		
       }); 
+	  console.log(map.height);
+	  
+	  // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
+	  on(map, "load", function(){
+	    //map.resize();
+	  });
 	  
 	  //Add Cached basemap
       var basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);
@@ -57,9 +72,6 @@
 
 
   });
-  
-
-
 </script>
 
 
