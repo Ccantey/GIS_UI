@@ -22,8 +22,8 @@
 
     <!-- Bootstrap core CSS. Heavily modified -->
     <link href="css/bootstrap.css" rel="stylesheet">
-<link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/js/dojo/dijit/themes/claro/claro.css">
-<link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/js/esri/css/esri.css">
+    <!-- <link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/js/dojo/dijit/themes/claro/claro.css"> -->
+    <link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css">
     <!-- Custom styles for this template -->
     <link href="css/starter-template.css" rel="stylesheet">
 	<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
@@ -36,29 +36,29 @@
 	
 	<!-- Custom JS -->
 	<script  type="text/javascript"  src="js/config.js"></script>
-	<script type="text/javascript" src="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/"></script>
+	<script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
 
 
-<script type="text/javascript">
-	  dojo.require("dijit.dijit"); // optimize: load dijit layer
-      dojo.require("esri.map");   
-var map;
-function init() {
-    map = new esri.Map("map");
-          var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://gis.wirapids.org/arcgis/rest/services/VectorBasemap2/MapServer");
-          map.addLayer(layer);
-    var resizeTimer;
-    dojo.connect(map, 'onLoad', function(theMap) {
-      dojo.connect(dijit.byId('map'), 'resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-          map.resize();
-          map.reposition();
-         }, 500);
-       });
-     });
-    }
-dojo.addOnLoad(init);
+<script>
+    require(["dojo/dom",
+          "esri/map",
+          "esri/layers/ArcGISTiledMapServiceLayer",
+          "esri/geometry/Geometry",
+          "esri/geometry/Extent",
+          "esri/SpatialReference"],
+    function(dom,  Map, ArcGISTiledMapServiceLayer, Geometry, Extent, SpatialReference){
+      var map = new Map("map", {
+        extent: new Extent({xmin:-1.000647919766419E7,ymin:5525319.431128474,xmax:-9991497.502634134,ymax:5530765.583020778,spatialReference:{wkid:102100}})
+      }); 
+	  
+	  //Add Cached basemap
+      var basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);
+      map.addLayer(basemap);
+
+
+  });
+  
+
 
 </script>
 
@@ -346,7 +346,7 @@ dojo.addOnLoad(init);
 
 	
 	
-	
+	<!-- Map navigation tools-->
     <div id="map-tools">
     	<a href="#" class="first" data-toggle="tooltip" title="Zoom to GPS Location"><i class="glyphicon glyphicon-globe"></i></a>
     	<a href="#" class="middle" data-toggle="tooltip" title="Reset Map"><i class="glyphicon glyphicon-refresh"></i></a>
