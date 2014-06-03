@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -22,62 +22,241 @@
 
     <!-- Bootstrap core CSS. Heavily modified -->
     <link href="css/bootstrap.css" rel="stylesheet">
-    <!-- <link rel="stylesheet" href="https://serverapi.arcgisonline.com/jsapi/arcgis/3.3/js/dojo/dijit/themes/claro/claro.css"> -->
-    <link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css">
-    <!-- Custom styles for this template -->
-    <link href="css/starter-template.css" rel="stylesheet">
+	
+	<!--JavaScript API & Stylesheets-->
+	<script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
+    <link href="http://js.arcgis.com/3.9/js/esri/css/esri.css" rel="stylesheet">
 	<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
-
+	
+    <!-- Custom styles for this app -->
+    <link href="css/styles.css" rel="stylesheet">
+	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 	
-	<!-- Custom JS -->
-	<script  type="text/javascript"  src="js/config.js"></script>
-	<script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
-    <style>
-      html {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
+	<!-- JavaScript placed at end of document -->
 
-<script>
-    require(["dojo/dom",
-	      "dojo/on",
-          "esri/map",
-          "esri/layers/ArcGISTiledMapServiceLayer",
-          "esri/geometry/Geometry",
-          "esri/geometry/Extent",
-          "esri/SpatialReference"],
-    function(dom, on, Map, ArcGISTiledMapServiceLayer, Geometry, Extent, SpatialReference){
-      var map = new Map("map", {
-        extent: new Extent({xmin:-1.000647919766419E7,ymin:5525319.431128474,xmax:-9991497.502634134,ymax:5530765.583020778,spatialReference:{wkid:102100}}),
+	
+
+    <!--Initialize javascript API-->
+	<script>	
+	  var initExtent, identifyTask, identifyParams, gsvc;
+	  var identifyTaskParcel,identifyParamsParcel;
+
+	  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+	  var televisingRelatedLayer;
+	  var overlayLayer;
+	  var aerialLayer;
+	  var nonLegendLayers;
+	  var operationToDo;
+	  var legend = null;
+	  var legendLayers = [];
+	  var token;
+	  var iTool = null;
+      var navToolbar = null; 
+      var measureTool = null; 
+      var mTool = null; 
+      var drawingTool = null;
+      var editToolbar = null;
+      var map = null;
+      var toolbar = null;
+      var circle = false;
+      var symbols = {};
+	  var printer = null;
+	  var printUrl = null;
+	  var printTask = null;	  
+	  var ctxMenuForGraphics, ctxMenuForMap;
+	  var featureLayerInfos;
+	  var signLayer;
+	  var reversePreviewExtent = null;
+	  var printAreaGraphic = null;
+	  var DocRequestLayer = null;
+	  var DocumentRequest = null;
+	  var requestStatus = null;
+	  var requestLocation;
+	  
+	  var globalMapLayers = [];
 		
-      }); 
-	  console.log(map.height);
-	  
-	  // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
-	  on(map, "load", function(){
-	    //map.resize();
+		require(["dojo/dom",
+			  "dojo/on",
+              "dojo/query",
+			  "esri/domUtils",
+			  "esri/map",
+			  "esri/request",
+			  "esri/dijit/Print",
+			  "esri/dijit/Legend",
+			  "esri/toolbars/draw",
+			  "esri/toolbars/navigation",
+			  "esri/tasks/IdentifyTask",
+			  "esri/tasks/IdentifyParameters",
+			  "esri/tasks/query",
+			  "esri/tasks/GeometryService",
+			  "esri/layers/ArcGISTiledMapServiceLayer",
+			  "esri/layers/ArcGISDynamicMapServiceLayer",
+			  "esri/layers/GraphicsLayer",
+			  "esri/geometry/Geometry",
+			  "esri/geometry/Extent",
+			  "esri/SpatialReference"],
+		function(dom, on, query, domUtils, Map, esriRequest, Print, Legend, Draw, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+		
+		  initExtent = new Extent({xmin:-1.000647919766419E7,ymin:5525319.431128474,xmax:-9991497.502634134,ymax:5530765.583020778,spatialReference:{wkid:102100}})
+		  map = new Map("map", {
+			extent: initExtent	
+		  }); 
+		  
+		  // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
+		  on(map, "load", function(){
+			//map.resize();
+		  });
+		  
+		  //Add Cached basemap
+		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);
+		  map.addLayer(basemap);
+		  
+		  //Add dynamic map 
+		  overlayLayer = new ArcGISDynamicMapServiceLayer(mapServiceURL, {id:"Basemap"});
+		  overlayLayer.setImageFormat("png32");
+		  overlayLayer.setVisibleLayers([1,28]);
+		  //overlayLayer.opacity = 0.7;
+		  map.addLayer(overlayLayer);
+          //console.log(overlayLayer);
+
+		  //Keep map in viewer
+		  maxExtent = map.extent;
+		  on(map, "extent-change", function (initExtent, delta, levelChange, lod){
+			//changePrintGraphic(); //move print box if its on.
+			var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new esri.SpatialReference({ wkid:102100 }));
+			var flag = false;	
+			//set a buffer to make the max extent a slightly bigger to void minor differences
+			//the map unit for this case is meter. 
+			var buffer = 25000;
+			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
+            var onLoadHandle = on(basemap, "update", function(){
+				dojo.disconnect(onLoadHandle);
+				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
+					adjustedEx.xmin = maxExtent.xmin;
+					adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
+					flag = true;
+				}
+				if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
+					adjustedEx.ymin = maxExtent.ymin;
+					adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
+					flag = true;
+				}
+				if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
+					adjustedEx.xmax = maxExtent.xmax;
+					adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
+					flag = true;
+				}
+				if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
+					adjustedEx.ymax = maxExtent.ymax;
+					adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
+					flag = true;
+				}
+				if (flag === true) {
+					map.setExtent(adjustedEx);				
+				}
+				flag = false;
+			});			
+		  });
+		  on(map, "update-end", function(){
+		    domUtils.hide(loading);
+			map.disableDoubleClickZoom();
+		  });
+          on(map, "update-start", function(){
+		    domUtils.show(loading);
+		  });
+          
+
+
+		   graphicLayer = new GraphicsLayer();
+           map.addLayer(graphicLayer);
+		   
+		   tempGraphicLayer = new GraphicsLayer();
+		   map.addLayer(tempGraphicLayer);
+		   
+		   graphicLayerLabels = new GraphicsLayer();
+		   map.addLayer(graphicLayerLabels);
+		   
+		   utilityMap = new ArcGISDynamicMapServiceLayer(mapServiceURL, { id: "Utility" });
+	       utilityMap.setImageFormat("png32");
+	       utilityMap.setVisibleLayers([-1]);
+	       map.addLayer(utilityMap);
+		   //console.log(utilityMap);
+		   
+		   identifyTask = new IdentifyTask(mapServiceURL);
+	       identifyParams = new esri.tasks.IdentifyParameters();
+	       identifyParams.tolerance = 5;
+	       identifyParams.returnGeometry = true;
+	       identifyParams.width = map.width;
+	       identifyParams.height = map.height;
+		   
+		   identifyTaskParcel = new IdentifyTask(mapServiceURL);
+		   identifyParamsParcel = new IdentifyParameters();
+		   identifyParamsParcel.layerIds = [parcelLayerID];
+		   identifyParamsParcel.tolerance = 1;
+           identifyParamsParcel.returnGeometry = true;
+		   identifyParamsParcel.width  = map.width;
+           identifyParamsParcel.height = map.height;
+		   
+/*		  operationToDo = 'identify';
+	      iTool = new Draw(map, { showTooltips: false });
+	      iTool.activate(Draw.Point);
+
+	      dojo.connect(iTool, "onDrawEnd", function (geom) {
+	          switch (operationToDo)
+			  {
+			    case "identify":
+				  doIdentify(geom);
+				break;
+				case "selection":
+				  drawGraphic(geom);
+				break;
+				case "measure":
+				  getAreaAndLength(geom);
+				break;
+				case "drawing":
+				  addToMapDrawing(geom)
+				break;
+			  }			  
+	      });*/
+		   
+		  overlayLayer.url = mapServiceURL;
+	      utilityMap.url = mapServiceURL;
+/*
+	      legendLayers.push({ layer: utilityMap, title: "Utility" });
+	      legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
+		  legend = new Legend({
+            map:map,
+            layerInfos:legendLayers
+          },"legendDiv");
+		  legend.startup();
+	      map.enableScrollWheelZoom(); */
+		   
+		  //esriRequest is a utility method to retrieve data from a web server. Data can be static (stored in a file on the web server), or it can be dynamic (generated on-demand by a web service). esriRequest can handle the following formats: plain txt, xml, json, jsonp
+		    var layersRequest = esriRequest({
+				url: mapServiceURL,
+				content: { f: "json" },
+				handleAs: "json",
+				callbackParamName: "callback"
+			  });
+			  layersRequest.then(
+				function(response) {
+				  //console.log("Success: ", response.layers);
+				  globalMapLayers = response.layers;
+			  }, function(error) {
+				  console.log("Error: ", error.message);
+			  });		   
+		   
+		   
 	  });
-	  
-	  //Add Cached basemap
-      var basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);
-      map.addLayer(basemap);
+	</script>
+</head>
 
-
-  });
-</script>
-
-
-  </head>
-
-  <body>
+<body>
 <!-- TOP NAVBAR-->
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <!-- <div class="container"> -->
@@ -98,13 +277,12 @@
         </div>
       <!-- </div> -->
     </div>
-	
-<!--     <End Top Navbar> -->
+<!-- End Top Navbar> -->
 
 
 	<a id="menu-toggle" href="#" class="btn btn-primary btn-lg toggle"><i class="glyphicon glyphicon-forward"></i></a> 
 	<!--Begin SIDEBAR-->  
-	<div id="sidebar-wrapper">
+<div id="sidebar-wrapper">
 	
 
 	<ul id="myTab" class="nav nav-tabs">
@@ -122,7 +300,8 @@
 		</li>
 	</ul>
 	<a id="menu-close" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
-	<div id="myTabContent" class="tab-content">
+	<!--Begin MyTabContent-->
+	<div id="myTabContent" class="tab-content">	
 	<!--Begin Search Tab Content-->
 		<div id="searchTab" class="tab-pane fade  active in">
 		  <div id="searchForm">
@@ -160,87 +339,84 @@
           </div>
 		  
 		  <section class="results identify">
-						    <!--<div class="process-results searchClass"><a class="mailOption" ><i class="icon-envelope-alt"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://dev.wsbinfolink.wsbeng.com/SouthStPaul-DataLink/outputs/parcelInfo.csv" target="_blank"><i class="icon-share"></i> Export</a></div>-->
-                            <!-- <div id="append" class="section-header">Results</div>
-							<select name="type" id="multipleSelect" class="selectmenu" onchange="updateIdentify(this.value)">       
-							</select> -->
-							</br></br>
-                            <div class="section-sub-header">Property Information</div>
-                            <table class="data" id="singleItem1"> 
-							</table>
-						
-                            <div class="section-sub-header2">Tax Districts</div>
-                            <table class="data" id="singleItem2">		
-                            </table>
-
-
-
-							
-                            
-                        </section>
-		  
-		  
+				<!--<div class="process-results searchClass"><a class="mailOption" ><i class="icon-envelope-alt"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://dev.wsbinfolink.wsbeng.com/SouthStPaul-DataLink/outputs/parcelInfo.csv" target="_blank"><i class="icon-share"></i> Export</a></div>-->
+				<!-- <div id="append" class="section-header">Results</div>
+				<select name="type" id="multipleSelect" class="selectmenu" onchange="updateIdentify(this.value)">       
+				</select> -->
+				</br></br>
+				<!-- <div class="section-sub-header">Property Information</div> -->
+				<table class="data" id="singleItem1"> 
+				</table>
+			
+				<!-- <div class="section-sub-header2">Tax Districts</div> -->
+				<table class="data" id="singleItem2">		
+				</table>                            
+           </section>		  
 		</div>
-		
-		<!--Begin Layers Tab Content-->
-		
+	<!--Begin Layers Tab Content-->		
 		<div id="layersTab" class="tab-pane fade ">
 		
 			  <div id="layerChecks">
 			  <strong>Utility Layers</strong>
 				  <div class="checkbox">
-						<div class="utilities">									
-							<label>
-							  <input type="checkbox"> Sanitary Sewer
-							</label>
-						</div>
-						<div class="utilities">					
-							<label>
-							  <input type="checkbox"> Storm Sewer
-							</label>
-						</div>
-						<div class="utilities">					
-							<label>
-							  <input type="checkbox"> Water
-							</label>
-						</div>
-						<div class="utilities">					
-							<label>
-							  <input type="checkbox"> A-Drawings
-							</label>
-						</div>
+				    <ul>
+						<li class="utilityLayer">									
+							<label>Taps</label>
+							  <input type="checkbox" id="SanSew">							
+						</li>
+						<li class="utilityLayer">					
+							<label>Sanitary_Pipe</label>
+							  <input type="checkbox" id="StormSew">							
+						</li>
+						<li class="utilityLayer">					
+							<label>Sanitary_Manholes</label>
+							  <input type="checkbox" id="Water">							
+						</li>
+						<li class="utilityLayer">					
+							<label>Sanitary_Sub-basins</label>
+							  <input type="checkbox" id="Adraw">							
+						</li>
+					  </ul>
 					</div>			
 				</div>
 				
 				<div id="layerChecks2">
 			      <strong>Basemap Layers</strong>
 				  <div class="checkbox">
-				  <div class="utilities">					
-							<label>
-							  <input type="checkbox"> Address Labels
-							</label>
-						</div>
-						<div class="utilities">					
-							<label>
-							  <input type="checkbox"> Aerial Photograph (2015)
-							</label>
-						</div>
-						<div class="utilities">					
-							<label>
-							  <input type="checkbox"> FEMA Floodplain
-							</label>
-						</div>
-						<div class="utilities">					
-							<label>
-							  <input type="checkbox"> Five Foot Contours
-							</label>
-						</div>
+				      <ul >
+				        <li class="overlayLayer">					
+							<label>Address Labels</label>
+							  <input type="checkbox" id="AddLabels">							
+						</li>
+						<!-- <li class="overlayLayer">					
+							<label>Streets</label>
+							  <input type="checkbox" id="StLabels">							
+						</li> -->
+						<li class="overlayLayer">					
+							<label>PID Labels</label>
+							  <input type="checkbox" id="PidLabels">							
+						</li>
+<!-- 						<li class="overlayLayer">					
+							<label>Aerial Photograph (2015)</label>
+							  <input type="checkbox" id="Aerial">							
+						</li>
+						<li class="overlayLayer">					
+							<label>FEMA Floodplain</label>
+							  <input type="checkbox" id="Fema">							
+						</li> -->
+						<li class="overlayLayer">					
+							<label>DNR Wetland Inventory</label>
+							  <input type="checkbox" id="DNR">							
+						</li>
+						<li class="overlayLayer">					
+							<label>Contours</label>
+							  <input type="checkbox" id="Contours">							
+						</li>
+					  </ul>	
 					</div>			
 				</div>
-		</div>
-		
-		
-		
+		</div>		
+	<!--Begin toolsTab-->	
 		<div id="toolsTab" class="tab-pane fade">
 
                         <table class="tools">
@@ -277,10 +453,7 @@
                                     <option value="UNIT_STATUTE_MILE">Miles</option>                                           
                                 </select>
                                 <button id="Buffer" class="transition btn">Go</button>
-                            </td>
-							
-							    
-							
+                            </td>							
                         </tr>
                         <tr>
                         	<th>Measure</th>
@@ -298,73 +471,72 @@
                         </tr>
                         </table>
 		</div>
-	
-	<div id="drawTab" class="tab-pane fade">
-
-                        <table class="tools">
-                        <tr>
-                        	<th>Shape</th>
-                        	<td>
-                            	<div class="radioset" id="shape-set">
-                                    <input type="radio" name="radio" id="dPoint"><label for="dPoint" class="dPoint sprite">Point</label>
-                                    <input type="radio" name="radio" id="dFreeLine"><label for="dFreeLine" class="dFreeLine sprite">Free Line</label>
-                                    <input type="radio" name="radio" id="dFreePoly"><label for="dFreePoly" class="dFreePoly sprite">Free Poly</label>
-                                    <input type="radio" name="radio" id="dText"><label for="dText" class="dText sprite" >Text</label>
-								</div>	
-                            </td>
-                        </tr>
-                        <tr>
-                        	<th>Buffer</th>
-                            <td>
-                            	<input type="text" name="Buffer" value="100" size="3" id="distance">
-                                <select id="unitBuff" class="selectmenu">
-                                    <option value="UNIT_FOOT">Feet</option>
-                                    <option value="UNIT_STATUTE_MILE">Miles</option>                                           
-                                </select>
-                                <button id="Buffer" class="transition btn">Go</button>
-                            </td>
-							
-							    
-							
-                        </tr>
-                        <tr>
-                        	<th>Measure</th>
-                            <td>
-                            	<div class="radioset" id="measure-set">
-                                    <input type="radio" name="radio" class="selectDraw" id="measureLength2"><label for="measureLength2" class="measureLength sprite">Length</label>
-                                    <input type="radio" name="radio" class="selectDraw" id="measureArea2"><label for="measureArea2" class="measureArea sprite">Area</label>
-								</div>
-                                <select id="measureUnit2" class="selectmenu">
-                                    <option value="UNIT_SQUARE_FEET">Feet</option>
-                                    <option value="UNIT_ACRES">Acres</option>
-                                    <option value="UNIT_SQUARE_MILES">Miles</option>
-                                </select>
-                        	</td>
-                        </tr>
-                        </table>
+	<!--Begin drawTab-->
+	    <div id="drawTab" class="tab-pane fade">
+			<table class="tools">
+				<tr>
+					<th>Shape</th>
+					<td>
+						<div class="radioset" id="shape-set">
+							<input type="radio" name="radio" id="dPoint"><label for="dPoint" class="dPoint sprite">Point</label>
+							<input type="radio" name="radio" id="dFreeLine"><label for="dFreeLine" class="dFreeLine sprite">Free Line</label>
+							<input type="radio" name="radio" id="dFreePoly"><label for="dFreePoly" class="dFreePoly sprite">Free Poly</label>
+							<input type="radio" name="radio" id="dText"><label for="dText" class="dText sprite" >Text</label>
+						</div>	
+					</td>
+				</tr>
+				<tr>
+					<th>Buffer</th>
+					<td>
+						<input type="text" name="Buffer" value="100" size="3" id="distance">
+						<select id="unitBuff" class="selectmenu">
+							<option value="UNIT_FOOT">Feet</option>
+							<option value="UNIT_STATUTE_MILE">Miles</option>                                           
+						</select>
+						<button id="Buffer" class="transition btn">Go</button>
+					</td>					
+				</tr>
+				<tr>
+					<th>Measure</th>
+					<td>
+						<div class="radioset" id="measure-set">
+							<input type="radio" name="radio" class="selectDraw" id="measureLength2"><label for="measureLength2" class="measureLength sprite">Length</label>
+							<input type="radio" name="radio" class="selectDraw" id="measureArea2"><label for="measureArea2" class="measureArea sprite">Area</label>
+						</div>
+						<select id="measureUnit2" class="selectmenu">
+							<option value="UNIT_SQUARE_FEET">Feet</option>
+							<option value="UNIT_ACRES">Acres</option>
+							<option value="UNIT_SQUARE_MILES">Miles</option>
+						</select>
+					</td>
+				</tr>
+			</table>
 		</div>
-	</div>
+	</div><!--MyTabContent-->
 </div><!--Sidebar wrapper-->
 
     <!-- Begin MAP-->
 	
     <div id="map" >
-
-	  <!-- <img id="loading" src="images/loading.gif" style="position:absolute;top:50%;left:50%;z-index:1111;width:32px;height:32px;" > -->
+	  <img id="loading" src="images/loading.gif" style="position:absolute;top:50%;left:50%;z-index:1111;width:32px;height:32px;" > 
     </div>
     <!--<div id="map-zoom-slider">
     	<img src="images/temporary-placeholders/placeholder-map-zoom-slider.png" alt="Placeholder" title="Placeholder" />
-    </div>-->
-
-	
+    </div>-->	
 	
 	<!-- Map navigation tools-->
     <div id="map-tools">
     	<a href="#" class="first" data-toggle="tooltip" title="Zoom to GPS Location"><i class="glyphicon glyphicon-globe"></i></a>
     	<a href="#" class="middle" data-toggle="tooltip" title="Reset Map"><i class="glyphicon glyphicon-refresh"></i></a>
         <!-- <a href="#" class="middle" title="Add Request" id="add-request"><i class="icon-edit"></i></a>		 -->
-    	<a href="#" class="last" data-toggle="tooltip" title="Print" id="print"><i class="glyphicon glyphicon-print"></i></a>
+    	<a href="#" class="last" data-toggle="tooltip" title="Print Map" id="print"><i class="glyphicon glyphicon-print"></i></a>
     </div>
+	
+	<footer class="foot">
+        <section id="watermarks">    		
+    		<a id="wsblogo" href="https://www.wirapids.org" target="_blank" ><img src="images/WRlogo.png" alt="Wisconsin Rapids"></a>    		
+        </section>
+	</footer>
 	
 	<!-- MODAL #1: About -->	
 	<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -385,7 +557,7 @@
 	  </div>
 	</div>
 	
-<!-- MODAL #2: Contact -->	
+    <!-- MODAL #2: Contact -->	
 	<div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	  <div class="modal-dialog">
 		<div class="modal-content">
@@ -429,14 +601,18 @@
 
 <!--     </div> --><!-- /.container -->
 
-    <!-- Bootstrap core JavaScript
+    <!-- Bootstrap/jQuery /jQuery-UI core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/app.js"></script>
+	<script src="js/bootstrap.min.js"></script>	
 	<script src="js/jquery-ui-1.10.2.min.js"></script>
-
+	
+	<!-- Custom JavaScript-->
+	<script src="js/config.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/mainCode.js"></script>
+	<script src="js/helper.js"></script>
 
   </body>
 </html>
