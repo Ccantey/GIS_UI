@@ -44,48 +44,58 @@
     <![endif]-->
 	
 	<script>	
-	    var initExtent, identifyTask, identifyParams, gsvc;
-	    var identifyTaskParcel, identifyParamsParcel;
-	    var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
-	    var A_Drawings;
-	    var overlayLayer;
-	    var aerialLayer;
-	    var operationToDo;
-	    var legend = null;
-	    var legendLayers = [];
-	    var iTool = null;
-	    var navToolbar = null; 
-	    var measureTool = null; 
-	    var drawingTool = null;
-	    var editToolbar = null;
-	    var map = null;
-	    var toolbar = null;
-	    var symbols = {};
-	    var printTask = null;	  
-	    var ctxMenuForGraphics, ctxMenuForMap;
-	    var printAreaGraphic = null;
+		  var initExtent, identifyTask, identifyParams, gsvc;
+		  var identifyTaskParcel, identifyParamsParcel, params;
+		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+		  var A_Drawings;
+		  var overlayLayer;
+		  var aerialLayer;
+		  var operationToDo;
+		  var legend = null;
+		  var legendLayers = [];
+		  var iTool = null;
+	      var navToolbar = null; 
+	      var measureTool = null; 
+	      var drawingTool = null;
+	      var editToolbar = null;
+	      var map = null;
+	      var toolbar = null;
+	      var symbols = {};
+		  var printTask = null;	  
+		  var ctxMenuForGraphics, ctxMenuForMap;
+		  var printAreaGraphic = null;
+		  var globalMapLayers = {};
 		
 		require(["dojo/dom",
-		         "dojo/on",
-                          "dojo/query",
+			  "dojo/on",
+              "dojo/query",
+			  "esri/Color",
 			  "esri/domUtils",
 			  "esri/map",
 			  "esri/request",
 			  "esri/tasks/PrintTask",
 			  "esri/dijit/Legend",
 			  "esri/toolbars/draw",
+			  "esri/toolbars/edit",
 			  "esri/toolbars/navigation",
 			  "esri/tasks/IdentifyTask",
 			  "esri/tasks/IdentifyParameters",
 			  "esri/tasks/query",
 			  "esri/tasks/GeometryService",
+			  "esri/tasks/BufferParameters",
+			  "esri/symbols/SimpleMarkerSymbol",
+              "esri/symbols/SimpleLineSymbol",
+              "esri/symbols/SimpleFillSymbol",
+			  "esri/symbols/PictureMarkerSymbol",
+			  "esri/dijit/editing/AttachmentEditor",
 			  "esri/layers/ArcGISTiledMapServiceLayer",
 			  "esri/layers/ArcGISDynamicMapServiceLayer",
+			  "esri/layers/FeatureLayer",
 			  "esri/layers/GraphicsLayer",
 			  "esri/geometry/Geometry",
 			  "esri/geometry/Extent",
 			  "esri/SpatialReference"],
-		function(dom, on, query, domUtils, Map, esriRequest, PrintTask, Legend, Draw, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+		function(dom, on, query, Color, domUtils, Map, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 		
 		  initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}})
 		  map = new Map("map", {
@@ -94,15 +104,86 @@
 		  gsvc = new GeometryService(gsvcURL);
 		  printTask = new PrintTask(printServiceURL);
 		  
+		      //var es = symbol;
+		      //var dc = dojo.Color;
+		      symbols.point = new SimpleMarkerSymbol("circle", 15, new SimpleLineSymbol("solid", new Color([255, 155, 0]), 1), new Color([206, 206, 206, 1]));
+		      symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
+		      symbols.polygon = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([255, 155, 0, 0.25]));
+		      symbols.polygonMeasure = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([0, 200, 0, 0.65]));
+		      symbols.multipoint = new SimpleMarkerSymbol("diamond", 20, new SimpleLineSymbol("solid", new Color([0, 0, 0]), 1), new Color([0, 0, 255, 0.5]));
+			  symbols.buffer = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 200, 0]), 2), new Color([155, 155, 155, 0.5]));
+			  symbols.Picture = PictureMarkerSymbol("images/bluedot.png", 40, 40);
+		      symbols.textSymbol = null;
+			  
 		  // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
 		  on(map, "load", function(){
-			//map.resize();
+			editToolbar = new Edit(map);
+		    on(map, "Click", function (evt) {
+		        editToolbar.deactivate();
+		     });
 		  });
+		  on(map, "extent-change", function(extent){
+			    var currentScale=map.getScale();
+				if(currentScale > 4800){
+				   $("#AddLabels").prop('indeterminate', true).change();
+				   $("#AddLabels").prop('disabled', true).change();
+				   $("#AddLabels").parent().css("color", "#777");
+
+				   $("#PidLabels").prop('indeterminate', true).change();
+				   $("#PidLabels").prop('disabled', true).change();;
+				   $("#PidLabels").parent().css("color", "#777");
+				}else{
+				   $("#AddLabels").prop('indeterminate', false).change();
+				   $("#AddLabels").prop('disabled', false).change();
+				   $("#AddLabels").parent().css("color", "#FFF");
+				   
+				   $("#PidLabels").prop('indeterminate', false).change();
+				   $("#PidLabels").prop('disabled', false).change();
+				   $("#PidLabels").parent().css("color", "#FFF");
+				}
+				if (currentScale > 9600){
+				   $("#Contours").prop('indeterminate', true).change();
+				   $("#Contours").prop('disabled', true).change();
+				   $("#Contours").parent().css("color", "#777")
+				   $("#Adraw").prop('indeterminate', true).change();
+				   $("#Adraw").prop('disabled', true).change();
+				   $("#Adraw").parent().css("color", "#777");		
+				 
+				}else{
+				   $("#Contours").prop('indeterminate', false).change();
+				   $("#Contours").prop('disabled', false).change();
+				   $("#Contours").parent().css("color", "#FFF")
+				   $("#Adraw").prop('indeterminate', false).change();
+				   $("#Adraw").prop('disabled', false).change();
+				   $("#Adraw").parent().css("color", "#FFF");			  
+				}
+				if (currentScale > 19200){
+				  
+				}else{				 
+				}			 
+	          });
 		  
-		  //Add Cached basemap
-		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);
+		 	  
+
+		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);	     //aerialServiceUrl 
 		  map.addLayer(basemap);
 		  
+		   //could load aerial first. vectorBase needs to be republished with appropriate scales, then reverse hide/show stuff.
+		  //maybe aerial will load properly after re publish 
+		  aerialLayer = new ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"); //vectorBaseUrl "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"
+		  map.addLayer(aerialLayer);
+		  aerialLayer.hide();
+		  //Add Feature service (A_Drawings/Attachments)
+		  A_Drawings = new FeatureLayer("http://gis.wirapids.org/arcgis/rest/services/DynamicBasemap/FeatureServer/24", {
+		          mode: FeatureLayer.MODE_ONDEMAND,
+				  outFields:["*"]
+		      });
+	          map.addLayers(A_Drawings);
+
+	          attachmentEditor = new AttachmentEditor({}, dom.byId("content"));
+	          attachmentEditor.startup();
+
+	          A_Drawings.hide();
 		  //Add dynamic map 
 		  overlayLayer = new ArcGISDynamicMapServiceLayer(mapServiceURL, {id:"Basemap"});
 		  overlayLayer.setImageFormat("png32");
@@ -121,7 +202,7 @@
 			//the map unit for this case is meter. 
 			var buffer = 25000;
 			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
-                        var onLoadHandle = on(basemap, "update", function(){
+            var onLoadHandle = on(basemap, "update", function(){
 				dojo.disconnect(onLoadHandle);
 				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
 					adjustedEx.xmin = maxExtent.xmin;
@@ -153,12 +234,19 @@
 		    domUtils.hide(loading);
 			map.disableDoubleClickZoom();
 		  });
-                  on(map, "update-start", function(){
+          on(map, "update-start", function(){
 		    domUtils.show(loading);
 		  });
-
+          
+		  on(map, "zoom-end", function () {
+		          $("#navigation input").attr("checked", false).button("refresh");
+		          var adjustedScale = map.getScale();
+		          if (adjustedScale > 72226) {
+		          	map.setExtent(initExtent);
+		          }
+		      });
 		   graphicLayer = new GraphicsLayer();
-                   map.addLayer(graphicLayer);
+           map.addLayer(graphicLayer);
 		   
 		   tempGraphicLayer = new GraphicsLayer();
 		   map.addLayer(tempGraphicLayer);
@@ -167,31 +255,36 @@
 		   map.addLayer(graphicLayerLabels);
 		   
 		   utilityMap = new ArcGISDynamicMapServiceLayer(mapServiceURL, { id: "Utility" });
-	           utilityMap.setImageFormat("png32");
-	           utilityMap.setVisibleLayers([-1]);
-	           map.addLayer(utilityMap);
+	       utilityMap.setImageFormat("png32");
+	       utilityMap.setVisibleLayers([-1]);
+	       map.addLayer(utilityMap);
+		   //console.log(utilityMap);
 		   
+		   //buffer params
+		   params = new BufferParameters();
+		   params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
+           
 		   identifyTask = new IdentifyTask(mapServiceURL);
-	           identifyParams = new esri.tasks.IdentifyParameters();
-	           identifyParams.tolerance = 5;
-	           identifyParams.returnGeometry = true;
-	           identifyParams.width = map.width;
-	           identifyParams.height = map.height;
+	       identifyParams = new esri.tasks.IdentifyParameters();
+	       identifyParams.tolerance = 5;
+	       identifyParams.returnGeometry = true;
+	       identifyParams.width = map.width;
+	       identifyParams.height = map.height;
 		   
 		   identifyTaskParcel = new IdentifyTask(mapServiceURL);
 		   identifyParamsParcel = new IdentifyParameters();
 		   identifyParamsParcel.layerIds = [parcelLayerID];
 		   identifyParamsParcel.tolerance = 1;
-                   identifyParamsParcel.returnGeometry = true;
+           identifyParamsParcel.returnGeometry = true;
 		   identifyParamsParcel.width  = map.width;
-                   identifyParamsParcel.height = map.height;
+           identifyParamsParcel.height = map.height;
 		   
 		  operationToDo = 'identify';
-	          iTool = new Draw(map, { showTooltips: false });
-	          iTool.activate(Draw.POINT);
+	      iTool = new Draw(map, { showTooltips: false });
+	      iTool.activate(Draw.POINT);
 
-	          dojo.connect(iTool, "onDrawEnd", function (geom) {
-	             switch (operationToDo)
+	      dojo.connect(iTool, "onDrawEnd", function (geom) {
+	          switch (operationToDo)
 			  {
 			    case "identify":
 				  doIdentify(geom);
@@ -206,10 +299,10 @@
 				  addToMapDrawing(geom)
 				break;
 			  }			  
-	            });
+	      });
 		   
 		  overlayLayer.url = mapServiceURL;
-	           utilityMap.url = mapServiceURL;
+	      utilityMap.url = mapServiceURL;
 /*
 	      legendLayers.push({ layer: utilityMap, title: "Utility" });
 	      legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
