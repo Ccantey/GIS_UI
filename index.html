@@ -44,30 +44,30 @@
     <![endif]-->
 	
 	<script>	
-		  var initExtent, identifyTask, identifyParams, gsvc;
-		  var identifyTaskParcel, identifyParamsParcel;
-		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
-		  var A_Drawings;
-		  var overlayLayer;
-		  var aerialLayer;
-		  var operationToDo;
-		  var legend = null;
-		  var legendLayers = [];
-		  var iTool = null;
-	      var navToolbar = null; 
-	      var measureTool = null; 
-	      var drawingTool = null;
-	      var editToolbar = null;
-	      var map = null;
-	      var toolbar = null;
-	      var symbols = {};
-		  var printTask = null;	  
-		  var ctxMenuForGraphics, ctxMenuForMap;
-		  var printAreaGraphic = null;
+	    var initExtent, identifyTask, identifyParams, gsvc;
+	    var identifyTaskParcel, identifyParamsParcel;
+	    var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+	    var A_Drawings;
+	    var overlayLayer;
+	    var aerialLayer;
+	    var operationToDo;
+	    var legend = null;
+	    var legendLayers = [];
+	    var iTool = null;
+	    var navToolbar = null; 
+	    var measureTool = null; 
+	    var drawingTool = null;
+	    var editToolbar = null;
+	    var map = null;
+	    var toolbar = null;
+	    var symbols = {};
+	    var printTask = null;	  
+	    var ctxMenuForGraphics, ctxMenuForMap;
+	    var printAreaGraphic = null;
 		
 		require(["dojo/dom",
-			  "dojo/on",
-              "dojo/query",
+		         "dojo/on",
+                          "dojo/query",
 			  "esri/domUtils",
 			  "esri/map",
 			  "esri/request",
@@ -121,7 +121,7 @@
 			//the map unit for this case is meter. 
 			var buffer = 25000;
 			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
-            var onLoadHandle = on(basemap, "update", function(){
+                        var onLoadHandle = on(basemap, "update", function(){
 				dojo.disconnect(onLoadHandle);
 				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
 					adjustedEx.xmin = maxExtent.xmin;
@@ -153,12 +153,12 @@
 		    domUtils.hide(loading);
 			map.disableDoubleClickZoom();
 		  });
-          on(map, "update-start", function(){
+                  on(map, "update-start", function(){
 		    domUtils.show(loading);
 		  });
 
 		   graphicLayer = new GraphicsLayer();
-           map.addLayer(graphicLayer);
+                   map.addLayer(graphicLayer);
 		   
 		   tempGraphicLayer = new GraphicsLayer();
 		   map.addLayer(tempGraphicLayer);
@@ -167,32 +167,31 @@
 		   map.addLayer(graphicLayerLabels);
 		   
 		   utilityMap = new ArcGISDynamicMapServiceLayer(mapServiceURL, { id: "Utility" });
-	       utilityMap.setImageFormat("png32");
-	       utilityMap.setVisibleLayers([-1]);
-	       map.addLayer(utilityMap);
-		   //console.log(utilityMap);
+	           utilityMap.setImageFormat("png32");
+	           utilityMap.setVisibleLayers([-1]);
+	           map.addLayer(utilityMap);
 		   
 		   identifyTask = new IdentifyTask(mapServiceURL);
-	       identifyParams = new esri.tasks.IdentifyParameters();
-	       identifyParams.tolerance = 5;
-	       identifyParams.returnGeometry = true;
-	       identifyParams.width = map.width;
-	       identifyParams.height = map.height;
+	           identifyParams = new esri.tasks.IdentifyParameters();
+	           identifyParams.tolerance = 5;
+	           identifyParams.returnGeometry = true;
+	           identifyParams.width = map.width;
+	           identifyParams.height = map.height;
 		   
 		   identifyTaskParcel = new IdentifyTask(mapServiceURL);
 		   identifyParamsParcel = new IdentifyParameters();
 		   identifyParamsParcel.layerIds = [parcelLayerID];
 		   identifyParamsParcel.tolerance = 1;
-           identifyParamsParcel.returnGeometry = true;
+                   identifyParamsParcel.returnGeometry = true;
 		   identifyParamsParcel.width  = map.width;
-           identifyParamsParcel.height = map.height;
+                   identifyParamsParcel.height = map.height;
 		   
 		  operationToDo = 'identify';
-	      iTool = new Draw(map, { showTooltips: false });
-	      iTool.activate(Draw.POINT);
+	          iTool = new Draw(map, { showTooltips: false });
+	          iTool.activate(Draw.POINT);
 
-	      dojo.connect(iTool, "onDrawEnd", function (geom) {
-	          switch (operationToDo)
+	          dojo.connect(iTool, "onDrawEnd", function (geom) {
+	             switch (operationToDo)
 			  {
 			    case "identify":
 				  doIdentify(geom);
@@ -207,10 +206,10 @@
 				  addToMapDrawing(geom)
 				break;
 			  }			  
-	      });
+	            });
 		   
 		  overlayLayer.url = mapServiceURL;
-	      utilityMap.url = mapServiceURL;
+	           utilityMap.url = mapServiceURL;
 /*
 	      legendLayers.push({ layer: utilityMap, title: "Utility" });
 	      legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
