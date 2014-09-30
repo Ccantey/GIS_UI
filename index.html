@@ -20,15 +20,21 @@
 
     <title>Wisconsin Rapids</title>
 
-    <!-- Bootstrap core CSS. Heavily modified -->
+    <!-- Bootstrap core CSS. Heavily modified, which was a terribly stupid thing to do in retrospect -->
     <link href="css/bootstrap.css" rel="stylesheet">
 	
 	<!--JavaScript API & Stylesheets-->
-	<script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
+    <script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
     <link href="http://js.arcgis.com/3.9/js/esri/css/esri.css" rel="stylesheet">
-	<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
-	
-    <!-- Custom styles for this app -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>   
+   
+    <link href="css/jquery.selectBoxIt.css" rel="stylesheet" type="text/css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="css/jquery.tree.min.css"/>
+    <link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
+    <link href="css/evol.colorpicker.css" rel="stylesheet" type="text/css" media="screen"/>  
+    <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />	
+
+	<!-- Custom styles for this app -->
     <link href="css/styles.css" rel="stylesheet">
 	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -37,48 +43,27 @@
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 	
-	<!-- JavaScript placed at end of document -->
-
-	
-
-    <!--Initialize javascript API-->
 	<script>	
-	  var initExtent, identifyTask, identifyParams, gsvc;
-	  var identifyTaskParcel,identifyParamsParcel;
-
-	  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
-	  var televisingRelatedLayer;
-	  var overlayLayer;
-	  var aerialLayer;
-	  var nonLegendLayers;
-	  var operationToDo;
-	  var legend = null;
-	  var legendLayers = [];
-	  var token;
-	  var iTool = null;
-      var navToolbar = null; 
-      var measureTool = null; 
-      var mTool = null; 
-      var drawingTool = null;
-      var editToolbar = null;
-      var map = null;
-      var toolbar = null;
-      var circle = false;
-      var symbols = {};
-	  var printer = null;
-	  var printUrl = null;
-	  var printTask = null;	  
-	  var ctxMenuForGraphics, ctxMenuForMap;
-	  var featureLayerInfos;
-	  var signLayer;
-	  var reversePreviewExtent = null;
-	  var printAreaGraphic = null;
-	  var DocRequestLayer = null;
-	  var DocumentRequest = null;
-	  var requestStatus = null;
-	  var requestLocation;
-	  
-	  var globalMapLayers = [];
+		  var initExtent, identifyTask, identifyParams, gsvc;
+		  var identifyTaskParcel, identifyParamsParcel;
+		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+		  var A_Drawings;
+		  var overlayLayer;
+		  var aerialLayer;
+		  var operationToDo;
+		  var legend = null;
+		  var legendLayers = [];
+		  var iTool = null;
+	      var navToolbar = null; 
+	      var measureTool = null; 
+	      var drawingTool = null;
+	      var editToolbar = null;
+	      var map = null;
+	      var toolbar = null;
+	      var symbols = {};
+		  var printTask = null;	  
+		  var ctxMenuForGraphics, ctxMenuForMap;
+		  var printAreaGraphic = null;
 		
 		require(["dojo/dom",
 			  "dojo/on",
@@ -86,7 +71,7 @@
 			  "esri/domUtils",
 			  "esri/map",
 			  "esri/request",
-			  "esri/dijit/Print",
+			  "esri/tasks/PrintTask",
 			  "esri/dijit/Legend",
 			  "esri/toolbars/draw",
 			  "esri/toolbars/navigation",
@@ -100,12 +85,14 @@
 			  "esri/geometry/Geometry",
 			  "esri/geometry/Extent",
 			  "esri/SpatialReference"],
-		function(dom, on, query, domUtils, Map, esriRequest, Print, Legend, Draw, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+		function(dom, on, query, domUtils, Map, esriRequest, PrintTask, Legend, Draw, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 		
-		  initExtent = new Extent({xmin:-1.000647919766419E7,ymin:5525319.431128474,xmax:-9991497.502634134,ymax:5530765.583020778,spatialReference:{wkid:102100}})
+		  initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}})
 		  map = new Map("map", {
 			extent: initExtent	
 		  }); 
+		  gsvc = new GeometryService(gsvcURL);
+		  printTask = new PrintTask(printServiceURL);
 		  
 		  // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
 		  on(map, "load", function(){
@@ -119,7 +106,7 @@
 		  //Add dynamic map 
 		  overlayLayer = new ArcGISDynamicMapServiceLayer(mapServiceURL, {id:"Basemap"});
 		  overlayLayer.setImageFormat("png32");
-		  overlayLayer.setVisibleLayers([1,28]);
+		  overlayLayer.setVisibleLayers([1,27,28,29]);
 		  //overlayLayer.opacity = 0.7;
 		  map.addLayer(overlayLayer);
           //console.log(overlayLayer);
@@ -169,8 +156,6 @@
           on(map, "update-start", function(){
 		    domUtils.show(loading);
 		  });
-          
-
 
 		   graphicLayer = new GraphicsLayer();
            map.addLayer(graphicLayer);
@@ -202,9 +187,9 @@
 		   identifyParamsParcel.width  = map.width;
            identifyParamsParcel.height = map.height;
 		   
-/*		  operationToDo = 'identify';
+		  operationToDo = 'identify';
 	      iTool = new Draw(map, { showTooltips: false });
-	      iTool.activate(Draw.Point);
+	      iTool.activate(Draw.POINT);
 
 	      dojo.connect(iTool, "onDrawEnd", function (geom) {
 	          switch (operationToDo)
@@ -222,7 +207,7 @@
 				  addToMapDrawing(geom)
 				break;
 			  }			  
-	      });*/
+	      });
 		   
 		  overlayLayer.url = mapServiceURL;
 	      utilityMap.url = mapServiceURL;
@@ -249,8 +234,7 @@
 				  globalMapLayers = response.layers;
 			  }, function(error) {
 				  console.log("Error: ", error.message);
-			  });		   
-		   
+			  });			   
 		   
 	  });
 	</script>
@@ -267,7 +251,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button> -->
-          <a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewer">Wisconsin Rapids </a><a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewerSMALL">Wis Rapids</a><font class="navbar-brand" style="color:#ff6600">City Viewer</font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
+          <a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewer">Wisconsin Rapids </a><a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewerSMALL">Rapids</a><font class="navbar-brand" style="color:#ff6600">City Viewer</font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -279,23 +263,22 @@
     </div>
 <!-- End Top Navbar> -->
 
-
 	<a id="menu-toggle" href="#" class="btn btn-primary btn-lg toggle"><i class="glyphicon glyphicon-forward"></i></a> 
 	<!--Begin SIDEBAR-->  
 <div id="sidebar-wrapper">
 	
 
 	<ul id="myTab" class="nav nav-tabs">
-		<li class="active">
-			<a class="tabtext" data-toggle="tab" href="#searchTab">Search</a>
+		<li id="search-tab" class="active">
+			<a  class="tabtext" data-toggle="tab" href="#searchTab">Search</a>
 		</li>
-		<li>
+		<li id="layers-tab">
 			<a class="tabtext" data-toggle="tab" href="#layersTab">Layers</a>
 		</li>
-		<li>
+		<li id="tools-tab">
 			<a class="tabtext" data-toggle="tab" href="#toolsTab">Tools</a>
 		</li>
-		<li>
+		<li id="draw-tab">
 			<a class="tabtext" data-toggle="tab" href="#drawTab">Draw</a>
 		</li>
 	</ul>
@@ -304,6 +287,7 @@
 	<div id="myTabContent" class="tab-content">	
 	<!--Begin Search Tab Content-->
 		<div id="searchTab" class="tab-pane fade  active in">
+		<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
 		  <div id="searchForm">
 			<form class="form-horizontal" role="form">
 			
@@ -311,7 +295,10 @@
 				<label for="inputEmail3" class="col-sm-4 control-label">Owner:</label>
 				<div class="col-lg-8">
 				<div class="input-group">
-				  <input type="text" class="form-control" id="owner" placeholder="Owner Name"><span class="input-group-btn"><button class="btn btn-lg" type="button">Go!</button></span>
+				  <input type="text" name="owner" onclick="this.value = ''" class="form-control autocomplete" id="owner" placeholder="Owner Name">
+				    <span class="input-group-btn">
+				    	<button id="ownerGo" class="btn btn-lg" type="button">Go!</button>
+				    </span>
 				</div>
 				</div>
 			  </div>
@@ -320,7 +307,10 @@
 				<label for="inputEmail3" class="col-sm-4 control-label">Address:</label>
 				<div class="col-lg-8">
 				<div class="input-group">
-				  <input type="text" class="form-control" id="address" placeholder="Street Address"><span class="input-group-btn"><button class="btn btn-lg" type="button">Go!</button></span>
+				  <input type="text" name="address" onclick="this.value = ''" class="form-control autocomplete" id="addresses" placeholder="Address">
+				     <span class="input-group-btn">
+				     	<button id="addressGo" class="btn btn-lg" type="button">Go!</button>
+				     </span>
 				</div>
 				</div>
 			  </div>
@@ -329,81 +319,102 @@
 				<label for="inputEmail3" class="col-sm-4 control-label">Parcel No:</label>
 				<div class="col-lg-8">
 				<div class="input-group">
-				  <input type="text" class="form-control" id="PID" placeholder="Parcel Number"><span class="input-group-btn"><button class="btn btn-lg" type="button">Go!</button></span>
+				  <input type="text" name="pid" onclick="this.value = ''" class="form-control autocomplete" id="pid" placeholder="Parcel No.">
+				      <span class="input-group-btn">
+				      	 <button id="pidGo" class="btn btn-lg" type="button">Go!</button>
+				       </span>
 				</div>
 				</div>
 			  </div>
 
 			</form>
 
-          </div>
+          </div><!--searchForm-->
 		  
-		  <section class="results identify">
+		  <section class="results identify" style="display:none">
 				<!--<div class="process-results searchClass"><a class="mailOption" ><i class="icon-envelope-alt"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://dev.wsbinfolink.wsbeng.com/SouthStPaul-DataLink/outputs/parcelInfo.csv" target="_blank"><i class="icon-share"></i> Export</a></div>-->
-				<!-- <div id="append" class="section-header">Results</div>
+				<div id="append" class="section-header">Results</div>
 				<select name="type" id="multipleSelect" class="selectmenu" onchange="updateIdentify(this.value)">       
-				</select> -->
-				</br></br>
-				<!-- <div class="section-sub-header">Property Information</div> -->
+				</select>
+				
+				<div class="section-sub-header">Property Information</div>
 				<table class="data" id="singleItem1"> 
 				</table>
 			
-				<!-- <div class="section-sub-header2">Tax Districts</div> -->
+				<div class="section-sub-header2">Tax Districts</div>
 				<table class="data" id="singleItem2">		
-				</table>                            
-           </section>		  
-		</div>
+				</table> 
+
+				<div class="attachments">
+                        <table class="data" id='viewAttachment' > </table>
+						<!-- <div class="progressBar" style="display:none"></div> -->
+			   </div>                           
+           </section>
+           <div id="searchfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>		  
+		</div><!--searchTab-->
 	<!--Begin Layers Tab Content-->		
-		<div id="layersTab" class="tab-pane fade ">
-		
-			  <div id="layerChecks">
-			  <strong>Utility Layers</strong>
-				  <div class="checkbox">
-				    <ul>
-						<li class="utilityLayer">									
-							<label>Taps</label>
-							  <input type="checkbox" id="SanSew">							
-						</li>
-						<li class="utilityLayer">					
-							<label>Sanitary_Pipe</label>
-							  <input type="checkbox" id="StormSew">							
-						</li>
-						<li class="utilityLayer">					
-							<label>Sanitary_Manholes</label>
-							  <input type="checkbox" id="Water">							
-						</li>
-						<li class="utilityLayer">					
-							<label>Sanitary_Sub-basins</label>
-							  <input type="checkbox" id="Adraw">							
-						</li>
-					  </ul>
-					</div>			
-				</div>
+<div id="layersTab" class="tab-pane fade "> <!--open-ended <li required for plugin-->		
+<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
+            <div id="tree">
+			
+			
+               <!--Checktree appends the closing elements... </li>-->
+               <strong id="utilTitle" style="color:#ff6600">Utility Layers</strong> <!--Checktree doesn't work correctly if there are misspells-->
+
+                <ul>
+                    <li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>
+                        <ul>
+                            
+                            <li class="utilityLayer"><input type="checkbox"><label>Sanitary Taps</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Sanitary Manholes</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Sanitary Leads</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Abandoned Sanitary Pipe</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Sanitary Gravity Main</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Sanitary Pressurized Mains</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Sewer Lift Stations</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Sanitary Sub-basins</label>
+
+                        </ul>
+                    <li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
+                        <ul>
+                            <li class="utilityLayer"><input type="checkbox"><label>Discharge Point</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Storm Manholes</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Catch Basins</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Storm Leads</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Storm Gravity Main</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Detention Pond</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Watershed Boundaries</label>
+                            <!-- <li class="utilityLayer"><input type="checkbox"><label>Parcels with Storm Permits</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Parcels with Maintenance Agrmts</label> -->
+
+
+                        </ul>
+                    <li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A_Drawings</label>
+                </ul>
+
+            </div>
+
 				
-				<div id="layerChecks2">
-			      <strong>Basemap Layers</strong>
+				<div id="base-layers">
+			      <strong style="color:#ff6600">Basemap Layers</strong>
 				  <div class="checkbox">
 				      <ul >
-				        <li class="overlayLayer">					
+					    <li class="overlayLayer">					
+							<label>Parcel Dimensions</label>
+							  <input type="checkbox" id="DimLabels">							
+						</li>
+					    <li class="overlayLayer">					
 							<label>Address Labels</label>
 							  <input type="checkbox" id="AddLabels">							
 						</li>
-						<!-- <li class="overlayLayer">					
-							<label>Streets</label>
-							  <input type="checkbox" id="StLabels">							
-						</li> -->
 						<li class="overlayLayer">					
 							<label>PID Labels</label>
 							  <input type="checkbox" id="PidLabels">							
 						</li>
-<!-- 						<li class="overlayLayer">					
-							<label>Aerial Photograph (2015)</label>
-							  <input type="checkbox" id="Aerial">							
-						</li>
 						<li class="overlayLayer">					
-							<label>FEMA Floodplain</label>
-							  <input type="checkbox" id="Fema">							
-						</li> -->
+							<label>Zoning Districts</label>
+							  <input type="checkbox" id="Zone">							
+						</li>
 						<li class="overlayLayer">					
 							<label>DNR Wetland Inventory</label>
 							  <input type="checkbox" id="DNR">							
@@ -415,22 +426,23 @@
 					  </ul>	
 					</div>			
 				</div>
-		</div>		
+			<div id="layersfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
+		</div>	<!--layersTab-->
+	
 	<!--Begin toolsTab-->	
 		<div id="toolsTab" class="tab-pane fade">
-
+<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a></br></br>
                         <table class="tools">
                         <tr>
                         	<th>Select From</th>
                         	<td>
                             	<select id="BufferLayer" class="selectmenu">
 									<!-- Change the value to the corresponding index at REST : Perhaps pass these strings to variable down the road -->
-                                    <option value=36>Parcels</option>  
+                                    <option value=27>Parcels</option>  
                                     <option value="Drawing">Drawing</option>                                           
-                                    <option value=17>Sanitary Gravity Mains</option>
-                                    <option value=24>Storm Gravity Mains</option>
-                                    <option value=11>Water Mains</option>
-                                                                       
+                                    <option value=20>Sanitary Gravity Mains</option>
+                                    <option value=12>Storm Gravity Mains</option>
+                                    <option value=11>Water Mains</option>                                                                       
                             	</select>
                             </td>
                         </tr>
@@ -470,9 +482,24 @@
                         	</td>
                         </tr>
                         </table>
-		</div>
+					   <section class="results multipleBuffer">
+					        <div class="process-results">
+					        	 <a class="mailOption" >
+					        	 	<i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+					        	 <a href="http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv" target="_blank">
+					        	 	<i class="glyphicon glyphicon-share-alt"></i> Export</a>
+					        </div>
+                            <div class="section-header">Results</div>
+                            <!--<div class="section-sub-header">Click row to zoom to selection</div>-->
+                            <table class="data" id="multiptleBufferItem">
+                            <!-- <tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>                              -->
+                            </table>					   
+					   </section>
+		   <div id="toolsfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
+		</div> <!--toolstab-->
 	<!--Begin drawTab-->
 	    <div id="drawTab" class="tab-pane fade">
+		<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
 			<table class="tools">
 				<tr>
 					<th>Shape</th>
@@ -485,59 +512,85 @@
 						</div>	
 					</td>
 				</tr>
-				<tr>
-					<th>Buffer</th>
-					<td>
-						<input type="text" name="Buffer" value="100" size="3" id="distance">
-						<select id="unitBuff" class="selectmenu">
-							<option value="UNIT_FOOT">Feet</option>
-							<option value="UNIT_STATUTE_MILE">Miles</option>                                           
-						</select>
-						<button id="Buffer" class="transition btn">Go</button>
-					</td>					
-				</tr>
-				<tr>
-					<th>Measure</th>
-					<td>
-						<div class="radioset" id="measure-set">
-							<input type="radio" name="radio" class="selectDraw" id="measureLength2"><label for="measureLength2" class="measureLength sprite">Length</label>
-							<input type="radio" name="radio" class="selectDraw" id="measureArea2"><label for="measureArea2" class="measureArea sprite">Area</label>
-						</div>
-						<select id="measureUnit2" class="selectmenu">
-							<option value="UNIT_SQUARE_FEET">Feet</option>
-							<option value="UNIT_ACRES">Acres</option>
-							<option value="UNIT_SQUARE_MILES">Miles</option>
-						</select>
-					</td>
-				</tr>
+                        <tr class="text-row" style="display:none;">
+                        	<th>Text</th>
+                            <td>
+                                <input type="text" id="text">
+                        	</td>
+                        </tr>
+                        <tr class="style-row">
+                        	<th>Style</th>
+                            <td>
+                                <select class="symbolOptions selectmenu" id="symbolOptions">
+                                	<option value="STYLE_CIRCLE">CIRCLE</option>
+                                    <option value="STYLE_X">CROSS</option>
+                                    <option value="STYLE_DIAMOND">DIAMOND</option>
+                                    <option value="STYLE_SQUARE">SQUARE</option>
+                        		</select>
+                            </td>
+                        </tr>
+                        <tr class="color-row">
+                        	<th>Color</th>
+                            <td>
+                            	<div class="color-button"><input id="colorPalette" class="color" /></div>
+                            </td>
+                        </tr>
+                        <tr class="size-row">
+                        	<th>Size</th>
+                            <td>
+								<input type="text" name="size" value="3" id="size" class="spinner">
+                        	</td>
+                        </tr>
 			</table>
-		</div>
+		<div id="drawfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
+		</div><!--drawTab-->
+		
 	</div><!--MyTabContent-->
+	
 </div><!--Sidebar wrapper-->
 
-    <!-- Begin MAP-->
-	
+    <!-- Begin MAP-->	
     <div id="map" >
 	  <img id="loading" src="images/loading.gif" style="position:absolute;top:50%;left:50%;z-index:1111;width:32px;height:32px;" > 
     </div>
-    <!--<div id="map-zoom-slider">
-    	<img src="images/temporary-placeholders/placeholder-map-zoom-slider.png" alt="Placeholder" title="Placeholder" />
-    </div>-->	
-	
+
 	<!-- Map navigation tools-->
     <div id="map-tools">
     	<a href="#" class="first" data-toggle="tooltip" title="Zoom to GPS Location"><i class="glyphicon glyphicon-globe"></i></a>
     	<a href="#" class="middle" data-toggle="tooltip" title="Reset Map"><i class="glyphicon glyphicon-refresh"></i></a>
-        <!-- <a href="#" class="middle" title="Add Request" id="add-request"><i class="icon-edit"></i></a>		 -->
     	<a href="#" class="last" data-toggle="tooltip" title="Print Map" id="print"><i class="glyphicon glyphicon-print"></i></a>
     </div>
 	
 	<footer class="foot">
         <section id="watermarks">    		
-    		<a id="wsblogo" href="https://www.wirapids.org" target="_blank" ><img src="images/WRlogo.png" alt="Wisconsin Rapids"></a>    		
+    		<img id ='toggleThis' class="aerialToggle" src="images/Aerial.png" onclick="toggle(this);" alt="Wisconsin Rapids"></a>
         </section>
 	</footer>
-	
+
+	<!--Print options-->
+	<div id="print-box" class="transition form">
+    <form method="post">
+        <div class="row"><input type="text" placeholder="Title" value="Title" onclick="this.value = '';" id="title"></div>
+		<div class="row">
+        <select name="paper" id="paper" onchange="changePrintGraphic()" >
+        	<option value="A4 Portrait">8.5 x 11 Portrait</option>
+        	<option value="A4 Landscape">8.5 x 11 Landscape</option>
+            <option  value="A3 Portrait" >11 x 17 Portrait</option>				
+			<option  value="A3 Landscape"  >11 x 17 Landscape</option>
+			<option  value="MAP_ONLY" >Image (jpeg)</option>
+        </select>		
+        </div>        
+        <div id="progressbar" class="progress progress-striped active"> 
+        	<div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 5%"> 
+        	<!-- <span class="sr-only">45% Complete</span>  -->
+            </div> 
+      </div>
+            <!--button type="cancel" id="btn-cancel" class="transition btn btn-secondary">Cancel</button-->
+			<button type="button" id="btn-printArea" class="transition btn btn-main">Preview</button>
+            <button type="submit" id="btn-print" class="transition btn btn-main">Print</button>        
+    </form>
+    </div>
+
 	<!-- MODAL #1: About -->	
 	<div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	  <div class="modal-dialog">
@@ -547,7 +600,14 @@
 			<h4 class="modal-title" id="myModalLabel">About City Viewer</h4>
 		  </div>
 		  <div class="modal-body">
-			Wisconsin Rapids City Viewer was developed by Chris Cantey, GIS Specialist. <br><br> This application was built on top of the Bootstrap front-end framework to create a browser-agnostic application, meaning this app is available across all browsers and all browser sizes (including mobile).<br><br>The data that drives the app was produced by the City of Wisconsin Rapids and stored inside of an ESRI LocalGovernment Information Data Model. Interaction with the data, including maps, geometry and calculations are served up using ArcGIS Server and REST endpoints called through the ArcGIS for JavaScript API. <br><br>The data is expected to be the most recent available to GIS.
+		  	<strong>About the map</strong><br>
+			Wisconsin Rapids City Viewer was designed and developed in 2014 by <a href="http://geo-odyssey.com/" target="_blank">Chris Cantey</a>, GIS Specialist for the City of Wisconsin Rapids under the direction of the City's Engineering, Planning, and Mayor's Office with assistance from the Information Systems Department. <br><br>
+
+			<strong>Browser Requirements</strong><br>The map depends upon <a href="https://developers.arcgis.com/javascript/" target="blank">(ArcGIS)</a> JavaScript. The map will run on most versions of Chrome, Firefox, Internet Explorer, and Safari. This application was built on top of the <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> front-end framework to create a browser-agnostic application, meaning this app is available across nearly all browsers and all browser sizes (including mobile).<br><br>
+
+			<strong>Data Acknowledgements</strong><br>
+			The data that drives this application was produced by the City of Wisconsin Rapids and <a href ="http://www.co.wood.wi.us/Departments/PZ/LandRecords.aspx" target="_blank">Wood County GIS</a>. While the data is expected to be the most recent and accurate available, the information on this website is not intended to be served as legal evidence of size, shape, location, or ownership of real estate.<br><br>
+
 		  </div>
 		  <div class="modal-footer">
 <!-- 			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -558,39 +618,49 @@
 	</div>
 	
     <!-- MODAL #2: Contact -->	
-	<div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true">
 	  <div class="modal-dialog">
 		<div class="modal-content">
 		  <div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h4 class="modal-title" id="myModalLabel">Contact GIS Services</h4>
+			<h4 class="modal-title" id="myModalLabel2">Contact GIS Services</h4>
 		  </div>
 		  <div class="modal-body">
-			<form class="form-horizontal" role="form">
-			  <div class="form-group">
-				<label for="contactName" class="col-sm-2 control-label">Name</label>
-				<div class="col-sm-7">
-				  <input type="email" class="form-control" id="contactName" placeholder="Your Name">
-				</div>
-			  </div>
-			  <div class="form-group">
-				<label for="contactEmail" class="col-sm-2 control-label">Email</label>
-				<div class="col-sm-7">
-				  <input type="email" class="form-control" id="contactEmail" placeholder="Your Email">
-				</div>
-			  </div>
-			  <div class="form-group">
-				<label for="contactMessage" class="col-sm-2 control-label" >Message</label>
-				<div class="col-sm-10">
-				   <textarea class="form-control" rows="4" id="contactMessage" placeholder="We will use PHP to send form data to my email... here is a boring example that should work http://www.youtube.com/watch?v=-DIcrdW56MA"></textarea>
-				</div>
-			  </div>			 
-			</form>
-			 <div class="modal-footer">
+            <!-- Begin registraion form -->
+						<form name="contactform" method="post" action="php/mailer.php" class="form-horizontal" role="form">
+							<div class="form-group">
+								<label for="inputName" class="col-lg-2 control-label">Name</label>
+								<div class="col-lg-10">
+									<input type="text" class="form-control" id="inputName" name="inputName" placeholder="Your Name">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="inputEmail1" class="col-lg-2 control-label">Email</label>
+								<div class="col-lg-10">
+									<input type="text" class="form-control" id="inputEmail" name="inputEmail" placeholder="Your Email">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="inputSubject" class="col-lg-2 control-label">Subject</label>
+								<div class="col-lg-10">
+									<input type="text" class="form-control" id="inputSubject" name="inputSubject" placeholder="Subject Message">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="inputPassword1" class="col-lg-2 control-label">Message</label>
+								<div class="col-lg-10">
+									<textarea class="form-control" rows="4" id="inputMessage" name="inputMessage" placeholder="Your message..."></textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-lg-offset-2 col-lg-10">
+									<button type="submit" class="btn btn-default">
+										Send Message
+									</button>
+								</div>
+							</div>
+						</form>
 
-				<button type="button" class="btn btn-primary">Send</button>
-			 </div>
-		  </div>
 <!-- 		  <div class="modal-footer">
 			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 			<button type="button" class="btn btn-primary">Save changes</button>
@@ -598,20 +668,36 @@
 		</div>
 	  </div>
 	</div>
+</div>
 
-<!--     </div> --><!-- /.container -->
+	<div id="mailLabelBox" class="transition form">
+         <a href="#" class="btn-close" title="Close"><i class="glyphicon glyphicon-remove"></i> Close</a>
+         <div class='mail-header'>Select Mail Recipient:</div>
+         <div class="row">
+         <button id="ownerMail" class="transition btn btn-main">Owner</button>
+         <button id="residentMail" class="transition btn btn-main">Resident</button>
+         <button id="bothMail" class="transition btn btn-main">Both</button>
+         </div>   
+    </div>
+
 
     <!-- Bootstrap/jQuery /jQuery-UI core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
 	<script src="js/bootstrap.min.js"></script>	
-	<script src="js/jquery-ui-1.10.2.min.js"></script>
+    <script src="js/jquery-ui-1.10.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery.tree.min.js"></script>
+    <script type="text/javascript" src="js/jquery.selectBoxIt.min.js"></script>	
+    <script type="text/javascript" src="js/evol.colorpicker.js"></script>
+    <script src="colorbox/jquery.colorbox.js"></script>
 	
 	<!-- Custom JavaScript-->
 	<script src="js/config.js"></script>
 	<script src="js/app.js"></script>
 	<script src="js/mainCode.js"></script>
+	<script src="js/mainCode-Measure.js"></script>
+	<script src="js/mainCode-Print.js"></script>
 	<script src="js/helper.js"></script>
 
   </body>
