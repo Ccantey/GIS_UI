@@ -19,7 +19,7 @@ function navEvent(task) {
     case 'defaultIdentify':
         operationToDo = 'identify';
         map.setMapCursor("default");
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         map.enablePan();
         $('.radioset').find(':radio').prop("checked", false);
         $('.radioset').buttonset('refresh');
@@ -29,17 +29,17 @@ function navEvent(task) {
         break;
     case 'point':
         operationToDo = 'selection';
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         $("#multipleSelectSelectBoxItContainer").hide();
         break;
     case 'line':
         operationToDo = 'selection';
-        iTool.activate(esri.toolbars.Draw.POLYLINE);
+        iTool.activate(iTool._geometryType='polyline');
         $("#multipleSelectSelectBoxItContainer").hide();
         break;
     case 'polygon':
         operationToDo = 'selection';
-        iTool.activate(esri.toolbars.Draw.POLYGON);
+        iTool.activate(iTool._geometryType='polygon');
         $("#multipleSelectSelectBoxItContainer").hide();
         break;
     case 'clear':
@@ -48,7 +48,7 @@ function navEvent(task) {
         // look for variables holding values in memory like mesureGeometry
         measureGeometry = null;
         operationToDo = 'identify';
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         geometryBuffer = [];
         selectedFeatures = { features: [] };
         unselectedGeometry = { features: [] };
@@ -72,7 +72,7 @@ function navEvent(task) {
          // look for variables holding values in memory like mesureGeometry
         measureGeometry = null;
         operationToDo = 'identify';
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         geometryBuffer = [];
         selectedFeatures = { features: [] };
         unselectedGeometry = { features: [] };
@@ -95,7 +95,7 @@ function navEvent(task) {
         graphicLayer.clear();
         graphicLayerLabels.clear();
         operationToDo = 'identify';
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         $('.radioset').find(':radio').prop("checked", false);
         $('.radioset').buttonset('refresh');
         map.enablePan();
@@ -126,7 +126,7 @@ function navEvent(task) {
         aerialLayer.hide();
         basemap.show();
         operationToDo = 'identify';
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         geometryBuffer = [];
         selectedFeatures = { features: [] };
         unselectedGeometry = { features: [] };
@@ -146,43 +146,43 @@ function navEvent(task) {
     case "gps":
         if (navigator.geolocation) {
         //if you want to track as the user moves setup navigator.geolocation.watchPostion
-        esri.show(dojo.byId("loading"));
+        $("#loading").show();
         navigator.geolocation.getCurrentPosition(zoomToLocation, locationError);
         }
         break;
     case "measureLine":
         operationToDo = 'measure';
         measureGeometry = null;
-        iTool.activate(esri.toolbars.Draw.POLYLINE);
+        iTool.activate(iTool._geometryType='polyline');
         break;
     case "measurePolygon":
         operationToDo = 'measure';
         measureGeometry = null;
-        iTool.activate(esri.toolbars.Draw.POLYGON);
+        iTool.activate(iTool._geometryType='polygon');
         break;
     case "drawingPolygon":
         operationToDo = 'drawing';
         labelling = false;
         map.disablePan();
-        iTool.activate(esri.toolbars.Draw.POLYGON);
+        iTool.activate(iTool._geometryType='polygon');
         break;
     case "drawingLine":
         operationToDo = 'drawing';
         labelling = false;
         map.disablePan();
-        iTool.activate(esri.toolbars.Draw.POLYLINE);
+        iTool.activate(iTool._geometryType='polyline');
         break;
     case "drawingPoint":
         operationToDo = 'drawing';
         labelling = false;
         map.disablePan();
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         break;
     case "drawingText":
         operationToDo = 'drawing';
         labelling = true;
         map.disablePan();
-        iTool.activate(esri.toolbars.Draw.POINT);
+        iTool.activate(iTool._geometryType='point');
         break;
     }
 }
@@ -205,92 +205,133 @@ function locationError(error) {
 }
 
 function pointTolerance(map, point, toleranceInPixel) {
+  var extent;
+  require(["esri/geometry/Extent"], function(Extent) {
     var pixelWidth = map.extent.getWidth() / map.width;
     var toleraceInMapCoords = toleranceInPixel * pixelWidth;
-    return new esri.geometry.Extent(point.x - toleraceInMapCoords, point.y - toleraceInMapCoords, point.x + toleraceInMapCoords, point.y + toleraceInMapCoords, map.spatialReference);
+    extent = new Extent(point.x - toleraceInMapCoords, point.y - toleraceInMapCoords, point.x + toleraceInMapCoords, point.y + toleraceInMapCoords, map.spatialReference);	
+  });
+  return extent;
 }		  
 
+
 function zoomToLocation(position) {
-    //$.mobile.hidePageLoadingMsg(); //true hides the dialog
-    var pt = esri.geometry.geographicToWebMercator(new esri.geometry.Point(position.coords.longitude, position.coords.latitude));
-    map.centerAndZoom(pt, 18);
-    //uncomment to add a graphic at the current location
-    var symbol = symbols.Picture;
-    map.graphics.add(new esri.Graphic(pt, symbol));
-    esri.hide(dojo.byId("loading"));
+  require(["esri/geometry/webMercatorUtils", "esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/graphic","esri/domUtils"], function(webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils){
+	//$.mobile.hidePageLoadingMsg(); //true hides the dialog
+	var pt = webMercatorUtils.geographicToWebMercator(new Point(position.coords.longitude, position.coords.latitude));
+	map.centerAndZoom(pt, 20);
+	//uncomment to add a graphic at the current location
+	var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
+	graphic = new Graphic(pt, symbol);
+	map.graphics.add(graphic);
+	domUtils.hide(loading);
+    gpsid = navigation.watchPosition(showLocation, locationError);
+  });
+}
+
+function showLocation(location) {
+  require(["esri/geometry/webMercatorUtils", "esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/graphic","esri/domUtils"], function(webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils){
+    var pt = webMercatorUtils.geographicToWebMercator(new Point(location.coords.longitude, location.coords.latitude));
+	var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
+   if (location.coords.accuracy <= 500) {
+   // the reading is accurate, do this
+     if (!graphic) {	
+		graphic = new Graphic(pt, symbol);
+		map.graphics.add(graphic);
+		//map.centerAndZoom(pt, 20);
+		domUtils.hide(loading);
+	  }else{ //move the graphic if it exists   
+		 graphic.setGeometry(pt);
+		 //map.centerAndZoom(pt, 20);
+		}
+   } else {
+		 // reading is not accurate enough, do something else
+		zoomToLocation(location);
+		//map.centerAndZoom(pt, 20);
+		//alert('The positional accuracy of your device is low. Best positional accuracy is obtained with a GPS/Wi-Fi enabled device');
+		navigation.clearWatch(gpsid);
+		//graphic = new Graphic(pt, symbol);
+		//map.graphics.add(graphic);
+		//domUtils.hide(loading);
+     }
+   });	
 }
 
 function drawGraphic(drawn) {  //Tools/Select By
-    map.enablePan();
-    var layerToBuffer = dojo.byId("BufferLayer").value;
-    if (layerToBuffer == parcelLayerID) {
-        var queryTask = new esri.tasks.QueryTask(mapServiceURL + "/" + layerToBuffer);
-        var query = new esri.tasks.Query();
-        query.outFields = ["*"];
-    } else {
-        var queryTask = new esri.tasks.QueryTask(mapServiceURL + "/" + layerToBuffer);
-        var query = new esri.tasks.Query();
-        query.outFields = ["*"];
-    }
-    //if 'select by drawing'
-    switch (drawn.type) { 
-    case "point":
-        symbolDraw = symbols.point;
-        break;
-    case "polyline":
-        symbolDraw = symbols.polyline;
-        break;
-    case "polygon":
-        symbolDraw = symbols.polygon;
-        break;
-    }
-    var graphicDraw = new esri.Graphic(drawn, symbolDraw);
-    if (layerToBuffer == "Drawing") {
-        geometryBuffer.push(graphicDraw.geometry);
-        map.graphics.add(graphicDraw);
-	//if NOT 'select by drawing'
-    } else {
-        query.returnGeometry = true;
-        if (graphicDraw.geometry.type == "point") {
-            query.geometry = pointTolerance(map, graphicDraw.geometry, 10);
-        } else {
-            query.geometry = graphicDraw.geometry;
-        }
+    require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic"], function(dom,Query, QueryTask, Graphic) {
+      map.enablePan();
+      var layerToBuffer = dom.byId("BufferLayer").value;
+      if (layerToBuffer == parcelLayerID) {
+          var queryTask = new QueryTask(mapServiceURL + "/" + layerToBuffer);
+		  console.log(queryTask);
+          var query = new Query();
+          query.outFields = ["*"];
+      } else {
+          var queryTask = new QueryTask(mapServiceURL + "/" + layerToBuffer);
+		  console.log(queryTask);
+          var query = new Query();
+          query.outFields = ["*"];
+      }
+      //if 'select by drawing'
+      switch (drawn.type) { 
+      case "point":
+          symbolDraw = symbols.point;
+          break;
+      case "polyline":
+          symbolDraw = symbols.polyline;
+          break;
+      case "polygon":
+          symbolDraw = symbols.polygon;
+          break;
+      }
+      var graphicDraw = new Graphic(drawn, symbolDraw);
+      if (layerToBuffer == "Drawing") {
+          geometryBuffer.push(graphicDraw.geometry);
+          map.graphics.add(graphicDraw);
+	  //if NOT 'select by drawing'
+      } else {
+          query.returnGeometry = true;
+          if (graphicDraw.geometry.type == "point") {
+              query.geometry = pointTolerance(map, graphicDraw.geometry, 10);
+          } else {
+              query.geometry = graphicDraw.geometry;
+          }
 
-        queryTask.execute(query, function (selectionGeometries) {
-            var currentSelection = selectionGeometries.features;
-            //alert(currentSelection.length);
-            if (currentSelection.length == 0 && layerToBuffer != parcelLayerID) {
-                map.graphics.add(graphicDraw);
-                geometryBuffer.push(graphicDraw.geometry);
-            } else {
-                switch (currentSelection[0].geometry.type) {
-                case "point":
-					var symbolSelect = symbols.point;
-                    break;
-                case "polyline":
-					var symbolSelect = symbols.polyline;
-                    break;
-                case "polygon":
-					var symbolSelect = symbols.polygon;
-                    break;
-            }
-            for (var i = 0; i < currentSelection.length; i++) {
-                currentSelection[i].setSymbol(symbolSelect);
-                map.graphics.add(currentSelection[i]);
-                selectedFeatures.features.push(currentSelection[i]);
-                geometryDraw.push(currentSelection[i].geometry);
-                geometryBuffer.push(currentSelection[i].geometry);
-            }
-            if (layerToBuffer == parcelLayerID && currentSelection.length != 0) {
-                createTable(selectedFeatures.features);
-            }
-        }
-    });
-    }
+          queryTask.execute(query, function (selectionGeometries) {
+              var currentSelection = selectionGeometries.features;
+              //alert(currentSelection.length);
+              if (currentSelection.length == 0 && layerToBuffer != parcelLayerID) {
+                  map.graphics.add(graphicDraw);
+                  geometryBuffer.push(graphicDraw.geometry);
+              } else {
+                  switch (currentSelection[0].geometry.type) {
+                  case "point":
+					  var symbolSelect = symbols.point;
+                      break;
+                  case "polyline":
+					  var symbolSelect = symbols.polyline;
+                      break;
+                  case "polygon":
+					  var symbolSelect = symbols.polygon;
+                      break;
+              }
+              for (var i = 0; i < currentSelection.length; i++) {
+                  currentSelection[i].setSymbol(symbolSelect);
+                  map.graphics.add(currentSelection[i]);
+                  selectedFeatures.features.push(currentSelection[i]);
+                  geometryDraw.push(currentSelection[i].geometry);
+                  geometryBuffer.push(currentSelection[i].geometry);
+              }
+              if (layerToBuffer == parcelLayerID && currentSelection.length != 0) {
+                  createTable(selectedFeatures.features);
+              }
+          }
+      });
+      }
+	});
 }
 
-function doBuffer() { //amd
+function doBuffer() { 
            params.distances = [dojo.byId("distance").value];
            params.unit = gsvc[dojo.byId("unitBuff").value];           
            params.outSpatialReference = map.spatialReference;
@@ -302,14 +343,15 @@ function doBuffer() { //amd
 }
 
 function showBuffer(features) {
+  require(["esri/graphic","esri/tasks/QueryTask","esri/tasks/query","esri/graphicsUtils"], function(Graphic,QueryTask,Query, graphicsUtils) {
     $('.results.multipleBuffer').hide();
     var bufferSymbol = symbols.buffer;
     map.graphics.clear();
     if (features.length > 0) {
-        var graphic = new esri.Graphic(features[0], bufferSymbol);
+        var graphic = new Graphic(features[0], bufferSymbol);
         map.graphics.add(graphic);
-        queryTask = new esri.tasks.QueryTask(mapServiceURL + "/" + parcelLayerID);
-        var bufferQuery = new esri.tasks.Query();
+        queryTask = new QueryTask(mapServiceURL + "/" + parcelLayerID);
+        var bufferQuery = new Query();
         bufferQuery.outFields = ["*"]; //mailLabelFields;
         bufferQuery.returnGeometry = true;
         bufferQuery.geometry = features[0];
@@ -321,11 +363,12 @@ function showBuffer(features) {
                 var allGraphics = dojo.map(fset.features, function (feature) {
                         return feature;
                     });
-                unionExtent = esri.graphicsExtent(allGraphics);
+                unionExtent = graphicsUtils.graphicsExtent(allGraphics);
                 map.setExtent(unionExtent.expand(1.5));
             }
         });
     }
+  });
 }
 
 function toggle(el) {
@@ -345,6 +388,7 @@ function toggle(el) {
 }
 
 function createTable(queryFeatures) {
+  require(["esri/graphic"], function(Graphic) {
     selectedFeatures = { features: [] };
     csvInfo = [];
     //fill/stroke of selected
@@ -369,7 +413,7 @@ function createTable(queryFeatures) {
             attValues.push(queryFeatures[i].attributes[attrAll[j]]);
         }
         csvInfo.push(attValues.join(","));
-        graphic = new esri.Graphic(queryFeatures[i].geometry, symbols.polygon);
+        graphic = new Graphic(queryFeatures[i].geometry, symbols.polygon);
         map.graphics.add(graphic);
         content += "<tr><td >" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.OwnerName'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.Adddress'] + "</td></tr>";
         mailParcels.push(queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO']);
@@ -381,7 +425,9 @@ function createTable(queryFeatures) {
     $("#multiptleBufferItem").html(content);
     $('.results.multipleBuffer').show();
     $('.results.identify').hide();
-    createCSVFile();
+    
+  });
+  createCSVFile();
 }
 
 function createCSVFile() {
@@ -416,8 +462,7 @@ function doIdentify(evt) {
     identifyParams.geometry = evt;
     identifyParams.returnGeometry = true;
     identifyParams.mapExtent = map.extent;
-    identifyParams.layerIds = utilityMap.visibleLayers.concat(identifyLayerAdditional);
-    identifyParams.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+    identifyParams.layerIds = utilityMap.visibleLayers.concat(identifyLayerAdditional);    
     identifyTask.execute(identifyParams, function (idResults) { addToMap(idResults, evt); });
     selectedFeatures = { features: [] }; //remove previously selected parcels in memory 
     $('.results.multipleBuffer').hide(); //remove previously selected parcels in results table
@@ -457,7 +502,8 @@ function addToMap(idResults, evt) {
             $("#multipleSelectSelectBoxItContainer").hide();
             $('.results.identify').show();
             identifyParamsParcel.mapExtent = map.extent;
-            identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+			
+            //identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
             identifyParamsParcel.geometry = evt;
             identifyTaskParcel.execute(identifyParamsParcel, function (idResults) { doneIdentifyParcel(idResults[0].feature) } );
     }
@@ -586,23 +632,24 @@ function doneIdentifyParcel(currentProperty) {
 }
 
 function SearchParcelByAttribute(search) {
+  require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils"], function(dom,Query, QueryTask, Graphic, graphicsUtils) {
     map.graphics.clear();
-    var query = new esri.tasks.Query();
+    var query = new Query();
     query.outFields = ['*'];
     query.returnGeometry = true;
     $(".searchClass").show();
     switch (search) {
     case "Owner":
-        query.where = "OwnerName = " + "'" + dojo.byId("owner").value + "'";
+        query.where = "OwnerName = " + "'" + dom.byId("owner").value + "'";
         break;
     case "Address":
-        query.where = "Adddress = " + "'" + dojo.byId("addresses").value.replace(/,/g, "") + "'";
+        query.where = "Adddress = " + "'" + dom.byId("addresses").value.replace(/,/g, "") + "'";
         break;
     case "PID":
-        query.where = "Parcels.PARCELNO  = " + "'" + dojo.byId("pid").value.replace(/,/g, "") + "'";
+        query.where = "Parcels.PARCELNO  = " + "'" + dom.byId("pid").value.replace(/,/g, "") + "'";
         break;
     }
-    var queryTask = new esri.tasks.QueryTask(mapServiceURL + "/" + parcelLayerID);
+    var queryTask = new QueryTask(mapServiceURL + "/" + parcelLayerID);
     queryTask.execute(query, function (searchFeature) {
         createSingleTable(searchFeature.features);
         var i;
@@ -616,7 +663,7 @@ function SearchParcelByAttribute(search) {
             var content = "<tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>";
             for (i = 0, il = searchFeature.features.length; i < il; i++) {
                 attValues = [];
-                graphic = new esri.Graphic(searchFeature.features[i].geometry, symbols.polygon);
+                graphic = new Graphic(searchFeature.features[i].geometry, symbols.polygon);
                 map.graphics.add(graphic);
 
                 content += "<tr><td >" + searchFeature.features[i].attributes.ParcelID + "</td><td>" + searchFeature.features[i].attributes["OwnerName"] + "</td><td>" + searchFeature.features[i].attributes["BLDG_NUM"] + " " + searchFeature.features[i].attributes["STREETNAME"] + " " + searchFeature.features[i].attributes["ZIP"] + " </td></tr>";
@@ -627,11 +674,11 @@ function SearchParcelByAttribute(search) {
                     attValues.push(searchFeature.features[i].attributes[attrAll[j]]);
                 }
                 if (searchFeature.features.length == 1) {
-                    unionExtent = esri.graphicsExtent(allGraphics);
+                    unionExtent = graphicsUtils.graphicsExtent(allGraphics);
                     map.setExtent(unionExtent.expand(1.5));
                 } else {
                     unionExtent = null;
-                    unionExtent = esri.graphicsExtent(searchFeature.features);
+                    unionExtent = graphicsUtils.graphicsExtent(searchFeature.features);
                     map.setExtent(unionExtent.expand(1.5));
                 }
                 csvInfo.push(attValues.join(","));
@@ -646,13 +693,14 @@ function SearchParcelByAttribute(search) {
             //console.log(searchFeature.features[0]);
             $('.results.multiple').hide();
             $('.results.multipleBuffer').hide();
-            extent = esri.graphicsExtent([searchFeature.features[0]]);
+            extent = graphicsUtils.graphicsExtent([searchFeature.features[0]]);
             extentParcel = extent.expand(3);
             map.setExtent(extentParcel, true);
             showFeature(searchFeature.features[0]);
             geometryBuffer.push(searchFeature.features[0].geometry);
         }
     });
+  });
 }
 
 function showSearchByAttributeResults(layerSearchResults) {
@@ -696,21 +744,25 @@ function showFeature(feature) {
 }
 
 function zoomToTableSelection(element) {
+  require(["esri/graphicsUtils"], function(graphicsUtils) { 
     map.graphics.clear();
     var row = $(element).parent().children().index($(element));
     var zoomGraphic = selectedFeatures.features[row];
-    var extent = esri.graphicsExtent([zoomGraphic]);
+    var extent = graphicsExtent([zoomGraphic]);
     var extentParcel = extent.expand(5);
     map.setExtent(extentParcel, true);
     zoomGraphic.setSymbol(symbols.polygon);
     map.graphics.add(zoomGraphic);
     doneIdentifyParcel(zoomGraphic);
+  });
 }
 
 function createGraphicsMenu() {
+var ctxMenuForGraphics, ctxMenuForMap;
+require(["dijit/Menu", "dijit/MenuItem"], function(Menu){
     // Creates right-click context menu for GRAPHICS
-    ctxMenuForGraphics = new dijit.Menu({});
-    ctxMenuForGraphics.addChild(new dijit.MenuItem({
+    ctxMenuForGraphics = new Menu({});
+    ctxMenuForGraphics.addChild(new MenuItem({
         label: "Delete",
         onClick: function () {
         //console.log(selected.geometry)
@@ -722,7 +774,7 @@ function createGraphicsMenu() {
     }));
 
     ctxMenuForGraphics.startup();
-    dojo.connect(graphicLayer, "onMouseOver", function (evt) {
+    on(graphicLayer,"onMouseOver", function (evt) {
         // We'll use this "selected" graphic to enable editing tools
         // on this graphic when the user click on one of the tools
         // listed in the menu.
@@ -731,9 +783,10 @@ function createGraphicsMenu() {
         ctxMenuForGraphics.bindDomNode(evt.graphic.getDojoShape().getNode());
     });
 
-    dojo.connect(graphicLayer, "onMouseOut", function (evt) {
+    on(graphicLayer, "onMouseOut", function (evt) {
         ctxMenuForGraphics.unBindDomNode(evt.graphic.getDojoShape().getNode());
     });
+  });
 }
 
 function createMapMenu() {
@@ -750,6 +803,7 @@ function createMapMenu() {
 }
 
 function getMapPointFromMenuPosition(box) {
+  require(["esri/geometry/Point"], function(Point) {
     var x = box.x, y = box.y;
     switch (box.corner) {
     case "TR":
@@ -764,6 +818,7 @@ function getMapPointFromMenuPosition(box) {
         break;
     }
 
-    var screenPoint = new esri.geometry.Point(x - map.position.x, y - map.position.y);
+    var screenPoint = new Point(x - map.position.x, y - map.position.y);
     return map.toMap(screenPoint);
+});
 }
