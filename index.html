@@ -168,9 +168,7 @@
 		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);	     //aerialServiceUrl 
 		  map.addLayer(basemap);
 		  
-		   //could load aerial first. vectorBase needs to be republished with appropriate scales, then reverse hide/show stuff.
-		  //maybe aerial will load properly after re publish 
-		  aerialLayer = new ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"); //vectorBaseUrl "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"
+		  aerialLayer = new ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"); 
 		  map.addLayer(aerialLayer);
 		  aerialLayer.hide();
 		  //Add Feature service (A_Drawings/Attachments)
