@@ -10,4 +10,4 @@ You should build with your own service anyway.
 DEMO 
 ======
 
-http://geo-odyssey.com/links/WiscRapids/
+http://gis.wirapids.org/CityViewer/#
