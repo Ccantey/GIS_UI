@@ -290,7 +290,7 @@ function drawGraphic(drawn) {  //Tools/Select By
     }
 }
 
-function doBuffer() { 
+function doBuffer() { //amd
            params.distances = [dojo.byId("distance").value];
            params.unit = gsvc[dojo.byId("unitBuff").value];           
            params.outSpatialReference = map.spatialReference;
@@ -349,7 +349,6 @@ function createTable(queryFeatures) {
     csvInfo = [];
     //fill/stroke of selected
     var querySymbol = symbols.polygon;
-	//new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([206, 206, 206, 0.65]), 2), new dojo.Color([255, 102, 0, 0.35]));
     symbols.polygon = querySymbol;
     var k;
     for (k in queryFeatures[0].attributes) {
@@ -683,15 +682,12 @@ function showSearchByAttributeResults(layerSearchResults) {
 function showFeature(feature) {
     switch (feature.geometry.type) {
     case "point":
-        //var symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, 10, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 155, 0]), 1), new dojo.Color([255, 155, 0, 1]));
 		var symbol = symbols.point;
         break;
     case "polyline":
-        //var symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 155, 0]), 4);
 		var symbol = symbols.polyline;
         break;
     case "polygon":
-        //var symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([206, 206, 206, 0.65]), 2), new dojo.Color([255, 102, 0, 0.35]));
 		var symbol = symbols.polygon;
         break;
     }
