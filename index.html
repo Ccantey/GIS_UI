@@ -22,8 +22,8 @@
 
     <!-- Bootstrap core CSS. Heavily modified, which was a terribly stupid thing to do in retrospect -->
     <link href="css/bootstrap.css" rel="stylesheet">
-	
-	<!--JavaScript API & Stylesheets-->
+    
+    <!--JavaScript API & Stylesheets-->
     <script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
     <link href="http://js.arcgis.com/3.9/js/esri/css/esri.css" rel="stylesheet">
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>   
@@ -34,7 +34,7 @@
     <link href="css/evol.colorpicker.css" rel="stylesheet" type="text/css" media="screen"/>  
     <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />	
 
-	<!-- Custom styles for this app -->
+    <!-- Custom styles for this app -->
     <link href="css/styles.css" rel="stylesheet">
 	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -44,58 +44,58 @@
     <![endif]-->
 	
 	<script>	
-		  var initExtent, identifyTask, identifyParams, gsvc;
-		  var identifyTaskParcel, identifyParamsParcel, params;
-		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
-		  var iPoint;
-		  var A_Drawings;
-		  var overlayLayer;
-		  var aerialLayer;
-		  var operationToDo;
-		  var legend = null;
-		  var legendLayers = [];
-		  var iTool = null;
-	      var navToolbar = null; 
-	      var measureTool = null; 
-	      var drawingTool = null;
-	      var editToolbar = null;
-	      var map = null;
-	      var toolbar = null;
-	      var symbols = {};
-		  var printTask = null;	  
-		  var ctxMenuForGraphics, ctxMenuForMap;
-		  var printAreaGraphic = null;
-		  var globalMapLayers = {};
-		
-		require(["dojo/dom",
-			  "dojo/on",
-              "dojo/query",
-			  "esri/Color",
-			  "esri/domUtils",
-			  "esri/map",
-			  "esri/request",
-			  "esri/tasks/PrintTask",
-			  "esri/dijit/Legend",
-			  "esri/toolbars/draw",
-			  "esri/toolbars/edit",
-			  "esri/toolbars/navigation",
-			  "esri/tasks/IdentifyTask",
-			  "esri/tasks/IdentifyParameters",
-			  "esri/tasks/query",
-			  "esri/tasks/GeometryService",
-			  "esri/tasks/BufferParameters",
-			  "esri/symbols/SimpleMarkerSymbol",
-              "esri/symbols/SimpleLineSymbol",
-              "esri/symbols/SimpleFillSymbol",
-			  "esri/symbols/PictureMarkerSymbol",
-			  "esri/dijit/editing/AttachmentEditor",
-			  "esri/layers/ArcGISTiledMapServiceLayer",
-			  "esri/layers/ArcGISDynamicMapServiceLayer",
-			  "esri/layers/FeatureLayer",
-			  "esri/layers/GraphicsLayer",
-			  "esri/geometry/Geometry",
-			  "esri/geometry/Extent",
-			  "esri/SpatialReference"],
+           var initExtent, identifyTask, identifyParams, gsvc;
+           var identifyTaskParcel, identifyParamsParcel, params;
+           var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+           var iPoint;
+           var A_Drawings;
+           var overlayLayer;
+           var aerialLayer;
+           var operationToDo;
+           var legend = null;
+	   var legendLayers = [];
+           var iTool = null;
+           var navToolbar = null; 
+           var measureTool = null; 
+           var drawingTool = null;
+           var editToolbar = null;
+           var map = null;
+           var toolbar = null;
+           var symbols = {};
+           var printTask = null;	  
+           var ctxMenuForGraphics, ctxMenuForMap;
+           var printAreaGraphic = null;
+           var globalMapLayers = {};
+           
+           require(["dojo/dom",
+                    "dojo/on",
+                    "dojo/query",
+                    "esri/Color",
+                    "esri/domUtils",
+                    "esri/map",
+                    "esri/request",
+                    "esri/tasks/PrintTask",
+                    "esri/dijit/Legend",
+                    "esri/toolbars/draw",
+                    "esri/toolbars/edit",
+                    "esri/toolbars/navigation",
+                    "esri/tasks/IdentifyTask",
+                    "esri/tasks/IdentifyParameters",
+                    "esri/tasks/query",
+                    "esri/tasks/GeometryService",
+                    "esri/tasks/BufferParameters",
+                    "esri/symbols/SimpleMarkerSymbol",
+                    "esri/symbols/SimpleLineSymbol",
+                    "esri/symbols/SimpleFillSymbol",
+                    "esri/symbols/PictureMarkerSymbol",
+                    "esri/dijit/editing/AttachmentEditor",
+                    "esri/layers/ArcGISTiledMapServiceLayer",
+                    "esri/layers/ArcGISDynamicMapServiceLayer",
+                    "esri/layers/FeatureLayer",
+                    "esri/layers/GraphicsLayer",
+                    "esri/geometry/Geometry",
+                    "esri/geometry/Extent",
+                    "esri/SpatialReference"],
 		function(dom, on, query, Color, domUtils, Map, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 		
 		  initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}})
@@ -122,47 +122,45 @@
 		     });
 		  });
 		  on(map, "extent-change", function(extent){
-			    var currentScale=map.getScale();
-				if(currentScale > 4800){
-				   $("#AddLabels").prop('indeterminate', true).change();
-				   $("#AddLabels").prop('disabled', true).change();
-				   $("#AddLabels").parent().css("color", "#777");
-
-				   $("#PidLabels").prop('indeterminate', true).change();
-				   $("#PidLabels").prop('disabled', true).change();;
-				   $("#PidLabels").parent().css("color", "#777");
-				}else{
-				   $("#AddLabels").prop('indeterminate', false).change();
-				   $("#AddLabels").prop('disabled', false).change();
-				   $("#AddLabels").parent().css("color", "#FFF");
-				   
-				   $("#PidLabels").prop('indeterminate', false).change();
-				   $("#PidLabels").prop('disabled', false).change();
-				   $("#PidLabels").parent().css("color", "#FFF");
-				}
-				if (currentScale > 9600){
-				   $("#Contours").prop('indeterminate', true).change();
-				   $("#Contours").prop('disabled', true).change();
-				   $("#Contours").parent().css("color", "#777")
-				   $("#Adraw").prop('indeterminate', true).change();
-				   $("#Adraw").prop('disabled', true).change();
-				   $("#Adraw").parent().css("color", "#777");		
-				 
-				}else{
-				   $("#Contours").prop('indeterminate', false).change();
-				   $("#Contours").prop('disabled', false).change();
-				   $("#Contours").parent().css("color", "#FFF")
-				   $("#Adraw").prop('indeterminate', false).change();
-				   $("#Adraw").prop('disabled', false).change();
-				   $("#Adraw").parent().css("color", "#FFF");			  
-				}
-				if (currentScale > 19200){
-				  
-				}else{				 
-				}			 
+		    var currentScale=map.getScale();
+			if(currentScale > 4800){
+			   $("#AddLabels").prop('indeterminate', true).change();
+			   $("#AddLabels").prop('disabled', true).change();
+			   $("#AddLabels").parent().css("color", "#777");
+	
+			   $("#PidLabels").prop('indeterminate', true).change();
+			   $("#PidLabels").prop('disabled', true).change();;
+			   $("#PidLabels").parent().css("color", "#777");
+			}else{
+			   $("#AddLabels").prop('indeterminate', false).change();
+			   $("#AddLabels").prop('disabled', false).change();
+			   $("#AddLabels").parent().css("color", "#FFF");
+			   
+			   $("#PidLabels").prop('indeterminate', false).change();
+			   $("#PidLabels").prop('disabled', false).change();
+			   $("#PidLabels").parent().css("color", "#FFF");
+			}
+			if (currentScale > 9600){
+			   $("#Contours").prop('indeterminate', true).change();
+			   $("#Contours").prop('disabled', true).change();
+			   $("#Contours").parent().css("color", "#777")
+			   $("#Adraw").prop('indeterminate', true).change();
+			   $("#Adraw").prop('disabled', true).change();
+			   $("#Adraw").parent().css("color", "#777");		
+			 
+			}else{
+			   $("#Contours").prop('indeterminate', false).change();
+			   $("#Contours").prop('disabled', false).change();
+			   $("#Contours").parent().css("color", "#FFF")
+			   $("#Adraw").prop('indeterminate', false).change();
+			   $("#Adraw").prop('disabled', false).change();
+			   $("#Adraw").parent().css("color", "#FFF");			  
+			}
+			if (currentScale > 19200){
+			  
+			}else{				 
+			}			 
 	          });
-		  
-		 	  
 
 		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl); 
 		  map.addLayer(basemap);
@@ -187,7 +185,6 @@
 		  overlayLayer.setVisibleLayers([1,27,28,29]);
 		  //overlayLayer.opacity = 0.7;
 		  map.addLayer(overlayLayer);
-          //console.log(overlayLayer);
 
 		  //Keep map in viewer
 		  maxExtent = map.extent;
@@ -199,51 +196,53 @@
 			//the map unit for this case is meter. 
 			var buffer = 25000;
 			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
-            var onLoadHandle = on(basemap, "update", function(){
-				dojo.disconnect(onLoadHandle);
-				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
-					adjustedEx.xmin = maxExtent.xmin;
-					adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
-					flag = true;
-				}
-				if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
-					adjustedEx.ymin = maxExtent.ymin;
-					adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
-					flag = true;
-				}
-				if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
-					adjustedEx.xmax = maxExtent.xmax;
-					adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
-					flag = true;
-				}
-				if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
-					adjustedEx.ymax = maxExtent.ymax;
-					adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
-					flag = true;
-				}
-				if (flag === true) {
-					map.setExtent(adjustedEx);				
-				}
-				flag = false;
-			});			
+                        var onLoadHandle = on(basemap, "update", function(){
+			  dojo.disconnect(onLoadHandle);
+			  if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
+			        adjustedEx.xmin = maxExtent.xmin;
+				adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
+				flag = true;
+			   }
+			   if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
+				adjustedEx.ymin = maxExtent.ymin;
+				adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
+				flag = true;
+			    }
+			    if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
+				adjustedEx.xmax = maxExtent.xmax;
+				adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
+				flag = true;
+			    }
+			    if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
+				adjustedEx.ymax = maxExtent.ymax;
+				adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
+				flag = true;
+			    }
+			     if (flag === true) {
+				map.setExtent(adjustedEx);				
+			     }
+			     flag = false;
+		        });			
 		  });
+		  
 		  on(map, "update-end", function(){
 		    domUtils.hide(loading);
 			map.disableDoubleClickZoom();
 		  });
-          on(map, "update-start", function(){
+		  
+                  on(map, "update-start", function(){
 		    domUtils.show(loading);
 		  });
           
 		  on(map, "zoom-end", function () {
-		          $("#navigation input").attr("checked", false).button("refresh");
-		          var adjustedScale = map.getScale();
-		          if (adjustedScale > 72226) {
-		          	map.setExtent(initExtent);
-		          }
-		      });
+	            $("#navigation input").attr("checked", false).button("refresh");
+	            var adjustedScale = map.getScale();
+	            if (adjustedScale > 72226) {
+	          	map.setExtent(initExtent);
+	              }
+		    });
 		   graphicLayer = new GraphicsLayer();
-           map.addLayer(graphicLayer);
+                   map.addLayer(graphicLayer);
 		   
 		   tempGraphicLayer = new GraphicsLayer();
 		   map.addLayer(tempGraphicLayer);
@@ -252,9 +251,9 @@
 		   map.addLayer(graphicLayerLabels);
 		   
 		   utilityMap = new ArcGISDynamicMapServiceLayer(mapServiceURL, { id: "Utility" });
-	       utilityMap.setImageFormat("png32");
-	       utilityMap.setVisibleLayers([-1]);
-	       map.addLayer(utilityMap);
+	           utilityMap.setImageFormat("png32");
+	           utilityMap.setVisibleLayers([-1]);
+	           map.addLayer(utilityMap);
 		   //console.log(utilityMap);
 		   
 		   //buffer params
@@ -262,30 +261,29 @@
 		   params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
            
 		   identifyTask = new IdentifyTask(mapServiceURL);
-	       identifyParams = new IdentifyParameters();
+	           identifyParams = new IdentifyParameters();
 
 		   identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
-	       identifyParams.tolerance = 5;
-	       identifyParams.returnGeometry = true;
-	       identifyParams.width = map.width;
-	       identifyParams.height = map.height;
+	           identifyParams.tolerance = 5;
+	           identifyParams.returnGeometry = true;
+	           identifyParams.width = map.width;
+	           identifyParams.height = map.height;
 		   
 		   identifyTaskParcel = new IdentifyTask(mapServiceURL);
 		   identifyParamsParcel = new IdentifyParameters();
 		   identifyParamsParcel.layerIds = [parcelLayerID];
 		   identifyParamsParcel.tolerance = 1;
-           identifyParamsParcel.returnGeometry = true;
+                   identifyParamsParcel.returnGeometry = true;
 		   identifyParamsParcel.width  = map.width;
-           identifyParamsParcel.height = map.height;
+                   identifyParamsParcel.height = map.height;
 		   
 		  operationToDo = 'identify';
-	      iTool = new Draw(map, { showTooltips: false });
-	      //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
+	          iTool = new Draw(map, { showTooltips: false });
+	          //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
 		  iTool.activate(iTool._geometryType='point');
 
-	      dojo.connect(iTool, "onDrawEnd", function (geom) {
-	          switch (operationToDo)
-			  {
+	          dojo.connect(iTool, "onDrawEnd", function (geom) {
+		          switch (operationToDo) {
 			    case "identify":
 				  doIdentify(geom);
 				break;
@@ -299,10 +297,10 @@
 				  addToMapDrawing(geom)
 				break;
 			  }			  
-	      });
+	           });
 		   
 		  overlayLayer.url = mapServiceURL;
-	      utilityMap.url = mapServiceURL;
+	          utilityMap.url = mapServiceURL;
 /*
 	      legendLayers.push({ layer: utilityMap, title: "Utility" });
 	      legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
