@@ -47,6 +47,7 @@
 		  var initExtent, identifyTask, identifyParams, gsvc;
 		  var identifyTaskParcel, identifyParamsParcel, params;
 		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+		  var iPoint;
 		  var A_Drawings;
 		  var overlayLayer;
 		  var aerialLayer;
@@ -104,16 +105,14 @@
 		  gsvc = new GeometryService(gsvcURL);
 		  printTask = new PrintTask(printServiceURL);
 		  
-		      //var es = symbol;
-		      //var dc = dojo.Color;
-		      symbols.point = new SimpleMarkerSymbol("circle", 15, new SimpleLineSymbol("solid", new Color([255, 155, 0]), 1), new Color([206, 206, 206, 1]));
-		      symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
-		      symbols.polygon = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([255, 155, 0, 0.25]));
-		      symbols.polygonMeasure = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([0, 200, 0, 0.65]));
-		      symbols.multipoint = new SimpleMarkerSymbol("diamond", 20, new SimpleLineSymbol("solid", new Color([0, 0, 0]), 1), new Color([0, 0, 255, 0.5]));
-			  symbols.buffer = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 200, 0]), 2), new Color([155, 155, 155, 0.5]));
-			  symbols.Picture = PictureMarkerSymbol("images/bluedot.png", 40, 40);
-		      symbols.textSymbol = null;
+		  symbols.point = new SimpleMarkerSymbol("circle", 15, new SimpleLineSymbol("solid", new Color([255, 155, 0]), 1), new Color([206, 206, 206, 1]));
+		  symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
+		  symbols.polygon = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([255, 155, 0, 0.25]));
+		  symbols.polygonMeasure = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([0, 200, 0, 0.65]));
+		  symbols.multipoint = new SimpleMarkerSymbol("diamond", 20, new SimpleLineSymbol("solid", new Color([0, 0, 0]), 1), new Color([0, 0, 255, 0.5]));
+		  symbols.buffer = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 200, 0]), 2), new Color([155, 155, 155, 0.5]));
+		  symbols.Picture = PictureMarkerSymbol("images/bluedot.png", 40, 40);
+		  symbols.textSymbol = null;
 			  
 		  // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
 		  on(map, "load", function(){
@@ -165,10 +164,10 @@
 		  
 		 	  
 
-		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl);	     //aerialServiceUrl 
+		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl); 
 		  map.addLayer(basemap);
 		  
-		  aerialLayer = new ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"); 
+		  aerialLayer = new ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/", {maxScale: 1128}); //scale to fit, rather than 1128.497
 		  map.addLayer(aerialLayer);
 		  aerialLayer.hide();
 		  //Add Feature service (A_Drawings/Attachments)
@@ -194,7 +193,7 @@
 		  maxExtent = map.extent;
 		  on(map, "extent-change", function (initExtent, delta, levelChange, lod){
 			//changePrintGraphic(); //move print box if its on.
-			var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new esri.SpatialReference({ wkid:102100 }));
+			var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
 			var flag = false;	
 			//set a buffer to make the max extent a slightly bigger to void minor differences
 			//the map unit for this case is meter. 
@@ -263,7 +262,9 @@
 		   params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
            
 		   identifyTask = new IdentifyTask(mapServiceURL);
-	       identifyParams = new esri.tasks.IdentifyParameters();
+	       identifyParams = new IdentifyParameters();
+
+		   identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
 	       identifyParams.tolerance = 5;
 	       identifyParams.returnGeometry = true;
 	       identifyParams.width = map.width;
@@ -279,7 +280,8 @@
 		   
 		  operationToDo = 'identify';
 	      iTool = new Draw(map, { showTooltips: false });
-	      iTool.activate(Draw.POINT);
+	      //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
+		  iTool.activate(iTool._geometryType='point');
 
 	      dojo.connect(iTool, "onDrawEnd", function (geom) {
 	          switch (operationToDo)
