@@ -343,7 +343,7 @@ function doBuffer() {
 }
 
 function showBuffer(features) {
-  require(["esri/graphic","esri/tasks/QueryTask","esri/tasks/query","esri/graphicsUtils"], function(Graphic,QueryTask,Query, graphicsUtils) {
+  require(["esri/graphic","esri/tasks/QueryTask","esri/tasks/query","esri/graphicsUtils", "dojo/_base/array"], function(Graphic,QueryTask,Query, graphicsUtils, array) {
     $('.results.multipleBuffer').hide();
     var bufferSymbol = symbols.buffer;
     map.graphics.clear();
@@ -360,7 +360,7 @@ function showBuffer(features) {
             createTable(bufferFeatures);
             navEvent('point');
             if (fset.features.length > 0) {
-                var allGraphics = dojo.map(fset.features, function (feature) {
+                var allGraphics = array.map(fset.features, function (feature) {
                         return feature;
                     });
                 unionExtent = graphicsUtils.graphicsExtent(allGraphics);
@@ -759,7 +759,7 @@ function zoomToTableSelection(element) {
 
 function createGraphicsMenu() {
 var ctxMenuForGraphics, ctxMenuForMap;
-require(["dijit/Menu", "dijit/MenuItem"], function(Menu){
+require(["dojo/on", "dijit/Menu", "dijit/MenuItem"], function(on, Menu, MenuItem){
     // Creates right-click context menu for GRAPHICS
     ctxMenuForGraphics = new Menu({});
     ctxMenuForGraphics.addChild(new MenuItem({
@@ -774,7 +774,7 @@ require(["dijit/Menu", "dijit/MenuItem"], function(Menu){
     }));
 
     ctxMenuForGraphics.startup();
-    on(graphicLayer,"onMouseOver", function (evt) {
+    on(graphicLayer,"mouse-over", function (evt) {
         // We'll use this "selected" graphic to enable editing tools
         // on this graphic when the user click on one of the tools
         // listed in the menu.
@@ -783,7 +783,7 @@ require(["dijit/Menu", "dijit/MenuItem"], function(Menu){
         ctxMenuForGraphics.bindDomNode(evt.graphic.getDojoShape().getNode());
     });
 
-    on(graphicLayer, "onMouseOut", function (evt) {
+    on(graphicLayer, "mouse-out", function (evt) {
         ctxMenuForGraphics.unBindDomNode(evt.graphic.getDojoShape().getNode());
     });
   });
@@ -791,7 +791,8 @@ require(["dijit/Menu", "dijit/MenuItem"], function(Menu){
 
 function createMapMenu() {
     // Creates right-click context menu for map
-    ctxMenuForMap = new dijit.Menu({
+	require(["dijit/Menu", "dijit/MenuItem"], function(Menu, MenuItem){
+    ctxMenuForMap = new Menu({
         onOpen: function (box) {
             // Lets calculate the map coordinates where user right clicked.
             // We'll use this to create the graphic when the user clicks
@@ -799,6 +800,7 @@ function createMapMenu() {
             currentLocation = getMapPointFromMenuPosition(box);
             editToolbar.deactivate();
         }
+    });
     });
 }
 
