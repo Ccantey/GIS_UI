@@ -19,13 +19,23 @@
 	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
 
     <title>Wisconsin Rapids</title>
-
+	<!-- define dojoConfig before dojo loader executes-->
+	<script type="text/javascript">
+      var path_location = location.pathname.replace(/\/[^/]+$/, '');
+      var dojoConfig = {
+        parseOnLoad: true,
+        paths: {
+              config: path_location 
+             }        
+      };
+    </script>
     <!-- Bootstrap core CSS. Heavily modified, which was a terribly stupid thing to do in retrospect -->
     <link href="css/bootstrap.css" rel="stylesheet">
-    
-    <!--JavaScript API & Stylesheets-->
-    <script type="text/javascript" src="http://js.arcgis.com/3.9/"></script>
-    <link href="http://js.arcgis.com/3.9/js/esri/css/esri.css" rel="stylesheet">
+	
+	<!--JavaScript API & Stylesheets-->
+	<!--3.11 works well, but prints the printGraphic-->
+    <script type="text/javascript" src="http://js.arcgis.com/3.10/"></script>
+    <link href="http://js.arcgis.com/3.10/js/esri/css/esri.css" rel="stylesheet">
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>   
    
     <link href="css/jquery.selectBoxIt.css" rel="stylesheet" type="text/css" media="screen"/>
@@ -34,7 +44,7 @@
     <link href="css/evol.colorpicker.css" rel="stylesheet" type="text/css" media="screen"/>  
     <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />	
 
-    <!-- Custom styles for this app -->
+	<!-- Custom styles for this app -->
     <link href="css/styles.css" rel="stylesheet">
 	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -42,68 +52,70 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-	
+
 	<script>	
-           var initExtent, identifyTask, identifyParams, gsvc;
-           var identifyTaskParcel, identifyParamsParcel, params;
-           var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
-           var iPoint;
-           var A_Drawings;
-           var overlayLayer;
-           var aerialLayer;
-           var operationToDo;
-           var legend = null;
-	   var legendLayers = [];
-           var iTool = null;
-           var navToolbar = null; 
-           var measureTool = null; 
-           var drawingTool = null;
-           var editToolbar = null;
-           var map = null;
-           var toolbar = null;
-           var symbols = {};
-           var printTask = null;	  
-           var ctxMenuForGraphics, ctxMenuForMap;
-           var printAreaGraphic = null;
-           var globalMapLayers = {};
-           
-           require(["dojo/dom",
-                    "dojo/on",
-                    "dojo/query",
-                    "esri/Color",
-                    "esri/domUtils",
-                    "esri/map",
-                    "esri/request",
-                    "esri/tasks/PrintTask",
-                    "esri/dijit/Legend",
-                    "esri/toolbars/draw",
-                    "esri/toolbars/edit",
-                    "esri/toolbars/navigation",
-                    "esri/tasks/IdentifyTask",
-                    "esri/tasks/IdentifyParameters",
-                    "esri/tasks/query",
-                    "esri/tasks/GeometryService",
-                    "esri/tasks/BufferParameters",
-                    "esri/symbols/SimpleMarkerSymbol",
-                    "esri/symbols/SimpleLineSymbol",
-                    "esri/symbols/SimpleFillSymbol",
-                    "esri/symbols/PictureMarkerSymbol",
-                    "esri/dijit/editing/AttachmentEditor",
-                    "esri/layers/ArcGISTiledMapServiceLayer",
-                    "esri/layers/ArcGISDynamicMapServiceLayer",
-                    "esri/layers/FeatureLayer",
-                    "esri/layers/GraphicsLayer",
-                    "esri/geometry/Geometry",
-                    "esri/geometry/Extent",
-                    "esri/SpatialReference"],
-		function(dom, on, query, Color, domUtils, Map, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+		  var initExtent, identifyTask, identifyParams, gsvc;
+		  var identifyTaskParcel, identifyParamsParcel, params;
+		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+		  var iPoint;
+		  var A_Drawings;
+		  var overlayLayer;
+		  var aerialLayer;
+		  var operationToDo;
+		  var legend = null;
+		  var legendLayers = [];
+		  var iTool = null;
+	      var navToolbar = null; 
+	      var measureTool = null; 
+	      var drawingTool = null;
+	      var editToolbar = null;
+	      var map = null;
+	      var toolbar = null;
+	      var symbols = {};
+		  var printTask = null;	  
+		  var ctxMenuForGraphics, ctxMenuForMap;
+		  var printAreaGraphic = null;
+		  var globalMapLayers = {};
+		
+		require(["dojo/dom",
+			  "dojo/on",
+              "dojo/query",
+			  "esri/Color",
+			  "esri/domUtils",
+			  "esri/map",
+			  "config/commonConfig",
+			  "esri/request",
+			  "esri/tasks/PrintTask",
+			  "esri/dijit/Legend",
+			  "esri/toolbars/draw",
+			  "esri/toolbars/edit",
+			  "esri/toolbars/navigation",
+			  "esri/tasks/IdentifyTask",
+			  "esri/tasks/IdentifyParameters",
+			  "esri/tasks/query",
+			  "esri/tasks/GeometryService",
+			  "esri/tasks/BufferParameters",
+			  "esri/symbols/SimpleMarkerSymbol",
+              "esri/symbols/SimpleLineSymbol",
+              "esri/symbols/SimpleFillSymbol",
+			  "esri/symbols/PictureMarkerSymbol",
+			  "esri/dijit/editing/AttachmentEditor",
+			  "esri/layers/ArcGISTiledMapServiceLayer",
+			  "esri/layers/ArcGISDynamicMapServiceLayer",
+			  "esri/layers/FeatureLayer",
+			  "esri/layers/GraphicsLayer",
+			  "esri/geometry/Geometry",
+			  "esri/geometry/Extent",
+			  "esri/SpatialReference"],
+		function(dom, on, query, Color, domUtils, Map, config, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 		
 		  initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}})
 		  map = new Map("map", {
 			extent: initExtent	
 		  }); 
-		  gsvc = new GeometryService(gsvcURL);
-		  printTask = new PrintTask(printServiceURL);
+		  console.log(config);
+		  gsvc = new GeometryService(config.helperServices.geometry);
+		  printTask = new PrintTask(config.helperServices.printTask);
 		  
 		  symbols.point = new SimpleMarkerSymbol("circle", 15, new SimpleLineSymbol("solid", new Color([255, 155, 0]), 1), new Color([206, 206, 206, 1]));
 		  symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
@@ -122,50 +134,60 @@
 		     });
 		  });
 		  on(map, "extent-change", function(extent){
-		    var currentScale=map.getScale();
-			if(currentScale > 4800){
-			   $("#AddLabels").prop('indeterminate', true).change();
-			   $("#AddLabels").prop('disabled', true).change();
-			   $("#AddLabels").parent().css("color", "#777");
-	
-			   $("#PidLabels").prop('indeterminate', true).change();
-			   $("#PidLabels").prop('disabled', true).change();;
-			   $("#PidLabels").parent().css("color", "#777");
-			}else{
-			   $("#AddLabels").prop('indeterminate', false).change();
-			   $("#AddLabels").prop('disabled', false).change();
-			   $("#AddLabels").parent().css("color", "#FFF");
-			   
-			   $("#PidLabels").prop('indeterminate', false).change();
-			   $("#PidLabels").prop('disabled', false).change();
-			   $("#PidLabels").parent().css("color", "#FFF");
-			}
-			if (currentScale > 9600){
-			   $("#Contours").prop('indeterminate', true).change();
-			   $("#Contours").prop('disabled', true).change();
-			   $("#Contours").parent().css("color", "#777")
-			   $("#Adraw").prop('indeterminate', true).change();
-			   $("#Adraw").prop('disabled', true).change();
-			   $("#Adraw").parent().css("color", "#777");		
-			 
-			}else{
-			   $("#Contours").prop('indeterminate', false).change();
-			   $("#Contours").prop('disabled', false).change();
-			   $("#Contours").parent().css("color", "#FFF")
-			   $("#Adraw").prop('indeterminate', false).change();
-			   $("#Adraw").prop('disabled', false).change();
-			   $("#Adraw").parent().css("color", "#FFF");			  
-			}
-			if (currentScale > 19200){
-			  
-			}else{				 
-			}			 
-	          });
+			    var currentScale=map.getScale();
+				if(currentScale > 4800){
+				   $("#AddLabels").prop('indeterminate', true).change();
+				   $("#AddLabels").prop('disabled', true).change();
+				   $("#AddLabels").parent().css("color", "#777");
 
-		  basemap = new ArcGISTiledMapServiceLayer(vectorBaseUrl); 
+				   $("#DimLabels").prop('indeterminate', true).change();
+				   $("#DimLabels").prop('disabled', true).change();
+				   $("#DimLabels").parent().css("color", "#777");
+
+				   $("#PidLabels").prop('indeterminate', true).change();
+				   $("#PidLabels").prop('disabled', true).change();;
+				   $("#PidLabels").parent().css("color", "#777");
+				}else{
+				   $("#AddLabels").prop('indeterminate', false).change();
+				   $("#AddLabels").prop('disabled', false).change();
+				   $("#AddLabels").parent().css("color", "#FFF");
+
+				   $("#DimLabels").prop('indeterminate', false).change();
+				   $("#DimLabels").prop('disabled', false).change();
+				   $("#DimLabels").parent().css("color", "#FFF");
+				   
+				   $("#PidLabels").prop('indeterminate', false).change();
+				   $("#PidLabels").prop('disabled', false).change();
+				   $("#PidLabels").parent().css("color", "#FFF");
+				}
+				if (currentScale > 9600){
+				   $("#Contours").prop('indeterminate', true).change();
+				   $("#Contours").prop('disabled', true).change();
+				   $("#Contours").parent().css("color", "#777")
+				   $("#Adraw").prop('indeterminate', true).change();
+				   $("#Adraw").prop('disabled', true).change();
+				   $("#Adraw").parent().css("color", "#777");		
+				 
+				}else{
+				   $("#Contours").prop('indeterminate', false).change();
+				   $("#Contours").prop('disabled', false).change();
+				   $("#Contours").parent().css("color", "#FFF")
+				   $("#Adraw").prop('indeterminate', false).change();
+				   $("#Adraw").prop('disabled', false).change();
+				   $("#Adraw").parent().css("color", "#FFF");			  
+				}
+				if (currentScale > 19200){
+				  
+				}else{				 
+				}			 
+	          });
+		  
+		 	  
+
+		  basemap = new ArcGISTiledMapServiceLayer(config.mapServices.vector); 
 		  map.addLayer(basemap);
 		  
-		  aerialLayer = new ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/", {maxScale: 1128}); //scale to fit, rather than 1128.497
+		  aerialLayer = new ArcGISTiledMapServiceLayer(config.mapServices.aerial, {maxScale: 1128}); //scale to fit, rather than 1128.497
 		  map.addLayer(aerialLayer);
 		  aerialLayer.hide();
 		  //Add Feature service (A_Drawings/Attachments)
@@ -180,69 +202,68 @@
 
 	          A_Drawings.hide();
 		  //Add dynamic map 
-		  overlayLayer = new ArcGISDynamicMapServiceLayer(mapServiceURL, {id:"Basemap"});
+		  overlayLayer = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, {id:"Basemap"});
 		  overlayLayer.setImageFormat("png32");
 		  overlayLayer.setVisibleLayers([1,27,28,29]);
 		  //overlayLayer.opacity = 0.7;
 		  map.addLayer(overlayLayer);
+          //console.log(overlayLayer);
 
 		  //Keep map in viewer
 		  maxExtent = map.extent;
 		  on(map, "extent-change", function (initExtent, delta, levelChange, lod){
-			//changePrintGraphic(); //move print box if its on.
+			changePrintGraphic(); //move print box if its on.
 			var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
 			var flag = false;	
 			//set a buffer to make the max extent a slightly bigger to void minor differences
 			//the map unit for this case is meter. 
 			var buffer = 25000;
 			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
-                        var onLoadHandle = on(basemap, "update", function(){
-			  dojo.disconnect(onLoadHandle);
-			  if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
-			        adjustedEx.xmin = maxExtent.xmin;
-				adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
-				flag = true;
-			   }
-			   if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
-				adjustedEx.ymin = maxExtent.ymin;
-				adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
-				flag = true;
-			    }
-			    if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
-				adjustedEx.xmax = maxExtent.xmax;
-				adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
-				flag = true;
-			    }
-			    if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
-				adjustedEx.ymax = maxExtent.ymax;
-				adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
-				flag = true;
-			    }
-			     if (flag === true) {
-				map.setExtent(adjustedEx);				
-			     }
-			     flag = false;
-		        });			
+            var onLoadHandle = on(basemap, "update", function(){
+				dojo.disconnect(onLoadHandle);
+				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
+					adjustedEx.xmin = maxExtent.xmin;
+					adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
+					flag = true;
+				}
+				if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
+					adjustedEx.ymin = maxExtent.ymin;
+					adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
+					flag = true;
+				}
+				if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
+					adjustedEx.xmax = maxExtent.xmax;
+					adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
+					flag = true;
+				}
+				if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
+					adjustedEx.ymax = maxExtent.ymax;
+					adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
+					flag = true;
+				}
+				if (flag === true) {
+					map.setExtent(adjustedEx);				
+				}
+				flag = false;
+			});			
 		  });
-		  
 		  on(map, "update-end", function(){
 		    domUtils.hide(loading);
 			map.disableDoubleClickZoom();
 		  });
-		  
-                  on(map, "update-start", function(){
+          on(map, "update-start", function(){
 		    domUtils.show(loading);
 		  });
           
 		  on(map, "zoom-end", function () {
-	            $("#navigation input").attr("checked", false).button("refresh");
-	            var adjustedScale = map.getScale();
-	            if (adjustedScale > 72226) {
-	          	map.setExtent(initExtent);
-	              }
-		    });
+		          $("#navigation input").attr("checked", false).button("refresh");
+		          var adjustedScale = map.getScale();
+		          if (adjustedScale > 72226) {
+		          	map.setExtent(initExtent);
+		          }
+		      });
 		   graphicLayer = new GraphicsLayer();
-                   map.addLayer(graphicLayer);
+           map.addLayer(graphicLayer);
 		   
 		   tempGraphicLayer = new GraphicsLayer();
 		   map.addLayer(tempGraphicLayer);
@@ -250,40 +271,41 @@
 		   graphicLayerLabels = new GraphicsLayer();
 		   map.addLayer(graphicLayerLabels);
 		   
-		   utilityMap = new ArcGISDynamicMapServiceLayer(mapServiceURL, { id: "Utility" });
-	           utilityMap.setImageFormat("png32");
-	           utilityMap.setVisibleLayers([-1]);
-	           map.addLayer(utilityMap);
+		   utilityMap = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, { id: "Utility" });
+	       utilityMap.setImageFormat("png32");
+	       utilityMap.setVisibleLayers([-1]);
+	       map.addLayer(utilityMap);
 		   //console.log(utilityMap);
 		   
 		   //buffer params
 		   params = new BufferParameters();
 		   params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
            
-		   identifyTask = new IdentifyTask(mapServiceURL);
-	           identifyParams = new IdentifyParameters();
+		   identifyTask = new IdentifyTask(config.mapServices.dynamic);
+	       identifyParams = new IdentifyParameters();
 
 		   identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
-	           identifyParams.tolerance = 5;
-	           identifyParams.returnGeometry = true;
-	           identifyParams.width = map.width;
-	           identifyParams.height = map.height;
+	       identifyParams.tolerance = 5;
+	       identifyParams.returnGeometry = true;
+	       identifyParams.width = map.width;
+	       identifyParams.height = map.height;
 		   
-		   identifyTaskParcel = new IdentifyTask(mapServiceURL);
+		   identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
 		   identifyParamsParcel = new IdentifyParameters();
 		   identifyParamsParcel.layerIds = [parcelLayerID];
 		   identifyParamsParcel.tolerance = 1;
-                   identifyParamsParcel.returnGeometry = true;
+           identifyParamsParcel.returnGeometry = true;
 		   identifyParamsParcel.width  = map.width;
-                   identifyParamsParcel.height = map.height;
+           identifyParamsParcel.height = map.height;
 		   
 		  operationToDo = 'identify';
-	          iTool = new Draw(map, { showTooltips: false });
-	          //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
+	      iTool = new Draw(map, { showTooltips: false });
+	      //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
 		  iTool.activate(iTool._geometryType='point');
 
-	          dojo.connect(iTool, "onDrawEnd", function (geom) {
-		          switch (operationToDo) {
+	      dojo.connect(iTool, "onDrawEnd", function (geom) {
+	          switch (operationToDo)
+			  {
 			    case "identify":
 				  doIdentify(geom);
 				break;
@@ -297,10 +319,10 @@
 				  addToMapDrawing(geom)
 				break;
 			  }			  
-	           });
+	      });
 		   
-		  overlayLayer.url = mapServiceURL;
-	          utilityMap.url = mapServiceURL;
+		  overlayLayer.url = config.mapServices.dynamic;
+	      utilityMap.url = config.mapServices.dynamic;
 /*
 	      legendLayers.push({ layer: utilityMap, title: "Utility" });
 	      legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
@@ -313,7 +335,7 @@
 		   
 		  //esriRequest is a utility method to retrieve data from a web server. Data can be static (stored in a file on the web server), or it can be dynamic (generated on-demand by a web service). esriRequest can handle the following formats: plain txt, xml, json, jsonp
 		    var layersRequest = esriRequest({
-				url: mapServiceURL,
+				url: config.mapServices.dynamic,
 				content: { f: "json" },
 				handleAs: "json",
 				callbackParamName: "callback"
@@ -691,8 +713,10 @@
 		  </div>
 		  <div class="modal-body">
 		  	<strong>About the map</strong><br>
-			Wisconsin Rapids City Viewer was designed and developed in 2014 by <a href="http://geo-odyssey.com/" target="_blank">Chris Cantey</a>, GIS Specialist for the City of Wisconsin Rapids under the direction of the City's Engineering, Planning, and Mayor's Office with assistance from the Information Systems Department. <br><br>
-
+			Wisconsin Rapids City Viewer was designed and developed in 2014 by Chris Cantey, GIS Specialist for the City of Wisconsin Rapids under the direction of the Mayor's Office and the City Engineering Department with assistance from the Information Systems Department. <br><br>
+            
+            <a href='images/CityViewerManual.pdf' target='_blank'><img src='images/pdf-icon.png'/><strong>Instructions</strong></a><br><br>
+			
 			<strong>Browser Requirements</strong><br>The map depends upon <a href="https://developers.arcgis.com/javascript/" target="blank">(ArcGIS)</a> JavaScript. The map will run on most versions of Chrome, Firefox, Internet Explorer, and Safari. This application was built on top of the <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> front-end framework to create a browser-agnostic application, meaning this app is available across nearly all browsers and all browser sizes (including mobile).<br><br>
 
 			<strong>Data Acknowledgements</strong><br>
