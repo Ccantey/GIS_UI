@@ -274,7 +274,7 @@ the page in or out -->
 
             //buffer params
             params = new BufferParameters();
-            params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
+            params.bufferSpatialReference = new SpatialReference({ wkid: 102100 });
 
             identifyTask = new IdentifyTask(config.mapServices.dynamic);
             identifyParams = new IdentifyParameters();
@@ -298,39 +298,23 @@ the page in or out -->
             //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
             iTool.activate(iTool._geometryType='point');
 
-//            iTool.on("draw-end", drawEnd);
-//            function drawEnd(geom) {
-//                switch (operationToDo){
-//                case "identify":
-//                    doIdentify(geom);
-//                    break;
-//                case "selection":
-//                    drawGraphic(geom);
-//                    break;
-//                case "measure":
-//                    getAreaAndLength(geom);
-//                    break;
-//                case "drawing":
-//                    addToMapDrawing(geom)
-//                    break;
-//                }
-//            };
-            connect.connect(iTool, "onDrawEnd", function (geom) {
-                switch (operationToDo){
-                case "identify":
-                    doIdentify(geom);
-                    break;
-                case "selection":
-                    drawGraphic(geom);
-                    break;
-                case "measure":
-                    getAreaAndLength(geom);
-                    break;
-                case "drawing":
-                    addToMapDrawing(geom)
-                    break;
-                }			  
-            });
+           iTool.on("draw-end", function (geom) {
+               switch (operationToDo){
+               case "identify":
+                   console.log(geom);
+                   doIdentify(geom.geometry);
+                   break;
+               case "selection":
+                   drawGraphic(geom);
+                   break;
+               case "measure":
+                   getAreaAndLength(geom.geometry);
+                   break;
+               case "drawing":
+                   addToMapDrawing(geom.geometry)
+                   break;
+               }
+           });
 
             overlayLayer.url = config.mapServices.dynamic;
             utilityMap.url = config.mapServices.dynamic;
