@@ -55,17 +55,17 @@
     <![endif]-->
 
 	<script>	
-		  var initExtent, identifyTask, identifyParams, gsvc;
-		  var identifyTaskParcel, identifyParamsParcel, params;
-		  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
-		  var iPoint;
-		  var A_Drawings;
-		  var overlayLayer;
-		  var aerialLayer;
-		  var operationToDo;
-		  var legend = null;
-		  var legendLayers = [];
-		  var iTool = null;
+	      var initExtent, identifyTask, identifyParams, gsvc;
+	      var identifyTaskParcel, identifyParamsParcel, params;
+	      var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+	      var iPoint;
+	      var A_Drawings;
+	      var overlayLayer;
+	      var aerialLayer;
+	      var operationToDo;
+	      var legend = null;
+	      var legendLayers = [];
+	      var iTool = null;
 	      var navToolbar = null; 
 	      var measureTool = null; 
 	      var drawingTool = null;
@@ -73,14 +73,14 @@
 	      var map = null;
 	      var toolbar = null;
 	      var symbols = {};
-		  var printTask = null;	  
-		  var ctxMenuForGraphics, ctxMenuForMap;
-		  var printAreaGraphic = null;
-		  var globalMapLayers = {};
+	      var printTask = null;	  
+	      var ctxMenuForGraphics, ctxMenuForMap;
+	      var printAreaGraphic = null;
+	      var globalMapLayers = {};
 		
 		require(["dojo/dom",
 			  "dojo/on",
-              "dojo/query",
+                          "dojo/query",
 			  "esri/Color",
 			  "esri/domUtils",
 			  "esri/map",
@@ -97,8 +97,8 @@
 			  "esri/tasks/GeometryService",
 			  "esri/tasks/BufferParameters",
 			  "esri/symbols/SimpleMarkerSymbol",
-              "esri/symbols/SimpleLineSymbol",
-              "esri/symbols/SimpleFillSymbol",
+                          "esri/symbols/SimpleLineSymbol",
+                          "esri/symbols/SimpleFillSymbol",
 			  "esri/symbols/PictureMarkerSymbol",
 			  "esri/dijit/editing/AttachmentEditor",
 			  "esri/layers/ArcGISTiledMapServiceLayer",
@@ -135,9 +135,6 @@
 		     });
 		  });
 
-		  
-		 	  
-
 		  basemap = new ArcGISTiledMapServiceLayer(config.mapServices.vector); 
 		  map.addLayer(basemap);
 		  
@@ -161,7 +158,7 @@
 		  overlayLayer.setVisibleLayers([1,27,28,29]);
 		  //overlayLayer.opacity = 0.7;
 		  map.addLayer(overlayLayer);
-          //console.log(overlayLayer);
+                  //console.log(overlayLayer);
 
 		  //Keep map in viewer
 		  maxExtent = map.extent;
@@ -173,8 +170,8 @@
 			//the map unit for this case is meter. 
 			var buffer = 25000;
 			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
-            var onLoadHandle = on(basemap, "update", function(){
-				dojo.disconnect(onLoadHandle);
+                        var onLoadHandle = on(basemap, "update", function(){
+				onLoadHandle.remove();
 				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
 					adjustedEx.xmin = maxExtent.xmin;
 					adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
@@ -251,7 +248,7 @@
 		    domUtils.hide(loading);
 			map.disableDoubleClickZoom();
 		  });
-          on(map, "update-start", function(){
+                 on(map, "update-start", function(){
 		    domUtils.show(loading);
 		  });
           
@@ -263,7 +260,7 @@
 		          }
 		      });
 		   graphicLayer = new GraphicsLayer();
-           map.addLayer(graphicLayer);
+                   map.addLayer(graphicLayer);
 		   
 		   tempGraphicLayer = new GraphicsLayer();
 		   map.addLayer(tempGraphicLayer);
@@ -272,9 +269,9 @@
 		   map.addLayer(graphicLayerLabels);
 		   
 		   utilityMap = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, { id: "Utility" });
-	       utilityMap.setImageFormat("png32");
-	       utilityMap.setVisibleLayers([-1]);
-	       map.addLayer(utilityMap);
+	           utilityMap.setImageFormat("png32");
+	           utilityMap.setVisibleLayers([-1]);
+	           map.addLayer(utilityMap);
 		   //console.log(utilityMap);
 		   
 		   //buffer params
@@ -282,28 +279,30 @@
 		   params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
            
 		   identifyTask = new IdentifyTask(config.mapServices.dynamic);
-	       identifyParams = new IdentifyParameters();
+	           identifyParams = new IdentifyParameters();
 
 		   identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
-	       identifyParams.tolerance = 5;
-	       identifyParams.returnGeometry = true;
-	       identifyParams.width = map.width;
-	       identifyParams.height = map.height;
+	           identifyParams.tolerance = 5;
+	           identifyParams.returnGeometry = true;
+	           identifyParams.width = map.width;
+	           identifyParams.height = map.height;
 		   
 		   identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
 		   identifyParamsParcel = new IdentifyParameters();
 		   identifyParamsParcel.layerIds = [parcelLayerID];
 		   identifyParamsParcel.tolerance = 1;
-           identifyParamsParcel.returnGeometry = true;
+                   identifyParamsParcel.returnGeometry = true;
 		   identifyParamsParcel.width  = map.width;
-           identifyParamsParcel.height = map.height;
+                   identifyParamsParcel.height = map.height;
 		   
 		  operationToDo = 'identify';
-	      iTool = new Draw(map, { showTooltips: false });
-	      //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
-		  iTool.activate(iTool._geometryType='point');
+	          iTool = new Draw(map, { showTooltips: false });
+	          //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
+	          iTool.activate(Draw.Point);
 
-	      iTool.on("draw-end", function (geom) {
+	          iTool.on("draw-end", drawEnd);
+		  
+	      function drawEnd(geom) {
 	          switch (operationToDo)
 			  {
 			    case "identify":
@@ -319,7 +318,8 @@
 				  addToMapDrawing(geom)
 				break;
 			  }			  
-	      });
+	      
+		  };
 		   
 		  overlayLayer.url = config.mapServices.dynamic;
 	      utilityMap.url = config.mapServices.dynamic;
