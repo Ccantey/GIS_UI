@@ -9,4 +9,5 @@ The repo is missing some dependencies... i'll get to it.
 DEMO 
 ======
 
-http://gis.wirapids.org/CityViewer/#
+
+http://gis.wirapids.org/CityViewer-AMD/#
