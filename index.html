@@ -25,7 +25,8 @@
       var dojoConfig = {
         parseOnLoad: true,
         paths: {
-              config: path_location 
+              config: path_location,
+              app: 	path_location + '/js'
              }        
       };
     </script>
@@ -115,7 +116,7 @@
 		  }); 
 		  console.log(config);
 		  gsvc = new GeometryService(config.helperServices.geometry);
-		  printTask = new PrintTask(config.helperServices.printTask);
+		  printTask = new PrintTask(config.helperServices.print);
 		  
 		  symbols.point = new SimpleMarkerSymbol("circle", 15, new SimpleLineSymbol("solid", new Color([255, 155, 0]), 1), new Color([206, 206, 206, 1]));
 		  symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
@@ -133,8 +134,73 @@
 		        editToolbar.deactivate();
 		     });
 		  });
-		  on(map, "extent-change", function(extent){
-			    var currentScale=map.getScale();
+
+		  
+		 	  
+
+		  basemap = new ArcGISTiledMapServiceLayer(config.mapServices.vector); 
+		  map.addLayer(basemap);
+		  
+		  aerialLayer = new ArcGISTiledMapServiceLayer(config.mapServices.aerial, {maxScale: 1128}); //scale to fit, rather than 1128.497
+		  map.addLayer(aerialLayer);
+		  aerialLayer.hide();
+		  //Add Feature service (A_Drawings/Attachments)
+		  A_Drawings = new FeatureLayer("http://gis.wirapids.org/arcgis/rest/services/DynamicBasemap/FeatureServer/24", {
+		          mode: FeatureLayer.MODE_ONDEMAND,
+				  outFields:["*"]
+		      });
+	          map.addLayers(A_Drawings);
+
+	          attachmentEditor = new AttachmentEditor({}, dom.byId("content"));
+	          attachmentEditor.startup();
+
+	          A_Drawings.hide();
+		  //Add dynamic map 
+		  overlayLayer = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, {id:"Basemap"});
+		  overlayLayer.setImageFormat("png32");
+		  overlayLayer.setVisibleLayers([1,27,28,29]);
+		  //overlayLayer.opacity = 0.7;
+		  map.addLayer(overlayLayer);
+          //console.log(overlayLayer);
+
+		  //Keep map in viewer
+		  maxExtent = map.extent;
+		  on(map, "extent-change", function (initExtent){
+			changePrintGraphic(); //move print box if its on.
+			var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
+			var flag = false;	
+			//set a buffer to make the max extent a slightly bigger to void minor differences
+			//the map unit for this case is meter. 
+			var buffer = 25000;
+			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
+            var onLoadHandle = on(basemap, "update", function(){
+				dojo.disconnect(onLoadHandle);
+				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
+					adjustedEx.xmin = maxExtent.xmin;
+					adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
+					flag = true;
+				}
+				if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
+					adjustedEx.ymin = maxExtent.ymin;
+					adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
+					flag = true;
+				}
+				if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
+					adjustedEx.xmax = maxExtent.xmax;
+					adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
+					flag = true;
+				}
+				if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
+					adjustedEx.ymax = maxExtent.ymax;
+					adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
+					flag = true;
+				}
+				if (flag === true) {
+					map.setExtent(adjustedEx);				
+				}
+				flag = false;
+			});	
+                var currentScale=map.getScale();
 				if(currentScale > 4800){
 				   $("#AddLabels").prop('indeterminate', true).change();
 				   $("#AddLabels").prop('disabled', true).change();
@@ -179,73 +245,7 @@
 				if (currentScale > 19200){
 				  
 				}else{				 
-				}			 
-	          });
-		  
-		 	  
-
-		  basemap = new ArcGISTiledMapServiceLayer(config.mapServices.vector); 
-		  map.addLayer(basemap);
-		  
-		  aerialLayer = new ArcGISTiledMapServiceLayer(config.mapServices.aerial, {maxScale: 1128}); //scale to fit, rather than 1128.497
-		  map.addLayer(aerialLayer);
-		  aerialLayer.hide();
-		  //Add Feature service (A_Drawings/Attachments)
-		  A_Drawings = new FeatureLayer("http://gis.wirapids.org/arcgis/rest/services/DynamicBasemap/FeatureServer/24", {
-		          mode: FeatureLayer.MODE_ONDEMAND,
-				  outFields:["*"]
-		      });
-	          map.addLayers(A_Drawings);
-
-	          attachmentEditor = new AttachmentEditor({}, dom.byId("content"));
-	          attachmentEditor.startup();
-
-	          A_Drawings.hide();
-		  //Add dynamic map 
-		  overlayLayer = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, {id:"Basemap"});
-		  overlayLayer.setImageFormat("png32");
-		  overlayLayer.setVisibleLayers([1,27,28,29]);
-		  //overlayLayer.opacity = 0.7;
-		  map.addLayer(overlayLayer);
-          //console.log(overlayLayer);
-
-		  //Keep map in viewer
-		  maxExtent = map.extent;
-		  on(map, "extent-change", function (initExtent, delta, levelChange, lod){
-			changePrintGraphic(); //move print box if its on.
-			var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
-			var flag = false;	
-			//set a buffer to make the max extent a slightly bigger to void minor differences
-			//the map unit for this case is meter. 
-			var buffer = 25000;
-			//console.log(initExtent.extent.ymin+", "+initExtent.extent.ymax);	
-            var onLoadHandle = on(basemap, "update", function(){
-				dojo.disconnect(onLoadHandle);
-				if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
-					adjustedEx.xmin = maxExtent.xmin;
-					adjustedEx.xmax = Math.abs(initExtent.extent.xmin - maxExtent.xmin) + initExtent.extent.xmax;
-					flag = true;
-				}
-				if(initExtent.extent.ymin < maxExtent.ymin-buffer) {
-					adjustedEx.ymin = maxExtent.ymin;
-					adjustedEx.ymax = Math.abs(initExtent.extent.ymin - maxExtent.ymin) + initExtent.extent.ymax;
-					flag = true;
-				}
-				if(initExtent.extent.xmax-buffer > maxExtent.xmax) {
-					adjustedEx.xmax = maxExtent.xmax;
-					adjustedEx.xmin =initExtent.extent.xmin - Math.abs(initExtent.extent.xmax - maxExtent.xmax);
-					flag = true;
-				}
-				if(initExtent.extent.ymax-buffer > maxExtent.ymax) {
-					adjustedEx.ymax = maxExtent.ymax;
-					adjustedEx.ymin =initExtent.extent.ymin - Math.abs(initExtent.extent.ymax - maxExtent.ymax);
-					flag = true;
-				}
-				if (flag === true) {
-					map.setExtent(adjustedEx);				
-				}
-				flag = false;
-			});			
+				}			 			
 		  });
 		  on(map, "update-end", function(){
 		    domUtils.hide(loading);
@@ -303,7 +303,7 @@
 	      //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
 		  iTool.activate(iTool._geometryType='point');
 
-	      dojo.connect(iTool, "onDrawEnd", function (geom) {
+	      iTool.on("draw-end", function (geom) {
 	          switch (operationToDo)
 			  {
 			    case "identify":
