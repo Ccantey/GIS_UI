@@ -209,22 +209,22 @@ function pointTolerance(map, point, toleranceInPixel) {
   require(["esri/geometry/Extent"], function(Extent) {
     var pixelWidth = map.extent.getWidth() / map.width;
     var toleraceInMapCoords = toleranceInPixel * pixelWidth;
-    extent = new Extent(point.x - toleraceInMapCoords, point.y - toleraceInMapCoords, point.x + toleraceInMapCoords, point.y + toleraceInMapCoords, map.spatialReference);	
+    extent = new Extent(point.x - toleraceInMapCoords, point.y - toleraceInMapCoords, point.x + toleraceInMapCoords, point.y + toleraceInMapCoords, map.spatialReference);  
   });
   return extent;
-}		  
+}         
 
 
 function zoomToLocation(position) {
   require(["esri/geometry/webMercatorUtils", "esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/graphic","esri/domUtils"], function(webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils){
-	//$.mobile.hidePageLoadingMsg(); //true hides the dialog
-	var pt = webMercatorUtils.geographicToWebMercator(new Point(position.coords.longitude, position.coords.latitude));
-	map.centerAndZoom(pt, 20);
-	//uncomment to add a graphic at the current location
-	var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
-	graphic = new Graphic(pt, symbol);
-	map.graphics.add(graphic);
-	domUtils.hide(loading);
+    //$.mobile.hidePageLoadingMsg(); //true hides the dialog
+    var pt = webMercatorUtils.geographicToWebMercator(new Point(position.coords.longitude, position.coords.latitude));
+    map.centerAndZoom(pt, 20);
+    //uncomment to add a graphic at the current location
+    var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
+    graphic = new Graphic(pt, symbol);
+    map.graphics.add(graphic);
+    domUtils.hide(loading);
     gpsid = navigation.watchPosition(showLocation, locationError);
   });
 }
@@ -232,43 +232,43 @@ function zoomToLocation(position) {
 function showLocation(location) {
   require(["esri/geometry/webMercatorUtils", "esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/graphic","esri/domUtils"], function(webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils){
     var pt = webMercatorUtils.geographicToWebMercator(new Point(location.coords.longitude, location.coords.latitude));
-	var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
+    var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
    if (location.coords.accuracy <= 500) {
    // the reading is accurate, do this
-     if (!graphic) {	
-		graphic = new Graphic(pt, symbol);
-		map.graphics.add(graphic);
-		//map.centerAndZoom(pt, 20);
-		domUtils.hide(loading);
-	  }else{ //move the graphic if it exists   
-		 graphic.setGeometry(pt);
-		 //map.centerAndZoom(pt, 20);
-		}
+     if (!graphic) {    
+        graphic = new Graphic(pt, symbol);
+        map.graphics.add(graphic);
+        //map.centerAndZoom(pt, 20);
+        domUtils.hide(loading);
+      }else{ //move the graphic if it exists   
+         graphic.setGeometry(pt);
+         //map.centerAndZoom(pt, 20);
+        }
    } else {
-		 // reading is not accurate enough, do something else
-		zoomToLocation(location);
-		//map.centerAndZoom(pt, 20);
-		//alert('The positional accuracy of your device is low. Best positional accuracy is obtained with a GPS/Wi-Fi enabled device');
-		navigation.clearWatch(gpsid);
-		//graphic = new Graphic(pt, symbol);
-		//map.graphics.add(graphic);
-		//domUtils.hide(loading);
+         // reading is not accurate enough, do something else
+        zoomToLocation(location);
+        //map.centerAndZoom(pt, 20);
+        //alert('The positional accuracy of your device is low. Best positional accuracy is obtained with a GPS/Wi-Fi enabled device');
+        navigation.clearWatch(gpsid);
+        //graphic = new Graphic(pt, symbol);
+        //map.graphics.add(graphic);
+        //domUtils.hide(loading);
      }
-   });	
+   });  
 }
 
 function drawGraphic(drawn) {  //Tools/Select By
-    require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic"], function(dom,Query, QueryTask, Graphic) {
+    require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig"], function(dom,Query, QueryTask, Graphic, config) {
       map.enablePan();
       var layerToBuffer = dom.byId("BufferLayer").value;
       if (layerToBuffer == parcelLayerID) {
-          var queryTask = new QueryTask(mapServiceURL + "/" + layerToBuffer);
-		  console.log(queryTask);
+          var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
+          console.log(queryTask);
           var query = new Query();
           query.outFields = ["*"];
       } else {
-          var queryTask = new QueryTask(mapServiceURL + "/" + layerToBuffer);
-		  console.log(queryTask);
+          var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
+          console.log(queryTask);
           var query = new Query();
           query.outFields = ["*"];
       }
@@ -288,7 +288,7 @@ function drawGraphic(drawn) {  //Tools/Select By
       if (layerToBuffer == "Drawing") {
           geometryBuffer.push(graphicDraw.geometry);
           map.graphics.add(graphicDraw);
-	  //if NOT 'select by drawing'
+      //if NOT 'select by drawing'
       } else {
           query.returnGeometry = true;
           if (graphicDraw.geometry.type == "point") {
@@ -306,13 +306,13 @@ function drawGraphic(drawn) {  //Tools/Select By
               } else {
                   switch (currentSelection[0].geometry.type) {
                   case "point":
-					  var symbolSelect = symbols.point;
+                      var symbolSelect = symbols.point;
                       break;
                   case "polyline":
-					  var symbolSelect = symbols.polyline;
+                      var symbolSelect = symbols.polyline;
                       break;
                   case "polygon":
-					  var symbolSelect = symbols.polygon;
+                      var symbolSelect = symbols.polygon;
                       break;
               }
               for (var i = 0; i < currentSelection.length; i++) {
@@ -328,7 +328,7 @@ function drawGraphic(drawn) {  //Tools/Select By
           }
       });
       }
-	});
+    });
 }
 
 function doBuffer() { 
@@ -502,7 +502,7 @@ function addToMap(idResults, evt) {
             $("#multipleSelectSelectBoxItContainer").hide();
             $('.results.identify').show();
             identifyParamsParcel.mapExtent = map.extent;
-			
+            
             //identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
             identifyParamsParcel.geometry = evt;
             identifyTaskParcel.execute(identifyParamsParcel, function (idResults) { doneIdentifyParcel(idResults[0].feature) } );
@@ -730,13 +730,13 @@ function showSearchByAttributeResults(layerSearchResults) {
 function showFeature(feature) {
     switch (feature.geometry.type) {
     case "point":
-		var symbol = symbols.point;
+        var symbol = symbols.point;
         break;
     case "polyline":
-		var symbol = symbols.polyline;
+        var symbol = symbols.polyline;
         break;
     case "polygon":
-		var symbol = symbols.polygon;
+        var symbol = symbols.polygon;
         break;
     }
     feature.setSymbol(symbol);
@@ -791,7 +791,7 @@ require(["dojo/on", "dijit/Menu", "dijit/MenuItem"], function(on, Menu, MenuItem
 
 function createMapMenu() {
     // Creates right-click context menu for map
-	require(["dijit/Menu", "dijit/MenuItem"], function(Menu, MenuItem){
+    require(["dijit/Menu", "dijit/MenuItem"], function(Menu, MenuItem){
     ctxMenuForMap = new Menu({
         onOpen: function (box) {
             // Lets calculate the map coordinates where user right clicked.
