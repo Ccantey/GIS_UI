@@ -81,7 +81,7 @@ the page in or out -->
   require(["dojo/dom",
            "dojo/on",
            "dojo/query",
-		   "dojo/_base/connect",
+           "dojo/_base/connect",
            "esri/Color",
            "esri/domUtils",
            "esri/map",
@@ -197,7 +197,7 @@ the page in or out -->
                     flag = false;
                 });	
                 
-				var currentScale=map.getScale();
+                var currentScale=map.getScale();
                 if(currentScale > 4800){
                     $("#AddLabels").prop('indeterminate', true).change();
                     $("#AddLabels").prop('disabled', true).change();
@@ -242,7 +242,7 @@ the page in or out -->
                 }else{				 
                 }			 			
             });
-			on(map, "update-start", function(){
+            on(map, "update-start", function(){
                 domUtils.show(loading);
             });
             on(map, "update-end", function(){
@@ -341,8 +341,7 @@ the page in or out -->
                     globalMapLayers = response.layers;
                 }, function(error) {
                     console.log("Error: ", error.message);
-                });			   
-
+                });
         });
 </script>
 </head>
