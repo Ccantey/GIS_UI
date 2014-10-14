@@ -26,7 +26,7 @@ the page in or out -->
   parseOnLoad: true,
   paths: {
     config: path_location,
-    app: 	path_location + '/js'
+    app: path_location + '/js'
   }        
 };
 </script>
@@ -86,7 +86,7 @@ the page in or out -->
            "esri/domUtils",
            "esri/map",
            "config/commonConfig",
-		   "app/identification",
+	   "app/identification",
            "esri/request",
            "esri/tasks/PrintTask",
            "esri/dijit/Legend",
@@ -243,7 +243,7 @@ the page in or out -->
                 }else{				 
                 }			 			
             });
-			on(map, "update-start", function(){
+	    on(map, "update-start", function(){
                 domUtils.show(loading);
             });
             on(map, "update-end", function(){
@@ -309,7 +309,7 @@ the page in or out -->
                    break;
                case "selection":
                    //drawGraphic(evt);
-				   app._drawGraphic(evt);
+		   app._drawGraphic(evt);
                    break;
                case "measure":
                    getAreaAndLength(evt.geometry);
@@ -317,9 +317,9 @@ the page in or out -->
                case "drawing":
                    addToMapDrawing(evt.geometry)
                    break;
-				case "buffer":
-				   doBuffer();
-				   break
+	       case "buffer":
+		   doBuffer();
+		   break
                }
            });
 
