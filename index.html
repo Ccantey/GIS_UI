@@ -86,7 +86,7 @@ the page in or out -->
            "esri/domUtils",
            "esri/map",
            "config/commonConfig",
-		   "app/parcelID",
+		   "app/identification",
            "esri/request",
            "esri/tasks/PrintTask",
            "esri/dijit/Legend",
@@ -110,7 +110,7 @@ the page in or out -->
            "esri/geometry/Geometry",
            "esri/geometry/Extent",
            "esri/SpatialReference"],
-           function(dom, on, query, connect, Color, domUtils, Map, config, parcelID, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+           function(dom, on, query, connect, Color, domUtils, Map, config, identification, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
@@ -298,17 +298,18 @@ the page in or out -->
             iTool = new Draw(map, { showTooltips: false });
             //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
             iTool.activate(iTool._geometryType='point');
-            var parcelID = new parcelID();
+            var app = new identification();
 			
            iTool.on("draw-end", function (evt) {
                switch (operationToDo){
                case "identify":
                    console.log(evt);
 				   //doIdentify(evt.geometry);
-                   parcelID._identify(evt.geometry);
+                   app._identify(evt.geometry);
                    break;
                case "selection":
-                   drawGraphic(evt);
+                   //drawGraphic(evt);
+				   app._drawGraphic(evt);
                    break;
                case "measure":
                    getAreaAndLength(evt.geometry);
@@ -316,6 +317,9 @@ the page in or out -->
                case "drawing":
                    addToMapDrawing(evt.geometry)
                    break;
+				case "buffer":
+				   doBuffer();
+				   break
                }
            });
 
