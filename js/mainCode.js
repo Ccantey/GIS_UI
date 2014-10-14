@@ -258,7 +258,7 @@ function showLocation(location) {
 }
 
 function drawGraphic(drawn) {  //Tools/Select By
-    require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig"], function(dom,Query, QueryTask, Graphic, config) {
+    require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig"], function(dom,Query, QueryTask, Graphic,config) {
       map.enablePan();
       var layerToBuffer = dom.byId("BufferLayer").value;
       if (layerToBuffer == parcelLayerID) {
@@ -343,14 +343,14 @@ function doBuffer() {
 }
 
 function showBuffer(features) {
-  require(["esri/graphic","esri/tasks/QueryTask","esri/tasks/query","esri/graphicsUtils", "dojo/_base/array"], function(Graphic,QueryTask,Query, graphicsUtils, array) {
+  require(["esri/graphic","esri/tasks/QueryTask","esri/tasks/query","esri/graphicsUtils", "dojo/_base/array","config/commonConfig"], function(Graphic,QueryTask,Query, graphicsUtils, array,config) {
     $('.results.multipleBuffer').hide();
     var bufferSymbol = symbols.buffer;
     map.graphics.clear();
     if (features.length > 0) {
         var graphic = new Graphic(features[0], bufferSymbol);
         map.graphics.add(graphic);
-        queryTask = new QueryTask(mapServiceURL + "/" + parcelLayerID);
+        queryTask = new QueryTask(config.mapServices.dynamic + "/" + parcelLayerID);
         var bufferQuery = new Query();
         bufferQuery.outFields = ["*"]; //mailLabelFields;
         bufferQuery.returnGeometry = true;
@@ -458,56 +458,57 @@ function createSingleTable(queryFeatures) {
     createCSVFile();
 }
 
-function doIdentify(evt) {
-    identifyParams.geometry = evt;
-    identifyParams.returnGeometry = true;
-    identifyParams.mapExtent = map.extent;
-    identifyParams.layerIds = utilityMap.visibleLayers.concat(identifyLayerAdditional);    
-    identifyTask.execute(identifyParams, function (idResults) { addToMap(idResults, evt); });
-    selectedFeatures = { features: [] }; //remove previously selected parcels in memory 
-    $('.results.multipleBuffer').hide(); //remove previously selected parcels in results table
-    map.graphics.clear();                //remove previously selected parcels in map
-}
+// function doIdentify(evt) {
+    // identifyParams.geometry = evt;
+    // identifyParams.returnGeometry = true;
+    // identifyParams.mapExtent = map.extent;
+    // identifyParams.layerIds = utilityMap.visibleLayers.concat(identifyLayerAdditional);  
+    // console.log(identifyTask);
+    // identifyTask.execute(identifyParams, function (idResults) { addToMap(idResults, evt); });
+    // selectedFeatures = { features: [] }; //remove previously selected parcels in memory 
+    // $('.results.multipleBuffer').hide(); //remove previously selected parcels in results table
+    // map.graphics.clear();                //remove previously selected parcels in map
+// }
 
-function addToMap(idResults, evt) {   
-    multipleIdentifyStack = [];
-    multipleIdentifyLayerName = [];
+// function addToMap(idResults, evt) {   
+    // multipleIdentifyStack = [];
+    // multipleIdentifyLayerName = [];
 
-    if (idResults.length > 0) {
-        var options = '';
-        var i = 0;
-        for (i =0, il = idResults.length; i < il; i++) {
-            options += '<option value="' + i + '">' + idResults[i].layerName + "</option>";
-            multipleIdentifyStack.push(idResults[i].feature);
-            multipleIdentifyLayerName.push(idResults[i].layerName);
-        }
-        // $('#multipleSelect').html(options);
-        // $('#multipleSelect').selectBoxIt('refresh');
-        if (idResults.length > 1) {
-            //console.log(idResults.length);
-            $('#append').html("RESULTS (" +idResults.length+")" );
-            $('#multipleSelect,multipleSelect2').html(options);
-            $('#multipleSelect,multipleSelect2').selectBoxIt('refresh');
-            $("#multipleSelectSelectBoxItContainer").show();
-            $('.results.multiple').hide();
-        } else {
-            $('#append').html("RESULTS");
-            $("#multipleSelectSelectBoxItContainer").hide();
-            $("multipleSelectSelectBoxItArrowContainer").hide();
-        }
-        showFeature(multipleIdentifyStack[0]);
-        layerTabContent(multipleIdentifyStack[0], multipleIdentifyLayerName[0]);
-    } else {
-            $('#append').html("RESULTS");
-            $("#multipleSelectSelectBoxItContainer").hide();
-            $('.results.identify').show();
-            identifyParamsParcel.mapExtent = map.extent;
+    // if (idResults.length > 0) {
+        // var options = '';
+        // var i = 0;
+        // for (i =0, il = idResults.length; i < il; i++) {
+            // options += '<option value="' + i + '">' + idResults[i].layerName + "</option>";
+            // multipleIdentifyStack.push(idResults[i].feature);
+            // multipleIdentifyLayerName.push(idResults[i].layerName);
+        // }
+        // // $('#multipleSelect').html(options);
+        // // $('#multipleSelect').selectBoxIt('refresh');
+        // if (idResults.length > 1) {
+            // //console.log(idResults.length);
+            // $('#append').html("RESULTS (" +idResults.length+")" );
+            // $('#multipleSelect,multipleSelect2').html(options);
+            // $('#multipleSelect,multipleSelect2').selectBoxIt('refresh');
+            // $("#multipleSelectSelectBoxItContainer").show();
+            // $('.results.multiple').hide();
+        // } else {
+            // $('#append').html("RESULTS");
+            // $("#multipleSelectSelectBoxItContainer").hide();
+            // $("multipleSelectSelectBoxItArrowContainer").hide();
+        // }
+        // showFeature(multipleIdentifyStack[0]);
+        // layerTabContent(multipleIdentifyStack[0], multipleIdentifyLayerName[0]);
+    // } else {
+            // $('#append').html("RESULTS");
+            // $("#multipleSelectSelectBoxItContainer").hide();
+            // $('.results.identify').show();
+            // identifyParamsParcel.mapExtent = map.extent;
             
-            //identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
-            identifyParamsParcel.geometry = evt;
-            identifyTaskParcel.execute(identifyParamsParcel, function (idResults) { doneIdentifyParcel(idResults[0].feature) } );
-    }
-}
+            // //identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
+            // identifyParamsParcel.geometry = evt;
+            // identifyTaskParcel.execute(identifyParamsParcel, function (idResults) { doneIdentifyParcel(idResults[0].feature) } );
+    // }
+// }
 
 function updateIdentify() {
     selectedFeatures = { features: [] }; //remove previously selected parcels in results table
@@ -517,62 +518,62 @@ function updateIdentify() {
     layerTabContent(multipleIdentifyStack[$('#multipleSelect,multipleSelect2').val()], multipleIdentifyLayerName[$('#multipleSelect,multipleSelect2').val()]);
 }
 
-function layerTabContent(layerResults, layerName) {
-    $(".identify .section-sub-header").html(layerName);
-    $('.results.identify').show();
-    geometryBuffer = [layerResults.geometry];
-    var content = '';
-    var attributesName;
-    if (layerName == 'A_Drawings') {
-        if($('#sidebar-wrapper').hasClass('active')) {
-            $('#menu-toggle').addClass('tab');
-        }        
-        if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
-            $('#search-tab a').addClass('notice');
-        } else {};        
-        var objectId;
-        for (attributesName in layerResults.attributes) {
-            objectId = layerResults.attributes["OBJECTID"];
-            console.log(objectId);
-            A_Drawings.queryAttachmentInfos(objectId, function(info) {
-                $.each(info, function (number,attachment) {
-                    var a = '<a target="_blank" href="' + attachment.url + '">' + attachment.name + "</a></td></tr>";
-                    //$("#viewAttachment").append(a); 
-                    console.log(a);
-                    $("#viewAttachment").html("<tr><th >A-Drawing: </th><td>"+ a+ "</td>")
-                });
-                $("#viewAttachment").show();
-            });
-        }
-    } else if (layerName != 'Parcels') {
-        if($('#sidebar-wrapper').hasClass('active')) {
-            $('#menu-toggle').addClass('tab');
-        }
-        if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
-            $('#search-tab a').addClass('notice');
-        } else {} ;
+// function layerTabContent(layerResults, layerName) {
+    // $(".identify .section-sub-header").html(layerName);
+    // $('.results.identify').show();
+    // geometryBuffer = [layerResults.geometry];
+    // var content = '';
+    // var attributesName;
+    // if (layerName == 'A_Drawings') {
+        // if($('#sidebar-wrapper').hasClass('active')) {
+            // $('#menu-toggle').addClass('tab');
+        // }        
+        // if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
+            // $('#search-tab a').addClass('notice');
+        // } else {};        
+        // var objectId;
+        // for (attributesName in layerResults.attributes) {
+            // objectId = layerResults.attributes["OBJECTID"];
+            // console.log(objectId);
+            // A_Drawings.queryAttachmentInfos(objectId, function(info) {
+                // $.each(info, function (number,attachment) {
+                    // var a = '<a target="_blank" href="' + attachment.url + '">' + attachment.name + "</a></td></tr>";
+                    // //$("#viewAttachment").append(a); 
+                    // console.log(a);
+                    // $("#viewAttachment").html("<tr><th >A-Drawing: </th><td>"+ a+ "</td>")
+                // });
+                // $("#viewAttachment").show();
+            // });
+        // }
+    // } else if (layerName != 'Parcels') {
+        // if($('#sidebar-wrapper').hasClass('active')) {
+            // $('#menu-toggle').addClass('tab');
+        // }
+        // if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
+            // $('#search-tab a').addClass('notice');
+        // } else {} ;
 
-        $("#viewAttachment").hide();
-        for (attributesName in layerResults.attributes) {
-            console.log(attributesName, layerResults.attributes[attributesName]);
-            //Add asbuilt links
-            if (attributesName.match(/AsBuilt/gi)) {
-                content += "";
-            }
-            if (attributesName.match(/Enabled/gi) || (attributesName.match(/AsBuilt/gi)) || (attributesName.match(/GlobalID/gi))){
-                content += "";
-            } else if (attributesName.match(/shape/gi) == null && attributesName.match(/OBJECTID/gi) == null && layerResults.attributes[attributesName] != null && layerResults.attributes[attributesName] != "Null") {
-                content += "<tr><th>" + attributesName + ":</th><td>" + layerResults.attributes[attributesName] + "</td></tr>";
-            }
-        }
-    } else {
-        content += "<tr><th>" + "No Data" + ":</th><td>" + "No Data" + "</td></tr>";
-    }
-    $("#singleItem1,#singleItem4").html(content);
-    $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").hide();
-    $('.results.multiple').hide();
-    $('.results.identify').show();
-}
+        // $("#viewAttachment").hide();
+        // for (attributesName in layerResults.attributes) {
+            // console.log(attributesName, layerResults.attributes[attributesName]);
+            // //Add asbuilt links
+            // if (attributesName.match(/AsBuilt/gi)) {
+                // content += "";
+            // }
+            // if (attributesName.match(/Enabled/gi) || (attributesName.match(/AsBuilt/gi)) || (attributesName.match(/GlobalID/gi))){
+                // content += "";
+            // } else if (attributesName.match(/shape/gi) == null && attributesName.match(/OBJECTID/gi) == null && layerResults.attributes[attributesName] != null && layerResults.attributes[attributesName] != "Null") {
+                // content += "<tr><th>" + attributesName + ":</th><td>" + layerResults.attributes[attributesName] + "</td></tr>";
+            // }
+        // }
+    // } else {
+        // content += "<tr><th>" + "No Data" + ":</th><td>" + "No Data" + "</td></tr>";
+    // }
+    // $("#singleItem1,#singleItem4").html(content);
+    // $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").hide();
+    // $('.results.multiple').hide();
+    // $('.results.identify').show();
+// }
 
 function doneIdentifyParcel(currentProperty) {
     $(".identify .section-sub-header").html("Property Information");
@@ -632,7 +633,7 @@ function doneIdentifyParcel(currentProperty) {
 }
 
 function SearchParcelByAttribute(search) {
-  require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils"], function(dom,Query, QueryTask, Graphic, graphicsUtils) {
+  require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils","config/commonConfig",], function(dom,Query, QueryTask, Graphic, graphicsUtils, config) {
     map.graphics.clear();
     var query = new Query();
     query.outFields = ['*'];
@@ -649,7 +650,7 @@ function SearchParcelByAttribute(search) {
         query.where = "Parcels.PARCELNO  = " + "'" + dom.byId("pid").value.replace(/,/g, "") + "'";
         break;
     }
-    var queryTask = new QueryTask(mapServiceURL + "/" + parcelLayerID);
+    var queryTask = new QueryTask(config.mapServices.dynamic + "/" + parcelLayerID);
     queryTask.execute(query, function (searchFeature) {
         createSingleTable(searchFeature.features);
         var i;
@@ -727,21 +728,21 @@ function showSearchByAttributeResults(layerSearchResults) {
     createSingleTable([layerSearchResults]);
 }
 
-function showFeature(feature) {
-    switch (feature.geometry.type) {
-    case "point":
-        var symbol = symbols.point;
-        break;
-    case "polyline":
-        var symbol = symbols.polyline;
-        break;
-    case "polygon":
-        var symbol = symbols.polygon;
-        break;
-    }
-    feature.setSymbol(symbol);
-    map.graphics.add(feature);
-}
+// function showFeature(feature) {
+    // switch (feature.geometry.type) {
+    // case "point":
+        // var symbol = symbols.point;
+        // break;
+    // case "polyline":
+        // var symbol = symbols.polyline;
+        // break;
+    // case "polygon":
+        // var symbol = symbols.polygon;
+        // break;
+    // }
+    // feature.setSymbol(symbol);
+    // map.graphics.add(feature);
+// }
 
 function zoomToTableSelection(element) {
   require(["esri/graphicsUtils"], function(graphicsUtils) { 
