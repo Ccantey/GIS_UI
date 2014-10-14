@@ -320,12 +320,12 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 }
             });
             }		
-		},
+	},
 		
-		//createTable
-		//Private Class for a few
-		_createTable: function(queryFeatures){
-		    selectedFeatures = { features: [] };
+	//createTable
+	//Private Class for a few
+	_createTable: function(queryFeatures){
+	    selectedFeatures = { features: [] };
             csvInfo = [];
             //fill/stroke of selected
             var querySymbol = symbols.polygon;
