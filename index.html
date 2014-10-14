@@ -31,7 +31,7 @@ the page in or out -->
 };
 </script>
 <!-- Bootstrap core CSS. Heavily modified, which was a terribly stupid thing to do in retrospect -->
-<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap.css" rel="stylesheet">
 
 <!--JavaScript API & Stylesheets-->
 <!--3.11 works well, but prints the printGraphic-->
@@ -86,6 +86,7 @@ the page in or out -->
            "esri/domUtils",
            "esri/map",
            "config/commonConfig",
+		   "app/parcelID",
            "esri/request",
            "esri/tasks/PrintTask",
            "esri/dijit/Legend",
@@ -109,7 +110,7 @@ the page in or out -->
            "esri/geometry/Geometry",
            "esri/geometry/Extent",
            "esri/SpatialReference"],
-           function(dom, on, query, connect, Color, domUtils, Map, config, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+           function(dom, on, query, connect, Color, domUtils, Map, config, parcelID, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
@@ -197,7 +198,7 @@ the page in or out -->
                     flag = false;
                 });	
                 
-                var currentScale=map.getScale();
+				var currentScale=map.getScale();
                 if(currentScale > 4800){
                     $("#AddLabels").prop('indeterminate', true).change();
                     $("#AddLabels").prop('disabled', true).change();
@@ -242,7 +243,7 @@ the page in or out -->
                 }else{				 
                 }			 			
             });
-            on(map, "update-start", function(){
+			on(map, "update-start", function(){
                 domUtils.show(loading);
             });
             on(map, "update-end", function(){
@@ -274,7 +275,7 @@ the page in or out -->
 
             //buffer params
             params = new BufferParameters();
-            params.bufferSpatialReference = new SpatialReference({ wkid: 102100 });
+            params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
 
             identifyTask = new IdentifyTask(config.mapServices.dynamic);
             identifyParams = new IdentifyParameters();
@@ -292,32 +293,35 @@ the page in or out -->
             identifyParamsParcel.returnGeometry = true;
             identifyParamsParcel.width  = map.width;
             identifyParamsParcel.height = map.height;
-
+          
             operationToDo = 'identify';
             iTool = new Draw(map, { showTooltips: false });
             //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
             iTool.activate(iTool._geometryType='point');
-
-           iTool.on("draw-end", function (geom) {
+            var parcelID = new parcelID();
+			
+           iTool.on("draw-end", function (evt) {
                switch (operationToDo){
                case "identify":
-                   console.log(geom);
-                   doIdentify(geom.geometry);
+                   console.log(evt);
+				   //doIdentify(evt.geometry);
+                   parcelID._identify(evt.geometry);
                    break;
                case "selection":
-                   drawGraphic(geom);
+                   drawGraphic(evt);
                    break;
                case "measure":
-                   getAreaAndLength(geom.geometry);
+                   getAreaAndLength(evt.geometry);
                    break;
                case "drawing":
-                   addToMapDrawing(geom.geometry)
+                   addToMapDrawing(evt.geometry)
                    break;
                }
            });
 
             overlayLayer.url = config.mapServices.dynamic;
             utilityMap.url = config.mapServices.dynamic;
+			
             /*
             legendLayers.push({ layer: utilityMap, title: "Utility" });
             legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
@@ -341,7 +345,8 @@ the page in or out -->
                     globalMapLayers = response.layers;
                 }, function(error) {
                     console.log("Error: ", error.message);
-                });
+                });			   
+
         });
 </script>
 </head>
@@ -438,7 +443,6 @@ the page in or out -->
 </div><!--searchForm-->
 
 <section class="results identify" style="display:none">
-<!--<div class="process-results searchClass"><a class="mailOption" ><i class="icon-envelope-alt"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://dev.wsbinfolink.wsbeng.com/SouthStPaul-DataLink/outputs/parcelInfo.csv" target="_blank"><i class="icon-share"></i> Export</a></div>-->
 <div id="append" class="section-header">Results</div>
 <select name="type" id="multipleSelect" class="selectmenu" onchange="updateIdentify(this.value)">       
 </select>
@@ -592,7 +596,7 @@ the page in or out -->
 <div class="process-results">
 <a class="mailOption" >
 <i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv" target="_blank">
+<a href="http://gis.wirapids.org/CityViewer-AMD/outputs/parcelInfo.csv" target="_blank">
 <i class="glyphicon glyphicon-share-alt"></i> Export</a>
 </div>
 <div class="section-header">Results</div>
