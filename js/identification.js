@@ -289,36 +289,36 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                     query.geometry = graphicDraw.geometry;
                 }
 
-             queryTask.execute(query, function (selectionGeometries) {
-                var currentSelection = selectionGeometries.features;
-                //alert(currentSelection.length);
-                if (currentSelection.length == 0 && layerToBuffer != parcelLayerID) {
-                    map.graphics.add(graphicDraw);
-                    geometryBuffer.push(graphicDraw.geometry);
-                } else {
-                    switch (currentSelection[0].geometry.type) {
-                    case "point":
-                        var symbolSelect = symbols.point;
-                        break;
-                    case "polyline":
-                        var symbolSelect = symbols.polyline;
-                        break;
-                    case "polygon":
-                        var symbolSelect = symbols.polygon;
-                        break;
+                queryTask.execute(query, function (selectionGeometries) {
+                    var currentSelection = selectionGeometries.features;
+                    //alert(currentSelection.length);
+                    if (currentSelection.length == 0 && layerToBuffer != parcelLayerID) {
+                        map.graphics.add(graphicDraw);
+                        geometryBuffer.push(graphicDraw.geometry);
+                    } else {
+                        switch (currentSelection[0].geometry.type) {
+                        case "point":
+                            var symbolSelect = symbols.point;
+                            break;
+                        case "polyline":
+                            var symbolSelect = symbols.polyline;
+                            break;
+                        case "polygon":
+                            var symbolSelect = symbols.polygon;
+                            break;
+                        }
+                        for (var i = 0; i < currentSelection.length; i++) {
+                            currentSelection[i].setSymbol(symbolSelect);
+                            map.graphics.add(currentSelection[i]);
+                            selectedFeatures.features.push(currentSelection[i]);
+                            geometryDraw.push(currentSelection[i].geometry);
+                            geometryBuffer.push(currentSelection[i].geometry);
+                        }
+                        if (layerToBuffer == parcelLayerID && currentSelection.length != 0) {
+                            this._createTable(selectedFeatures.features);
+                        }
                     }
-                    for (var i = 0; i < currentSelection.length; i++) {
-                        currentSelection[i].setSymbol(symbolSelect);
-                        map.graphics.add(currentSelection[i]);
-                        selectedFeatures.features.push(currentSelection[i]);
-                        geometryDraw.push(currentSelection[i].geometry);
-                        geometryBuffer.push(currentSelection[i].geometry);
-                    }
-                    if (layerToBuffer == parcelLayerID && currentSelection.length != 0) {
-                        this._createTable(selectedFeatures.features);
-                    }
-                }
-            });
+                });
             }		
 	},
 		
