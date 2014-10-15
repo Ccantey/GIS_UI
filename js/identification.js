@@ -226,8 +226,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		
 		//createSingleTable
 		//private Class
-		_createSingleTable: function(queryFeatures){
-		    selectedFeatures = { features: [] };
+	_createSingleTable: function(queryFeatures){
+	    selectedFeatures = { features: [] };
             $('.results.multipleBuffer').hide();
             csvInfo = [];
             mailParcels = [];
@@ -327,8 +327,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		
 		//createTable
 		//Private Class for a few
-		_createTable: function(queryFeatures){
-		    selectedFeatures = { features: [] };
+	_createTable: function(queryFeatures){
+	    selectedFeatures = { features: [] };
             csvInfo = [];
             //fill/stroke of selected
             var querySymbol = symbols.polygon;
@@ -367,9 +367,9 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             createCSVFile();
 		},
 		
-		//getAreaAndLength
-		//Public class
-		_getAreaAndLength: function(geometry){
+	//getAreaAndLength
+	//Public class
+	_getAreaAndLength: function(geometry){
             var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": "Miles", "UNIT_ACRES": "Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
 
             symbols.polygonMeasure = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([0, 200, 0, 0.65]));
@@ -435,9 +435,9 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             }		
 		},
 		
-		//addToMapDrawing
-		//PublicClass
-		_addDrawingToMap: function(geometry){
+	//addToMapDrawing
+	//PublicClass
+	_addDrawingToMap: function(geometry){
             symbolStyle = $("#symbolOptions").val();
             switch (geometry.type) {
                 case "point":
@@ -493,10 +493,10 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             map.enablePan();
 		},
 		
-		//labelGeom
-		//Private class
-		_labelGeom: function(geometry){
-		    var x1 = geometry.x;
+	//labelGeom
+	//Private class
+	_labelGeom: function(geometry){
+	    var x1 = geometry.x;
             var y1 = geometry.y
             var x2 = x1 + 10;
             var y2 = y1 + 10;
@@ -514,10 +514,10 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 			    // this._utility(idResults, evt); 
 				
 			// }));
-		//getLabelPoints
-		//Private Class
-		_getLabelPoints: function(graphicsLabel){
-		    gsvc.labelPoints(graphicsLabel, function (labelPoints) {
+	//getLabelPoints
+	//Private Class
+	_getLabelPoints: function(graphicsLabel){
+	    gsvc.labelPoints(graphicsLabel, function (labelPoints) {
                 var style = eval("TextSymbol." + symbolStyle);
                 var labelSize = parseInt($("#size").val() * 5);
                 var text = $("#text").val();
@@ -530,7 +530,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 graphicLayerLabels.add(labelPointGraphic);
 
             });
-		}
+	}
 
 		
 		
