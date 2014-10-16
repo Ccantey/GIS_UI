@@ -5,12 +5,18 @@ function() {
     mapServices:{
        vector: "http://gis.wirapids.org/arcgis/rest/services/VectorBasemapHybrid/MapServer",
        dynamic: "http://gis.wirapids.org/arcgis/rest/services/DynamicBasemap/MapServer",
-       aerial: "http://gis.wirapids.org/arcgis/rest/services/AerialBasemap/MapServer"
-    },	   
+       aerial: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"
+    },     
     helperServices: {
        geometry:"http://gis.wirapids.org/arcgis/rest/services/Utilities/Geometry/GeometryServer",
-       printTask: "http://gis.wirapids.org/arcgis/rest/services/ExportWebMap/GPServer/Export%20Web%20Map"
-    }
+       print: "http://gis.wirapids.org/arcgis/rest/services/ExportWebMap/GPServer/Export%20Web%20Map"
+    },
+	utilityLayerID:[-1],
+	parcelLayerID: [27],
+	csvUrl: "http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv",
+	mailLink: "https://gis.wirapids.org/CityViewer/outputs/",
+	identifyLayerAdditional:[]
+	
 };
   
   // could use a has() test to optionally populate some global
