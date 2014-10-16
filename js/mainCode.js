@@ -61,7 +61,7 @@ function navEvent(task) {
         $('.results.identify').hide();
         $('.results.multipleBuffer').hide();
         $('.results.multiple').hide();
-        $('#searchfooter, #toolsfooter').css({'position': 'absolute', 'bottom': '7%'});
+        //$('#searchfooter, #toolsfooter').css({'position': 'absolute', 'bottom': '7%'});
         $('#drawPoint').prop("checked",true);
         $('.radioset').buttonset('refresh');
         map.enablePan();
@@ -88,7 +88,6 @@ function navEvent(task) {
         $('#mailLabelBox').hide();
         $('.radioset').buttonset('refresh');
         $('.dDot,.drawLine,.Extent').removeClass('ui-state-active');
-        $('#searchfooter,#toolsfooter').css({'position': 'absolute', 'bottom':'7%'});
         map.enablePan();
         break;
     case 'clearDrawing':
@@ -101,7 +100,6 @@ function navEvent(task) {
         map.enablePan();
         $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
-        $('#searchfooter,#toolsfooter').css({'position':'absolute','bottom':'7%'});
         break;
     case "resetMap":
         map.graphics.clear();
@@ -120,7 +118,6 @@ function navEvent(task) {
         };
         $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
-        $('#searchfooter,#toolsfooter').css({'position':'absolute','bottom':'7%'});
         overlayLayer.setVisibleLayers([-1]); //Resets tab content but does not reset the checkboxes
         utilityMap.setVisibleLayers([-1]);
         aerialLayer.hide();
@@ -266,80 +263,6 @@ function showLocation(location) {
    });  
 }
 
-// function drawGraphic(drawn) {  //Tools/Select By
-    // require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig"], function(dom,Query, QueryTask, Graphic,config) {
-      // map.enablePan();
-      // var layerToBuffer = dom.byId("BufferLayer").value;
-      // if (layerToBuffer == parcelLayerID) {
-          // var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
-          // console.log(queryTask);
-          // var query = new Query();
-          // query.outFields = ["*"];
-      // } else {
-          // var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
-          // console.log(queryTask);
-          // var query = new Query();
-          // query.outFields = ["*"];
-      // }
-      // //if 'select by drawing'
-      // switch (drawn.type) { 
-      // case "point":
-          // symbolDraw = symbols.point;
-          // break;
-      // case "polyline":
-          // symbolDraw = symbols.polyline;
-          // break;
-      // case "polygon":
-          // symbolDraw = symbols.polygon;
-          // break;
-      // }
-      // var graphicDraw = new Graphic(drawn, symbolDraw);
-      // if (layerToBuffer == "Drawing") {
-          // geometryBuffer.push(graphicDraw.geometry);
-          // map.graphics.add(graphicDraw);
-      // //if NOT 'select by drawing'
-      // } else {
-          // query.returnGeometry = true;
-          // if (graphicDraw.geometry.type == "point") {
-              // query.geometry = pointTolerance(map, graphicDraw.geometry, 10);
-          // } else {
-              // query.geometry = graphicDraw.geometry;
-          // }
-
-          // queryTask.execute(query, function (selectionGeometries) {
-              // var currentSelection = selectionGeometries.features;
-              // //alert(currentSelection.length);
-              // if (currentSelection.length == 0 && layerToBuffer != parcelLayerID) {
-                  // map.graphics.add(graphicDraw);
-                  // geometryBuffer.push(graphicDraw.geometry);
-              // } else {
-                  // switch (currentSelection[0].geometry.type) {
-                  // case "point":
-                      // var symbolSelect = symbols.point;
-                      // break;
-                  // case "polyline":
-                      // var symbolSelect = symbols.polyline;
-                      // break;
-                  // case "polygon":
-                      // var symbolSelect = symbols.polygon;
-                      // break;
-              // }
-              // for (var i = 0; i < currentSelection.length; i++) {
-                  // currentSelection[i].setSymbol(symbolSelect);
-                  // map.graphics.add(currentSelection[i]);
-                  // selectedFeatures.features.push(currentSelection[i]);
-                  // geometryDraw.push(currentSelection[i].geometry);
-                  // geometryBuffer.push(currentSelection[i].geometry);
-              // }
-              // if (layerToBuffer == parcelLayerID && currentSelection.length != 0) {
-                  // createTable(selectedFeatures.features);
-              // }
-          // }
-      // });
-      // }
-    // });
-// }
-
 function doBuffer() { 
            params.distances = [dojo.byId("distance").value];
            params.unit = gsvc[dojo.byId("unitBuff").value];           
@@ -359,7 +282,7 @@ function showBuffer(features) {
     if (features.length > 0) {
         var graphic = new Graphic(features[0], bufferSymbol);
         map.graphics.add(graphic);
-        queryTask = new QueryTask(config.mapServices.dynamic + "/" + parcelLayerID);
+        queryTask = new QueryTask(config.mapServices.dynamic + "/" + config.parcelLayerID);
         var bufferQuery = new Query();
         bufferQuery.outFields = ["*"]; //mailLabelFields;
         bufferQuery.returnGeometry = true;
@@ -380,6 +303,71 @@ function showBuffer(features) {
   });
 }
 
+function measureUpdate(measureGeometry) {
+    var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": " Miles", "UNIT_ACRES": " Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
+
+    if (measureGeometry != null) {
+
+        map.graphics.remove(labelPointGraphic);
+        if (measureGeometry[0].type == 'polygon') {
+            //setup the parameters for the areas and lengths operation
+            var areasAndLengthParams = new esri.tasks.AreasAndLengthsParameters();
+            areasAndLengthParams.lengthUnit = esri.tasks.GeometryService.UNIT_FOOT;
+            areasAndLengthParams.areaUnit = eval("esri.tasks.GeometryService." + dojo.byId("measureUnit").value);
+            areasAndLengthParams.calculationType = 'preserveShape';
+            //console.log("areasAndLengthParams.areaUnit: ", areasAndLengthParams.areaUnit);
+
+
+            gsvc.simplify(measureGeometry, function (simplifiedGeometries) {
+                areasAndLengthParams.polygons = simplifiedGeometries;
+                measureGeometry = simplifiedGeometries;
+                gsvc.labelPoints(simplifiedGeometries, function (labelPoints) {
+                    gsvc.areasAndLengths(areasAndLengthParams, function (result) {
+                        var font = new esri.symbol.Font("13", esri.symbol.Font.STYLE_NORMAL, esri.symbol.Font.VARIANT_NORMAL, esri.symbol.Font.WEIGHT_NORMAL, "Arial");
+                        symbols.textSymbol = new esri.symbol.TextSymbol(((result.areas[0].toFixed(2))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +" "+ labelUnit[dojo.byId("measureUnit").value]).setColor(new dojo.Color([0, 0, 0])).setAlign(esri.symbol.Font.ALIGN_START).setFont(font);
+                        labelPointGraphic = new esri.Graphic(labelPoints[0], symbols.textSymbol);
+
+                        map.graphics.add(labelPointGraphic);
+                    });
+                });
+            });
+        }
+        if (measureGeometry[0].type == 'polyline') {
+            console.log(measureGeometry[0].type);
+
+            var lengthParams = new esri.tasks.LengthsParameters();
+            lengthParams.calculationType = 'preserveShape';
+            lengthParams.lengthUnit = eval("esri.tasks.GeometryService." + dojo.byId("measureUnit").value);
+
+            gsvc.simplify(measureGeometry, function (simplifiedGeometries) {
+                lengthParams.polylines = simplifiedGeometries;
+                var params = new esri.tasks.BufferParameters();
+                params.calculationType = 'preserveShape';
+                params.distances = [100];
+                params.bufferSpatialReference = new esri.SpatialReference({ wkid: 102100 });
+                params.outSpatialReference = map.spatialReference;
+
+                params.unit = eval("esri.tasks.GeometryService.UNIT_FOOT");
+                //console.log(lengthParams.lengthUnit); //params.unit returns "9020" // unit is correct for bufferparam.. 9002 == esrifeet
+                params.unionResults = true;
+                params.geometries = simplifiedGeometries;
+                //console.log(lengthParams);
+                gsvc.buffer(params, function (geometries) {
+                    gsvc.labelPoints(geometries, function (labelPoints) {
+                            //new
+                            gsvc.lengths(lengthParams, function (result) {
+                            var font = new esri.symbol.Font("13", esri.symbol.Font.STYLE_NORMAL, esri.symbol.Font.VARIANT_NORMAL, esri.symbol.Font.WEIGHT_NORMAL, "Arial");
+                            symbols.textSymbol = new esri.symbol.TextSymbol((result.lengths[0].toFixed(2)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + labelUnit[dojo.byId("measureUnit").value]).setColor(new dojo.Color([0, 0, 0])).setAlign(esri.symbol.Font.ALIGN_START).setFont(font);
+                            labelPointGraphic = new esri.Graphic(labelPoints[0], symbols.textSymbol);
+                            map.graphics.add(labelPointGraphic);
+                            });
+                    });
+                });
+            });
+        }
+    }
+}
+
 function toggle(el) {
     if (el.className != "vectorToggle") {
         el.src = 'images/Vector.png';
@@ -396,250 +384,9 @@ function toggle(el) {
     }
 }
 
-// function createTable(queryFeatures) {
-  // require(["esri/graphic"], function(Graphic) {
-    // selectedFeatures = { features: [] };
-    // csvInfo = [];
-    // //fill/stroke of selected
-    // var querySymbol = symbols.polygon;
-    // symbols.polygon = querySymbol;
-    // var k;
-    // for (k in queryFeatures[0].attributes) {
-        // //var a = k.replace('gisWiRapids.LGIM.Parcels','');
-        // attrAll.push(k);
-        // //console.log(attrAll);
-    // }
-    // csvInfo.push(attrAll.join(","));
-    // //console.log(csvInfo);
-    // var content = "";
-    // content += "<thead><tr><th>PID</th><th>Owner Name</th><th>Address</th></tr></thead>";
-    // var i;
-    // var j;
-    // var graphic;
-    // for (i = 0, il = queryFeatures.length; i < il; i++) {
-        // attValues = [];
-        // for (j = 0; j < attrAll.length; j++) {
-            // attValues.push(queryFeatures[i].attributes[attrAll[j]]);
-        // }
-        // csvInfo.push(attValues.join(","));
-        // graphic = new Graphic(queryFeatures[i].geometry, symbols.polygon);
-        // map.graphics.add(graphic);
-        // content += "<tr><td >" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.OwnerName'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.Adddress'] + "</td></tr>";
-        // mailParcels.push(queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO']);
-        // selectedFeatures.features.push(queryFeatures[i]);
-        // if (queryFeatures.length > 6) {
-            // $('#toolsfooter').css({'position': 'relative', 'bottom': '0px'});
-        // }
-    // }
-    // $("#multiptleBufferItem").html(content);
-    // $('.results.multipleBuffer').show();
-    // $('.results.identify').hide();
-    
-  // });
-  // createCSVFile();
-// }
-
 function createCSVFile() {
     $.post('outputs/csvCreate.php', { q: csvInfo }, function (data) {  });
 }
-
-// function createSingleTable(queryFeatures) {
-    // selectedFeatures = { features: [] };
-    // $('.results.multipleBuffer').hide();
-    // csvInfo = [];
-    // mailParcels = [];
-    // var k;
-    // for (k in queryFeatures[0].attributes) {
-        // attrAll.push(k);
-    // }
-    // csvInfo.push(attrAll.join(","));
-    // var i;
-    // var j;
-    // for (i = 0, il = queryFeatures.length; i < il; i++) {
-        // attValues = [];
-        // for (j = 0; j < attrAll.length; j++) {
-            // attValues.push(queryFeatures[i].attributes[attrAll[j]]);
-        // }
-        // csvInfo.push(attValues.join(","));
-        // mailParcels.push(queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO']); //this is where single mail label broke down, changed from [0] to PID_NO
-        // selectedFeatures.features.push(queryFeatures[i]);
-    // }
-    // createCSVFile();
-// }
-
-// function doIdentify(evt) {
-    // identifyParams.geometry = evt;
-    // identifyParams.returnGeometry = true;
-    // identifyParams.mapExtent = map.extent;
-    // identifyParams.layerIds = utilityMap.visibleLayers.concat(identifyLayerAdditional);  
-    // console.log(identifyTask);
-    // identifyTask.execute(identifyParams, function (idResults) { addToMap(idResults, evt); });
-    // selectedFeatures = { features: [] }; //remove previously selected parcels in memory 
-    // $('.results.multipleBuffer').hide(); //remove previously selected parcels in results table
-    // map.graphics.clear();                //remove previously selected parcels in map
-// }
-
-// function addToMap(idResults, evt) {   
-    // multipleIdentifyStack = [];
-    // multipleIdentifyLayerName = [];
-
-    // if (idResults.length > 0) {
-        // var options = '';
-        // var i = 0;
-        // for (i =0, il = idResults.length; i < il; i++) {
-            // options += '<option value="' + i + '">' + idResults[i].layerName + "</option>";
-            // multipleIdentifyStack.push(idResults[i].feature);
-            // multipleIdentifyLayerName.push(idResults[i].layerName);
-        // }
-        // // $('#multipleSelect').html(options);
-        // // $('#multipleSelect').selectBoxIt('refresh');
-        // if (idResults.length > 1) {
-            // //console.log(idResults.length);
-            // $('#append').html("RESULTS (" +idResults.length+")" );
-            // $('#multipleSelect,multipleSelect2').html(options);
-            // $('#multipleSelect,multipleSelect2').selectBoxIt('refresh');
-            // $("#multipleSelectSelectBoxItContainer").show();
-            // $('.results.multiple').hide();
-        // } else {
-            // $('#append').html("RESULTS");
-            // $("#multipleSelectSelectBoxItContainer").hide();
-            // $("multipleSelectSelectBoxItArrowContainer").hide();
-        // }
-        // showFeature(multipleIdentifyStack[0]);
-        // layerTabContent(multipleIdentifyStack[0], multipleIdentifyLayerName[0]);
-    // } else {
-            // $('#append').html("RESULTS");
-            // $("#multipleSelectSelectBoxItContainer").hide();
-            // $('.results.identify').show();
-            // identifyParamsParcel.mapExtent = map.extent;
-            
-            // //identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
-            // identifyParamsParcel.geometry = evt;
-            // identifyTaskParcel.execute(identifyParamsParcel, function (idResults) { doneIdentifyParcel(idResults[0].feature) } );
-    // }
-// }
-
-function updateIdentify() {
-    selectedFeatures = { features: [] }; //remove previously selected parcels in results table
-    multipleIdentifyLayerName = [];
-    map.graphics.clear();
-    showFeature(multipleIdentifyStack[parseInt($('#multipleSelect,multipleSelect2').val())]);
-    layerTabContent(multipleIdentifyStack[$('#multipleSelect,multipleSelect2').val()], multipleIdentifyLayerName[$('#multipleSelect,multipleSelect2').val()]);
-}
-
-// function layerTabContent(layerResults, layerName) {
-    // $(".identify .section-sub-header").html(layerName);
-    // $('.results.identify').show();
-    // geometryBuffer = [layerResults.geometry];
-    // var content = '';
-    // var attributesName;
-    // if (layerName == 'A_Drawings') {
-        // if($('#sidebar-wrapper').hasClass('active')) {
-            // $('#menu-toggle').addClass('tab');
-        // }        
-        // if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
-            // $('#search-tab a').addClass('notice');
-        // } else {};        
-        // var objectId;
-        // for (attributesName in layerResults.attributes) {
-            // objectId = layerResults.attributes["OBJECTID"];
-            // console.log(objectId);
-            // A_Drawings.queryAttachmentInfos(objectId, function(info) {
-                // $.each(info, function (number,attachment) {
-                    // var a = '<a target="_blank" href="' + attachment.url + '">' + attachment.name + "</a></td></tr>";
-                    // //$("#viewAttachment").append(a); 
-                    // console.log(a);
-                    // $("#viewAttachment").html("<tr><th >A-Drawing: </th><td>"+ a+ "</td>")
-                // });
-                // $("#viewAttachment").show();
-            // });
-        // }
-    // } else if (layerName != 'Parcels') {
-        // if($('#sidebar-wrapper').hasClass('active')) {
-            // $('#menu-toggle').addClass('tab');
-        // }
-        // if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
-            // $('#search-tab a').addClass('notice');
-        // } else {} ;
-
-        // $("#viewAttachment").hide();
-        // for (attributesName in layerResults.attributes) {
-            // console.log(attributesName, layerResults.attributes[attributesName]);
-            // //Add asbuilt links
-            // if (attributesName.match(/AsBuilt/gi)) {
-                // content += "";
-            // }
-            // if (attributesName.match(/Enabled/gi) || (attributesName.match(/AsBuilt/gi)) || (attributesName.match(/GlobalID/gi))){
-                // content += "";
-            // } else if (attributesName.match(/shape/gi) == null && attributesName.match(/OBJECTID/gi) == null && layerResults.attributes[attributesName] != null && layerResults.attributes[attributesName] != "Null") {
-                // content += "<tr><th>" + attributesName + ":</th><td>" + layerResults.attributes[attributesName] + "</td></tr>";
-            // }
-        // }
-    // } else {
-        // content += "<tr><th>" + "No Data" + ":</th><td>" + "No Data" + "</td></tr>";
-    // }
-    // $("#singleItem1,#singleItem4").html(content);
-    // $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").hide();
-    // $('.results.multiple').hide();
-    // $('.results.identify').show();
-// }
-
-// function doneIdentifyParcel(currentProperty) {
-    // $(".identify .section-sub-header").html("Property Information");
-    // $("#multipleSelect,multipleSelect2").hide();
-    // $('.results.multiple').hide();
-    // $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").show();
-    // $('.results.identify').show();
-    // $('#searchfooter').css({'position': 'relative', 'bottom': '0px'});
-    // $("#viewAttachment").hide();
-    // geometryBuffer = [currentProperty.geometry];
-    // var layerResults = currentProperty;
-    // //console.log(layerResults);
-    // showFeature(currentProperty);
-    // createSingleTable([currentProperty]);
-    // if($('#sidebar-wrapper').hasClass('active')) {
-            // $('#menu-toggle').addClass('tab');
-        // }
-    // if ($('#layers-tab').hasClass('active') || $('#tools-tab').hasClass('active') || $('#draw-tab').hasClass('active')) {
-        // $('#search-tab a').addClass('notice');
-    // } else {
-    // }
-    // var content1 = "";
-    // var content2 = "";
-
-    // // !HACK! For some reason the query task and the identifytask return different attributes for PID so I hack out PID from taxlink and layerResults.attributes['ParcelID'] only occurs on a few properties
-    // if (layerResults.attributes['ParcelID'] == 'Null') {
-        // content1 += "<tr><th> PIN" + ":</th><td>" + (layerResults.attributes['TaxLink']).split("TaxKey=").pop() + "</td></tr>";
-    // } else {
-        // content1 += "<tr><th> PIN" + ":</th><td>" + layerResults.attributes['ParcelID'] + "</td></tr>";
-    // }
-
-    // content1 += "<tr><th> Property Address" + ":</th><td>" + layerResults.attributes['Address']  + "</td></tr>"; //note misspell
-    // content1 += "<tr><th> Owner Name " + ":</th><td>" + layerResults.attributes["Owner Name"] + "</td></tr>";
-    // content1 += "<tr><th> Owner Address" + ":</th><td>" + layerResults.attributes['MAILADDLN1'] + "</br>" + layerResults.attributes['CITYSTZIP'] + "</td></tr>";
-    // content1 += "<tr><th> Area (Acres)" + ":</th><td>" + (layerResults.attributes['Shape.STArea()'] / 43560).toFixed(2) + "</td></tr>";
-
-    // if (layerResults.attributes['SCHOOLDIST'] == 2) {
-        // content2 += "<tr><th> School District" + ":</th><td>Wisconsin Rapids</td></tr>";
-    // } else {
-        // content2 += "<tr><th> School District" + ":</th><td>" + layerResults.attributes['SCHOOLDIST'] + "</td></tr>";
-    // }
-
-    // if (layerResults.attributes['TaxLink'] == '') {
-        // content2 += '';
-    // } else {
-        // content2 += "<tr><th > Tax Link" + ":</th><td><a style='color:#ff6600' target='_blank' href='" + layerResults.attributes['TaxLink'] + "'</a>" + "Link" + "</td></tr>";
-    // }
-    // if (layerResults.attributes['Assesor Link'] == '') {
-        // content2 += '';
-    // } else {
-        // content2 += "<tr><th > Assessor's Link" + ":</th><td><a style='color:#ff6600' target='_blank' href='" + layerResults.attributes['Assesor Link'] + "'</a>" + "Link" + "</td></tr>";
-    // }
-
-    // $("#singleItem1,#singleItem4").html(content1);
-    // $("#singleItem2,#singleItem5").html(content2);
-    
-// }
 
 function SearchParcelByAttribute(search) {
   require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils","config/commonConfig",], function(dom,Query, QueryTask, Graphic, graphicsUtils, config) {
@@ -659,7 +406,7 @@ function SearchParcelByAttribute(search) {
         query.where = "Parcels.PARCELNO  = " + "'" + dom.byId("pid").value.replace(/,/g, "") + "'";
         break;
     }
-    var queryTask = new QueryTask(config.mapServices.dynamic + "/" + parcelLayerID);
+    var queryTask = new QueryTask(config.mapServices.dynamic + "/" + config.parcelLayerID);
     queryTask.execute(query, function (searchFeature) {
         createSingleTable(searchFeature.features);
         var i;
@@ -717,7 +464,6 @@ function showSearchByAttributeResults(layerSearchResults) {
     $(".identify .section-sub-header").html("Property Information");
     $("#singleItem2,.section-sub-header2").show();
     $('.results.identify').show();
-    $('#searchfooter').css({'position': 'relative', 'bottom': '0px'});
     geometryBuffer = [layerSearchResults.geometry];
     var content1 = "";
     var content2 = "";
@@ -736,22 +482,6 @@ function showSearchByAttributeResults(layerSearchResults) {
     $("#multipleSelectSelectBoxItContainer").hide();
     createSingleTable([layerSearchResults]);
 }
-
-// function showFeature(feature) {
-    // switch (feature.geometry.type) {
-    // case "point":
-        // var symbol = symbols.point;
-        // break;
-    // case "polyline":
-        // var symbol = symbols.polyline;
-        // break;
-    // case "polygon":
-        // var symbol = symbols.polygon;
-        // break;
-    // }
-    // feature.setSymbol(symbol);
-    // map.graphics.add(feature);
-// }
 
 function zoomToTableSelection(element) {
   require(["esri/graphicsUtils"], function(graphicsUtils) { 
