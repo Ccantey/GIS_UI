@@ -78,56 +78,16 @@ the page in or out -->
   var printAreaGraphic = null;
   var globalMapLayers = {};
 
-  require(["dojo/dom",
-           "dojo/on",
-           "dojo/query",
-           "dojo/_base/connect",
-           "esri/Color",
-           "esri/domUtils",
-           "esri/map",
-           "config/commonConfig",
-		   "app/identification",
-           "esri/request",
-           "esri/tasks/PrintTask",
-           "esri/dijit/Legend",
-           "esri/toolbars/draw",
-           "esri/toolbars/edit",
-           "esri/toolbars/navigation",
-           "esri/tasks/IdentifyTask",
-           "esri/tasks/IdentifyParameters",
-           "esri/tasks/query",
-           "esri/tasks/GeometryService",
-           "esri/tasks/BufferParameters",
-           "esri/symbols/SimpleMarkerSymbol",
-           "esri/symbols/SimpleLineSymbol",
-           "esri/symbols/SimpleFillSymbol",
-           "esri/symbols/PictureMarkerSymbol",
-           "esri/dijit/editing/AttachmentEditor",
-           "esri/layers/ArcGISTiledMapServiceLayer",
-           "esri/layers/ArcGISDynamicMapServiceLayer",
-           "esri/layers/FeatureLayer",
-           "esri/layers/GraphicsLayer",
-           "esri/geometry/Geometry",
-           "esri/geometry/Extent",
-           "esri/SpatialReference"],
-           function(dom, on, query, connect, Color, domUtils, Map, config, identification, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, IdentifyTask, IdentifyParameters, Query, GeometryService, BufferParameters, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+  require(["dojo/dom", "dojo/on", "dojo/query", "dojo/_base/connect", "esri/Color", "esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/toolbars/navigation", "esri/tasks/query", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Geometry", "esri/geometry/Extent", "esri/SpatialReference"],
+           function(dom, on, query, connect, Color, domUtils, Map, config, identification, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, Query, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
                 extent: initExtent	
              }); 
              
-            gsvc = new GeometryService(config.helperServices.geometry);
+            gsvc = new GeometryService(config.helperServices.geometry); //identification, doBuffer, measureUpdate
             printTask = new PrintTask(config.helperServices.print);
-
-            symbols.point = new SimpleMarkerSymbol("circle", 15, new SimpleLineSymbol("solid", new Color([255, 155, 0]), 1), new Color([206, 206, 206, 1]));
-            symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
-            symbols.polygon = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([255, 155, 0, 0.25]));
-            symbols.polygonMeasure = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([0, 200, 0, 0.65]));
-            symbols.multipoint = new SimpleMarkerSymbol("diamond", 20, new SimpleLineSymbol("solid", new Color([0, 0, 0]), 1), new Color([0, 0, 255, 0.5]));
-            symbols.buffer = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 200, 0]), 2), new Color([155, 155, 155, 0.5]));
-            symbols.Picture = PictureMarkerSymbol("images/bluedot.png", 40, 40);
-            symbols.textSymbol = null;
 
             // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
             on(map, "load", function(){
@@ -200,47 +160,22 @@ the page in or out -->
                 
 				var currentScale=map.getScale();
                 if(currentScale > 4800){
-                    $("#AddLabels").prop('indeterminate', true).change();
-                    $("#AddLabels").prop('disabled', true).change();
-                    $("#AddLabels").parent().css("color", "#777");
-
-                    $("#DimLabels").prop('indeterminate', true).change();
-                    $("#DimLabels").prop('disabled', true).change();
-                    $("#DimLabels").parent().css("color", "#777");
-
-                    $("#PidLabels").prop('indeterminate', true).change();
-                    $("#PidLabels").prop('disabled', true).change();;
-                    $("#PidLabels").parent().css("color", "#777");
+                    $("#AddLabels, #DimLabels, #PidLabels").prop('indeterminate', true).change();
+                    $("#AddLabels, #DimLabels, #PidLabels").prop('disabled', true).change();
+                    $("#AddLabels, #DimLabels, #PidLabels").parent().css("color", "#777");
                 }else{
-                    $("#AddLabels").prop('indeterminate', false).change();
-                    $("#AddLabels").prop('disabled', false).change();
-                    $("#AddLabels").parent().css("color", "#FFF");
-
-                    $("#DimLabels").prop('indeterminate', false).change();
-                    $("#DimLabels").prop('disabled', false).change();
-                    $("#DimLabels").parent().css("color", "#FFF");
-
-                    $("#PidLabels").prop('indeterminate', false).change();
-                    $("#PidLabels").prop('disabled', false).change();
-                    $("#PidLabels").parent().css("color", "#FFF");
+                    $("#AddLabels, #DimLabels, #PidLabels").prop('indeterminate', false).change();
+                    $("#AddLabels, #DimLabels, #PidLabels").prop('disabled', false).change();
+                    $("#AddLabels, #DimLabels, #PidLabels").parent().css("color", "#FFF");
                 }
                 if (currentScale > 9600){
-                    $("#Contours").prop('indeterminate', true).change();
-                    $("#Contours").prop('disabled', true).change();
-                    $("#Contours").parent().css("color", "#777")
-                    $("#Adraw").prop('indeterminate', true).change();
-                    $("#Adraw").prop('disabled', true).change();
-                    $("#Adraw").parent().css("color", "#777");		
+                    $("#Contours, #Adraw").prop('indeterminate', true).change();
+                    $("#Contours, #Adraw").prop('disabled', true).change();
+                    $("#Contours, #Adraw").parent().css("color", "#777")		
                 }else{
-                    $("#Contours").prop('indeterminate', false).change();
-                    $("#Contours").prop('disabled', false).change();
-                    $("#Contours").parent().css("color", "#FFF")
-                    $("#Adraw").prop('indeterminate', false).change();
-                    $("#Adraw").prop('disabled', false).change();
-                    $("#Adraw").parent().css("color", "#FFF");			  
-                }
-                if (currentScale > 19200){
-                }else{				 
+                    $("#Contours, #Adraw").prop('indeterminate', false).change();
+                    $("#Contours, #Adraw").prop('disabled', false).change();
+                    $("#Contours, #Adraw").parent().css("color", "#FFF")			  
                 }			 			
             });
 			on(map, "update-start", function(){
@@ -271,28 +206,10 @@ the page in or out -->
             utilityMap.setImageFormat("png32");
             utilityMap.setVisibleLayers([-1]);
             map.addLayer(utilityMap);
-            //console.log(utilityMap);
 
             //buffer params
             params = new BufferParameters();
             params.bufferSpatialReference = new SpatialReference({ wkid: 103734 });
-
-            identifyTask = new IdentifyTask(config.mapServices.dynamic);
-            identifyParams = new IdentifyParameters();
-
-            identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
-            identifyParams.tolerance = 5;
-            identifyParams.returnGeometry = true;
-            identifyParams.width = map.width;
-            identifyParams.height = map.height;
-
-            identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
-            identifyParamsParcel = new IdentifyParameters();
-            identifyParamsParcel.layerIds = [parcelLayerID];
-            identifyParamsParcel.tolerance = 1;
-            identifyParamsParcel.returnGeometry = true;
-            identifyParamsParcel.width  = map.width;
-            identifyParamsParcel.height = map.height;
           
             operationToDo = 'identify';
             iTool = new Draw(map, { showTooltips: false });
@@ -320,15 +237,16 @@ the page in or out -->
             overlayLayer.url = config.mapServices.dynamic;
             utilityMap.url = config.mapServices.dynamic;
 			
-            /*
-            legendLayers.push({ layer: utilityMap, title: "Utility" });
-            legendLayers.push({ layer: overlayLayer, title: " ",hideLayers:[0,1,2,3,27]});
+            
+            legendLayers.push({ layer: utilityMap, title: "Legend" });
+            legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[0,1,2,3,27, 28, 29, 31]});
+			console.log(legendLayers);
             legend = new Legend({
-            map:map,
-            layerInfos:legendLayers
+               map:map,
+               layerInfos:legendLayers
             },"legendDiv");
             legend.startup();
-            map.enableScrollWheelZoom(); */
+            //map.enableScrollWheelZoom();
 
             //esriRequest is a utility method to retrieve data from a web server. Data can be static (stored in a file on the web server), or it can be dynamic (generated on-demand by a web service). esriRequest can handle the following formats: plain txt, xml, json, jsonp
             var layersRequest = esriRequest({
@@ -462,79 +380,78 @@ the page in or out -->
 </div><!--searchTab-->
 <!--Begin Layers Tab Content-->		
 <div id="layersTab" class="tab-pane fade "> <!--open-ended <li required for plugin-->		
-<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
-<div id="tree">
+    <a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
+    <div id="tree">
+    <!--Checktree appends the closing elements... </li>-->
+        <strong id="utilTitle" style="color:#ff6600">Utility Layers</strong> <!--Checktree doesn't work correctly if there are misspells-->
 
+        <ul>
+            <li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>
+			
+                <ul>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sanitary Taps</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sanitary Manholes</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sanitary Leads</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Abandoned Sanitary Pipe</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sanitary Gravity Main</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sanitary Pressurized Mains</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sewer Lift Stations</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Sanitary Sub-basins</label>
 
-<!--Checktree appends the closing elements... </li>-->
-<strong id="utilTitle" style="color:#ff6600">Utility Layers</strong> <!--Checktree doesn't work correctly if there are misspells-->
+                </ul>
+            <li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
 
-<ul>
-<li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>
-<ul>
+		        <ul>
+                    <li class="utilityLayer"><input type="checkbox"><label>Discharge Point</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Storm Manholes</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Catch Basins</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Storm Leads</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Storm Gravity Main</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Detention Pond</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Watershed Boundaries</label>
+                    <!-- <li class="utilityLayer"><input type="checkbox"><label>Parcels with Storm Permits</label>
+                    <li class="utilityLayer"><input type="checkbox"><label>Parcels with Maintenance Agrmts</label> -->
+                </ul>
+				
+            <li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A_Drawings</label>
+        </ul>
 
-<li class="utilityLayer"><input type="checkbox"><label>Sanitary Taps</label>
-<li class="utilityLayer"><input type="checkbox"><label>Sanitary Manholes</label>
-<li class="utilityLayer"><input type="checkbox"><label>Sanitary Leads</label>
-<li class="utilityLayer"><input type="checkbox"><label>Abandoned Sanitary Pipe</label>
-<li class="utilityLayer"><input type="checkbox"><label>Sanitary Gravity Main</label>
-<li class="utilityLayer"><input type="checkbox"><label>Sanitary Pressurized Mains</label>
-<li class="utilityLayer"><input type="checkbox"><label>Sewer Lift Stations</label>
-<li class="utilityLayer"><input type="checkbox"><label>Sanitary Sub-basins</label>
+    </div>
 
-</ul>
-<li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
-<ul>
-<li class="utilityLayer"><input type="checkbox"><label>Discharge Point</label>
-<li class="utilityLayer"><input type="checkbox"><label>Storm Manholes</label>
-<li class="utilityLayer"><input type="checkbox"><label>Catch Basins</label>
-<li class="utilityLayer"><input type="checkbox"><label>Storm Leads</label>
-<li class="utilityLayer"><input type="checkbox"><label>Storm Gravity Main</label>
-<li class="utilityLayer"><input type="checkbox"><label>Detention Pond</label>
-<li class="utilityLayer"><input type="checkbox"><label>Watershed Boundaries</label>
-<!-- <li class="utilityLayer"><input type="checkbox"><label>Parcels with Storm Permits</label>
-<li class="utilityLayer"><input type="checkbox"><label>Parcels with Maintenance Agrmts</label> -->
+    <div id="base-layers">
+        <strong style="color:#ff6600">Basemap Layers</strong>
+        <div class="checkbox">
+            <ul>
+                <li class="overlayLayer">
+				    <label>Parcel Dimensions</label>
+                    <input type="checkbox" id="DimLabels">							
+                </li>
+                <li class="overlayLayer">					
+                    <label>Address Labels</label>
+                    <input type="checkbox" id="AddLabels">							
+                </li>
+                <li class="overlayLayer">					
+                    <label>PID Labels</label>
+                    <input type="checkbox" id="PidLabels">							
+                </li>
+                <li class="overlayLayer">					
+                    <label>Zoning Districts</label>
+                    <input type="checkbox" id="Zone">							
+                </li>
+                <li class="overlayLayer">					
+                    <label>DNR Wetland Inventory</label>
+                    <input type="checkbox" id="DNR">							
+                </li>
+                <li class="overlayLayer">					
+                    <label>Contours</label>
+                    <input type="checkbox" id="Contours">							
+                </li>
+            </ul>	
+        </div>			
+    </div>
+    <section class="legend-items" id="legendDiv"></section>
 
-
-</ul>
-<li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A_Drawings</label>
-</ul>
-
-</div>
-
-
-<div id="base-layers">
-<strong style="color:#ff6600">Basemap Layers</strong>
-<div class="checkbox">
-<ul >
-<li class="overlayLayer">					
-<label>Parcel Dimensions</label>
-<input type="checkbox" id="DimLabels">							
-</li>
-<li class="overlayLayer">					
-<label>Address Labels</label>
-<input type="checkbox" id="AddLabels">							
-</li>
-<li class="overlayLayer">					
-<label>PID Labels</label>
-<input type="checkbox" id="PidLabels">							
-</li>
-<li class="overlayLayer">					
-<label>Zoning Districts</label>
-<input type="checkbox" id="Zone">							
-</li>
-<li class="overlayLayer">					
-<label>DNR Wetland Inventory</label>
-<input type="checkbox" id="DNR">							
-</li>
-<li class="overlayLayer">					
-<label>Contours</label>
-<input type="checkbox" id="Contours">							
-</li>
-</ul>	
-</div>			
-</div>
-<div id="layersfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
+    <div id="layersfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
 </div>	<!--layersTab-->
 
 <!--Begin toolsTab-->	
@@ -803,10 +720,10 @@ The data that drives this application was produced by the City of Wisconsin Rapi
 <script src="colorbox/jquery.colorbox.js"></script>
 
 <!-- Custom JavaScript-->
-<script src="js/config.js"></script>
+<!-- <script src="js/config.js"></script> -->
 <script src="js/app.js"></script>
 <script src="js/mainCode.js"></script>
-<script src="js/mainCode-Measure.js"></script>
+<!-- <script src="js/mainCode-Measure.js"></script> -->
 <script src="js/mainCode-Print.js"></script>
 <script src="js/helper.js"></script>
 
