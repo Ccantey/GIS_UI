@@ -19,6 +19,14 @@ body {
   height:100%;
   }
 
+  #legendDiv{
+    margin-left:40px;
+	margin-top: 10px;
+	line-height:1.5em;
+  }
+  .esriLegendServiceLabel{
+    color: #ff6600;
+  }
   
   .utilities{
   padding-left:20px;
@@ -162,11 +170,11 @@ body {
     color: #aaa;
 }
 
- #toolsTab .btn-clear,#drawTab .btn-clear{
-    /*position: absolute;*/
+/*  #toolsTab .btn-clear,#drawTab .btn-clear{
+    /*position: absolute;
   margin-left: 0px;
 
-}
+} */
   .btn-clear:hover{
     text-decoration:none;
     color: #ff6600;
@@ -367,7 +375,7 @@ table.data th {
 .dText span { background-position:-205px 0;}
 .dDot span { background-position:-136px 0;}
 
-table.tools {width:100%; border-spacing:0; border-collapse:collapse; margin-bottom:30px;;}
+table.tools {width:100%; border-spacing:0; border-collapse:collapse; margin-bottom:30px;margin-left:20px;}
 table.tools th, table.tools td {padding:0 0 15px 0; font-size:15px; vertical-align:middle;}
 /* table.tools th {font-family:Helvetica, arial, sans-serif; color:#24231f; text-align:left; font-weight:normal; padding-right:5px; width:70px; line-height:18px;} */
 table.tools input, .selectboxit-container {margin-right:5px;}   
@@ -377,7 +385,7 @@ table.tools input, .selectboxit-container {margin-right:5px;}
 #draw-tab select { width:120px;} 
 #draw-tab #text { width:200px;}
 #drawTab{padding-left:10px;}
-#drawTab >.tools{margin-top: 30px;}
+#drawTab >.tools{margin-top: 30px; margin-left:20px;}
 
 .color-button input { display:none;}
 
@@ -465,29 +473,45 @@ table.tools input, .selectboxit-container {margin-right:5px;}
   opacity: 1;
   cursor:pointer;
 }
-#searchfooter{
-  position:absolute;
-  bottom: 7%;  
-  padding-top: 25px;
-  margin-left: 90px;
-}
+
+/* the bottom margin is the negative value of the footer's height */
+ #layersTab,#searchTab, #toolsTab, #drawTab{
+    box-sizing: border-box;
+    min-height: 100%;
+    padding: 0 0 100px;
+    position: relative; 
+} 
+
 #layersfooter{
-  position:absolute;
-  bottom: 7%;  
-  padding-top: 25px;
-  margin-left: 90px;
+  bottom: 0;
+  height: 122px;
+  left: 90px;
+  position: absolute;
+  padding-top: 30px; 
+
 }
+
+#searchfooter{
+  bottom: 0;
+  height: 122px;
+  left: 90px;
+  position: absolute;
+  padding-top: 30px;
+}
+
 #toolsfooter{
-  position:absolute;
-  bottom: 7%;  
-  padding-top: 25px;
-  margin-left: 90px;
+  bottom: 0;
+  height: 122px;
+  left: 90px;
+  position: absolute;
+  padding-top: 48px;
 }
 #drawfooter{
-  position:absolute;
-  bottom: 7%;  
-  padding-top: 25px;
-  margin-left: 90px;
+  bottom: 0;
+  height: 122px;
+  left: 90px;
+  position: absolute;
+  padding-top: 48px;
 }
 
 .foot{
