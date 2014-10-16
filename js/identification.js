@@ -1,25 +1,8 @@
-define(["dojo/Evented","dojo/_base/declare", "dojo/_base/lang", "esri/arcgis/utils", "dojo/dom", "dojo/dom-class", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", 
+define(["dojo/Evented","dojo/_base/declare", "dojo/_base/lang", "esri/arcgis/utils", "dojo/dom", "dojo/dom-class", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "app/symbols",
 "dojo/domReady!"], 
-function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryTask, Graphic,config,SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon) {
+function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryTask, Graphic,config,SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon, IdentifyTask, IdentifyParameters, symbols) {
     return declare(null, {
-        // config: {},
-        // startup: function (config) {
-            // // config will contain application and user defined info for the template such as i18n strings, the web map id
-            // // and application id
-            // // any url parameters and any application specific configuration information.console.log("Hello World!");
-            // // console.log("My Map:", this.map);
-            // // console.log("My Config:", this.config);
-            // if (config) {
-                // this.config = config;
-                // //supply either the webmap id or, if available, the item info
-                // var itemInfo = this.config.itemInfo || this.config.webmap;
-                // this._createWebMap(itemInfo);
-            // } else {
-                // var error = new Error("Main:: Config is not defined");
-                // this.reportError(error);
-            // }
-        // },
-		
+        
         // Sample function, welcome to AMD!
         _helloWorld: function (evt) {
             console.log("Hello World!");
@@ -30,10 +13,23 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		//doIdentify
 		//Public Class
 	    _identify: function (evt) {
-            identifyParams.geometry = evt;
+		    identifyTask = new IdentifyTask(config.mapServices.dynamic);
+            identifyParams = new IdentifyParameters();
+            identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
+            identifyParams.tolerance = 5;
             identifyParams.returnGeometry = true;
+            identifyParams.width = map.width;
+            identifyParams.height = map.height;
+            identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
+            identifyParamsParcel = new IdentifyParameters();
+            identifyParamsParcel.layerIds = [config.parcelLayerID];
+            identifyParamsParcel.tolerance = 1;
+            identifyParamsParcel.returnGeometry = true;
+            identifyParamsParcel.width  = map.width;
+            identifyParamsParcel.height = map.height;
+            identifyParams.geometry = evt;
             identifyParams.mapExtent = map.extent;
-            identifyParams.layerIds = utilityMap.visibleLayers.concat(identifyLayerAdditional);  //UTILITYMAP
+            identifyParams.layerIds = utilityMap.visibleLayers.concat(config.identifyLayerAdditional);  //UTILITYMAP
             //console.log(this);			
             identifyTask.execute(identifyParams).then(lang.hitch(this, function (idResults) { 
 			    //console.log(this.idResults); //if utility selected returns object otherwise undefined
@@ -91,6 +87,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		//showFeature
 		//Private Class
         _showFeature: function(feature) {
+
             //console.log(feature)
             switch (feature.geometry.type) {
             case "point":
@@ -175,7 +172,6 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             $('.results.multiple').hide();
             $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").show();
             $('.results.identify').show();
-            $('#searchfooter').css({'position': 'relative', 'bottom': '0px'});
             $("#viewAttachment").hide();
             geometryBuffer = [currentProperty.geometry];
             var layerResults = currentProperty;
@@ -226,8 +222,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		
 		//createSingleTable
 		//private Class
-	_createSingleTable: function(queryFeatures){
-	    selectedFeatures = { features: [] };
+		_createSingleTable: function(queryFeatures){
+		    selectedFeatures = { features: [] };
             $('.results.multipleBuffer').hide();
             csvInfo = [];
             mailParcels = [];
@@ -255,7 +251,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		_drawGraphic: function(drawn){
 		    //map.enablePan();
             var layerToBuffer = dom.byId("BufferLayer").value;
-            if (layerToBuffer == parcelLayerID) {
+            if (layerToBuffer == config.parcelLayerID) {
                 var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
                 console.log(queryTask);
                 var query = new Query();
@@ -295,7 +291,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 queryTask.execute(query).then(lang.hitch(this, function (selectionGeometries) {
                     var currentSelection = selectionGeometries.features;
                     //alert(currentSelection.length);
-                    if (currentSelection.length == 0 && layerToBuffer != parcelLayerID) {
+                    if (currentSelection.length == 0 && layerToBuffer != config.parcelLayerID) {
                         map.graphics.add(graphicDraw);
                         geometryBuffer.push(graphicDraw.geometry);
                     } else {
@@ -317,7 +313,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                             geometryDraw.push(currentSelection[i].geometry);
                             geometryBuffer.push(currentSelection[i].geometry);
                         }
-                        if (layerToBuffer == parcelLayerID && currentSelection.length != 0) {
+                        if (layerToBuffer == config.parcelLayerID && currentSelection.length != 0) {
 						    this._createTable(selectedFeatures.features);
                         }
                     }
@@ -327,8 +323,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 		
 		//createTable
 		//Private Class for a few
-	_createTable: function(queryFeatures){
-	    selectedFeatures = { features: [] };
+		_createTable: function(queryFeatures){
+		    selectedFeatures = { features: [] };
             csvInfo = [];
             //fill/stroke of selected
             var querySymbol = symbols.polygon;
@@ -357,9 +353,6 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 content += "<tr><td >" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.OwnerName'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.Adddress'] + "</td></tr>";
                 mailParcels.push(queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO']);
                 selectedFeatures.features.push(queryFeatures[i]);
-                if (queryFeatures.length > 6) {
-                     $('#toolsfooter').css({'position': 'relative', 'bottom': '0px'});
-                }
             }
             $("#multiptleBufferItem").html(content);
             $('.results.multipleBuffer').show();
@@ -367,13 +360,11 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             createCSVFile();
 		},
 		
-	//getAreaAndLength
-	//Public class
-	_getAreaAndLength: function(geometry){
+		//getAreaAndLength
+		//Public class
+		_getAreaAndLength: function(geometry){
             var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": "Miles", "UNIT_ACRES": "Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
 
-            symbols.polygonMeasure = new SimpleFillSymbol("solid", new SimpleLineSymbol("solid", new Color([255, 155, 0]), 2), new Color([0, 200, 0, 0.65]));
-            symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4);
             if (geometry.type == 'polygon') {
                 measureGraphic = map.graphics.add(new Graphic(geometry, symbols.polygonMeasure));
                 var areasAndLengthParams = new AreasAndLengthsParameters();
@@ -435,9 +426,9 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             }		
 		},
 		
-	//addToMapDrawing
-	//PublicClass
-	_addDrawingToMap: function(geometry){
+		//addToMapDrawing
+		//PublicClass
+		_addDrawingToMap: function(geometry){
             symbolStyle = $("#symbolOptions").val();
             switch (geometry.type) {
                 case "point":
@@ -469,6 +460,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                     symbols.polyline = new SimpleLineSymbol(style, new Color(color), width);
                     var graphic = new Graphic(geometry, symbols.polyline);
                     graphicLayer.add(graphic);
+					//symbols.polyline parameter was changed to symbolStyle, change back to default orange
+					symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4)
                 break;
                 case "polygon":
                     var symbolType = $("#symbolOptions").html();
@@ -493,10 +486,10 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             map.enablePan();
 		},
 		
-	//labelGeom
-	//Private class
-	_labelGeom: function(geometry){
-	    var x1 = geometry.x;
+		//labelGeom
+		//Private class
+		_labelGeom: function(geometry){
+		    var x1 = geometry.x;
             var y1 = geometry.y
             var x2 = x1 + 10;
             var y2 = y1 + 10;
@@ -514,10 +507,10 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 			    // this._utility(idResults, evt); 
 				
 			// }));
-	//getLabelPoints
-	//Private Class
-	_getLabelPoints: function(graphicsLabel){
-	    gsvc.labelPoints(graphicsLabel, function (labelPoints) {
+		//getLabelPoints
+		//Private Class
+		_getLabelPoints: function(graphicsLabel){
+		    gsvc.labelPoints(graphicsLabel, function (labelPoints) {
                 var style = eval("TextSymbol." + symbolStyle);
                 var labelSize = parseInt($("#size").val() * 5);
                 var text = $("#text").val();
@@ -530,7 +523,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 graphicLayerLabels.add(labelPointGraphic);
 
             });
-	}
+		}
 
 		
 		
