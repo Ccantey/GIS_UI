@@ -1,6 +1,5 @@
-define(["dojo/Evented","dojo/_base/declare", "dojo/_base/lang", "esri/arcgis/utils", "dojo/dom", "dojo/dom-class", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic","config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "app/symbols",
-"dojo/domReady!"], 
-function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryTask, Graphic,config,SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon, IdentifyTask, IdentifyParameters, symbols) {
+define(["dojo/Evented","dojo/_base/declare", "dojo/_base/lang", "esri/arcgis/utils", "dojo/dom", "dojo/dom-class", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils", "config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "app/symbols"], 
+function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryTask, Graphic, graphicsUtils, config, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon, IdentifyTask, IdentifyParameters, symbols) {
     return declare(null, {
         
         // Sample function, welcome to AMD!
@@ -9,43 +8,48 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             console.log("My Map:", this.map);
             console.log("My event:", this.evt);
         },
-		
-		//doIdentify
-		//Public Class
-	    _identify: function (evt) {
-		    identifyTask = new IdentifyTask(config.mapServices.dynamic);
+        
+        //doIdentify
+        //Public Class
+        _identify: function (evt) {
+            identifyTask = new IdentifyTask(config.mapServices.dynamic);
+
             identifyParams = new IdentifyParameters();
             identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
             identifyParams.tolerance = 5;
             identifyParams.returnGeometry = true;
             identifyParams.width = map.width;
             identifyParams.height = map.height;
-            identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
-            identifyParamsParcel = new IdentifyParameters();
-            identifyParamsParcel.layerIds = [config.parcelLayerID];
-            identifyParamsParcel.tolerance = 1;
-            identifyParamsParcel.returnGeometry = true;
-            identifyParamsParcel.width  = map.width;
-            identifyParamsParcel.height = map.height;
             identifyParams.geometry = evt;
             identifyParams.mapExtent = map.extent;
             identifyParams.layerIds = utilityMap.visibleLayers.concat(config.identifyLayerAdditional);  //UTILITYMAP
-            //console.log(this);			
+
+            console.log(identifyParams.layerIds);           
             identifyTask.execute(identifyParams).then(lang.hitch(this, function (idResults) { 
-			    //console.log(this.idResults); //if utility selected returns object otherwise undefined
-			    this._utility(idResults, evt); 
-				
-			}));
+                //console.log(this.idResults); //if utility selected returns object otherwise undefined
+                this._utility(idResults, evt); 
+                
+            }));
             selectedFeatures = { features: [] }; //remove previously selected parcels in memory 
             $('.results.multipleBuffer').hide(); //remove previously selected parcels in results table
             map.graphics.clear();                //remove previously selected parcels in map
         },
 
         // addToMap
-		//Private Class
-		_utility: function (idResults,evt) {
+        //Private Class
+        _utility: function (idResults,evt) {
             multipleIdentifyStack = [];
             multipleIdentifyLayerName = [];
+            
+            identifyParamsParcel = new IdentifyParameters();
+            identifyParamsParcel.layerIds = [config.parcelLayerID];
+            identifyParamsParcel.tolerance = 1;
+            identifyParamsParcel.returnGeometry = true;
+            identifyParamsParcel.width  = map.width;
+            identifyParamsParcel.height = map.height;
+            
+            identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
+            
             //console.log('idResults[0]',idResults); //utility selected?
             if (idResults.length > 0) {
                 var options = '';
@@ -80,19 +84,18 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 identifyParamsParcel.geometry = evt;
                 identifyTaskParcel.execute(identifyParamsParcel).then(lang.hitch(this, function (idResults) {
                     this._doneIdentifyParcel(idResults[0].feature) 
-				} ));
+                } ));
             }
         },
-		
-		//showFeature
-		//Private Class
+        
+        //showFeature
+        //Private Class
         _showFeature: function(feature) {
-
             //console.log(feature)
             switch (feature.geometry.type) {
             case "point":
                 var symbol = symbols.point;
-		        console.log(feature);
+                console.log(feature);
                 break;
             case "polyline":
                 var symbol = symbols.polyline;
@@ -104,10 +107,10 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             feature.setSymbol(symbol);  //highlight selection
             map.graphics.add(feature);  //add highlighted feature to map
         },
-		
-		//layerTabContent
-		//Private Class
-		_layerTabContent: function(layerResults, layerName) {
+        
+        //layerTabContent
+        //Private Class
+        _layerTabContent: function(layerResults, layerName) {
             $(".identify .section-sub-header").html(layerName);
             $('.results.identify').show();
             geometryBuffer = [layerResults.geometry];
@@ -123,7 +126,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             var objectId;
             for (attributesName in layerResults.attributes) {
                 objectId = layerResults.attributes["OBJECTID"];
-                console.log(objectId);
+                //console.log(objectId);
                 A_Drawings.queryAttachmentInfos(objectId, function(info) {
                     $.each(info, function (number,attachment) {
                         var a = '<a target="_blank" href="' + attachment.url + '">' + attachment.name + "</a></td></tr>";
@@ -155,18 +158,18 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                     content += "<tr><th>" + attributesName + ":</th><td>" + layerResults.attributes[attributesName] + "</td></tr>";
                 }
             }
-        } else {
-            content += "<tr><th>" + "No Data" + ":</th><td>" + "No Data" + "</td></tr>";
-        }
-        $("#singleItem1,#singleItem4").html(content);
-        $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").hide();
-        $('.results.multiple').hide();
-        $('.results.identify').show();
+            } else {
+                 content += "<tr><th>" + "No Data" + ":</th><td>" + "No Data" + "</td></tr>";
+            }
+            $("#singleItem1,#singleItem4").html(content);
+            $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").hide();
+            $('.results.multiple').hide();
+            $('.results.identify').show();
         },
-		
-		//doneIdentify
-		//Private Class
-		_doneIdentifyParcel: function(currentProperty) {
+        
+        //doneIdentify
+        //Private Class
+        _doneIdentifyParcel: function(currentProperty) {
             $(".identify .section-sub-header").html("Property Information");
             $("#multipleSelect,multipleSelect2").hide();
             $('.results.multiple').hide();
@@ -219,11 +222,11 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             $("#singleItem1,#singleItem4").html(content1);
             $("#singleItem2,#singleItem5").html(content2);    
         },
-		
-		//createSingleTable
-		//private Class
-		_createSingleTable: function(queryFeatures){
-		    selectedFeatures = { features: [] };
+        
+        //createSingleTable
+        //private Class
+        _createSingleTable: function(queryFeatures){
+            selectedFeatures = { features: [] };
             $('.results.multipleBuffer').hide();
             csvInfo = [];
             mailParcels = [];
@@ -244,12 +247,12 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 selectedFeatures.features.push(queryFeatures[i]);
             }
             createCSVFile();
-		},
-		
-		//drawGraphic
-		//Public Class
-		_drawGraphic: function(drawn){
-		    //map.enablePan();
+        },
+        
+        //drawGraphic
+        //Public Class
+        _drawGraphic: function(drawn){
+            //map.enablePan();
             var layerToBuffer = dom.byId("BufferLayer").value;
             if (layerToBuffer == config.parcelLayerID) {
                 var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
@@ -263,7 +266,7 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 query.outFields = ["*"];
             }
             //if 'select by drawing'
-			console.log(drawn.type);
+            console.log(drawn.type);
             switch (drawn.type) { 
             case "point":
                 symbolDraw = symbols.point;
@@ -314,17 +317,17 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                             geometryBuffer.push(currentSelection[i].geometry);
                         }
                         if (layerToBuffer == config.parcelLayerID && currentSelection.length != 0) {
-						    this._createTable(selectedFeatures.features);
+                            this._createTable(selectedFeatures.features);
                         }
                     }
                 }));
-            }		
-		},
-		
-		//createTable
-		//Private Class for a few
-		_createTable: function(queryFeatures){
-		    selectedFeatures = { features: [] };
+            }       
+        },
+        
+        //createTable
+        //Private Class for a few
+        _createTable: function(queryFeatures){
+            selectedFeatures = { features: [] };
             csvInfo = [];
             //fill/stroke of selected
             var querySymbol = symbols.polygon;
@@ -358,11 +361,11 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             $('.results.multipleBuffer').show();
             $('.results.identify').hide();
             createCSVFile();
-		},
-		
-		//getAreaAndLength
-		//Public class
-		_getAreaAndLength: function(geometry){
+        },
+        
+        //getAreaAndLength
+        //Public class
+        _getAreaAndLength: function(geometry){
             var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": "Miles", "UNIT_ACRES": "Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
 
             if (geometry.type == 'polygon') {
@@ -423,12 +426,13 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                         });
                     });            
                 });
-            }		
-		},
-		
-		//addToMapDrawing
-		//PublicClass
-		_addDrawingToMap: function(geometry){
+            }       
+        },
+        
+        //addToMapDrawing
+        //PublicClass
+        _addDrawingToMap: function(geometry){
+        
             symbolStyle = $("#symbolOptions").val();
             switch (geometry.type) {
                 case "point":
@@ -460,8 +464,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                     symbols.polyline = new SimpleLineSymbol(style, new Color(color), width);
                     var graphic = new Graphic(geometry, symbols.polyline);
                     graphicLayer.add(graphic);
-					//symbols.polyline parameter was changed to symbolStyle, change back to default orange
-					symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4)
+                    //symbols.polyline parameter was changed to symbolStyle, change back to default orange
+                    symbols.polyline = new SimpleLineSymbol("solid", new Color([255, 155, 0]), 4)
                 break;
                 case "polygon":
                     var symbolType = $("#symbolOptions").html();
@@ -484,12 +488,12 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             //map.enablePan();
             //$("#radioDraw input").attr("checked", false).button("refresh");
             map.enablePan();
-		},
-		
-		//labelGeom
-		//Private class
-		_labelGeom: function(geometry){
-		    var x1 = geometry.x;
+        },
+        
+        //labelGeom
+        //Private class
+        _labelGeom: function(geometry){
+            var x1 = geometry.x;
             var y1 = geometry.y
             var x2 = x1 + 10;
             var y2 = y1 + 10;
@@ -498,19 +502,15 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             var labelPolygon = new Polygon(new SpatialReference({ wkid: 102100 }));
             labelPolygon.addRing([[x1, y1], [x2, y2], [x3, y3], [x1, y1 - 5], [x1, y1]]);
             gsvc.simplify([labelPolygon]).then(lang.hitch(this, function(response){
-			    console.log(response);
-				this._getLabelPoints(response);
-			}));
-		},
-		// identifyTask.execute(identifyParams).then(lang.hitch(this, function (idResults) { 
-			    // //console.log(this.idResults); //if utility selected returns object otherwise undefined
-			    // this._utility(idResults, evt); 
-				
-			// }));
-		//getLabelPoints
-		//Private Class
-		_getLabelPoints: function(graphicsLabel){
-		    gsvc.labelPoints(graphicsLabel, function (labelPoints) {
+                console.log(response);
+                this._getLabelPoints(response);
+            }));
+        },
+
+        //getLabelPoints
+        //Private Class
+        _getLabelPoints: function(graphicsLabel){
+            gsvc.labelPoints(graphicsLabel, function (labelPoints) {
                 var style = eval("TextSymbol." + symbolStyle);
                 var labelSize = parseInt($("#size").val() * 5);
                 var text = $("#text").val();
@@ -523,12 +523,109 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 graphicLayerLabels.add(labelPointGraphic);
 
             });
-		}
+        },
+        
+        //searchParcelByAttribute(search)
+        //Public class
+        _searchParcelByAttribute: function(search){     
+            map.graphics.clear();
+            var query = new Query();
+            query.outFields = ['*'];
+            query.returnGeometry = true;
+            $(".searchClass").show();
+            switch (search) {
+            case "Owner":
+                query.where = "OwnerName = " + "'" + dom.byId("owner").value + "'";
+            break;
+            case "Address":
+                query.where = "Adddress = " + "'" + dom.byId("addresses").value.replace(/,/g, "") + "'";
+            break;
+            case "PID":
+                query.where = "Parcels.PARCELNO  = " + "'" + dom.byId("pid").value.replace(/,/g, "") + "'";
+            break;
+            }
+            var queryTask = new QueryTask(config.mapServices.dynamic + "/" + config.parcelLayerID);
+            queryTask.execute(query).then(lang.hitch(this, function (searchFeature) {
+                this._createSingleTable(searchFeature.features);
+                var i;
+                var j;
+                var graphic;
+                var unionExtent;
+                var extent;
+                var extentParcel;
+                if (search == "Owner" && searchFeature.features.length > 1) { //multiple properties
+                    selectedFeatures = searchFeature;
+                    var content = "<tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>";
+                    for (i = 0, il = searchFeature.features.length; i < il; i++) {
+                        attValues = [];
+                        graphic = new Graphic(searchFeature.features[i].geometry, symbols.polygon);
+                        map.graphics.add(graphic);
 
-		
-		
-		
-		
-	//end	
+                        content += "<tr><td >" + searchFeature.features[i].attributes.ParcelID + "</td><td>" + searchFeature.features[i].attributes["OwnerName"] + "</td><td>" + searchFeature.features[i].attributes["BLDG_NUM"] + " " + searchFeature.features[i].attributes["STREETNAME"] + " " + searchFeature.features[i].attributes["ZIP"] + " </td></tr>";
+                        mailParcels.push(searchFeature.features[i].attributes.ParcelID); //This may need to be reviewed
+                        selectedFeatures.features.push(searchFeature.features[i]);
+
+                        for (j = 0; j < attrAll.length; j++) {
+                            attValues.push(searchFeature.features[i].attributes[attrAll[j]]);
+                        }
+                        if (searchFeature.features.length == 1) {
+                            unionExtent = graphicsUtils.graphicsExtent(allGraphics);
+                            map.setExtent(unionExtent.expand(1.5));
+                        } else {
+                            unionExtent = null;
+                            unionExtent = graphicsUtils.graphicsExtent(searchFeature.features);
+                            map.setExtent(unionExtent.expand(1.5));
+                        }
+                        csvInfo.push(attValues.join(","));
+                    }
+                    //$(".results.multiple.section-sub-header").html(
+                    $("#multiptleItem").html(content);
+                    $('.results.multiple').show();
+                    //map.setExtent(extentParcel, true);
+
+                } else { //one property
+                    this._showSearchByAttributeResults(searchFeature.features[0]);
+                    //console.log(searchFeature.features[0]);
+                    $('.results.multiple').hide();
+                    $('.results.multipleBuffer').hide();
+                    extent = graphicsUtils.graphicsExtent([searchFeature.features[0]]);
+                    extentParcel = extent.expand(3);
+                    map.setExtent(extentParcel, true);
+                    this._showFeature(searchFeature.features[0]);
+                    geometryBuffer.push(searchFeature.features[0].geometry);
+                }
+            }));      
+        },
+        
+        //showSearchByAttributeResults(layerSearchResults
+        //private class
+        _showSearchByAttributeResults: function(layerSearchResults){
+            $(".identify .section-sub-header").html("Property Information");
+            $("#singleItem2,.section-sub-header2").show();
+            $('.results.identify').show();
+            geometryBuffer = [layerSearchResults.geometry];
+            var content1 = "";
+            var content2 = "";
+            content1 += "<tr><th> PIN" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.PARCELNO'] + "</td></tr>";
+            content1 += "<tr><th> Property Address" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.Adddress'] + "</td></tr>"; //note misspell
+            content1 += "<tr><th> Owner Name" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.OwnerName'] + "</td></tr>";
+            content1 += "<tr><th> Owner Address" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.MAILADDLN1'] + "</br>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.CITYSTZIP'] + "</td></tr>";
+            content1 += "<tr><th> Area (Acres)" + ":</th><td>" + (layerSearchResults.attributes['Shape.STArea()'] / 43560).toFixed(2) + "</td></tr>";
+            content2 += "<tr><th> School District" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.SCHOOLDIST'] + "</td></tr>";
+            content2 += "<tr><th > Tax Link" + ":</th><td><a style='color:#ff6600' target='_blank' href='" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.TaxLink'] + "'</a>" + "Link" + "</td></tr>";
+            content2 += "<tr><th > Assessor's Link" + ":</th><td><a style='color:#ff6600' target='_blank' href='" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.AssesorLink'] + "'</a>" + "Link" + "</td></tr>";
+            $("#singleItem1").html(content1);
+            $("#singleItem2").html(content2);
+            $('.results.multiple').hide();
+            $('.results.identify').show();
+            $("#multipleSelectSelectBoxItContainer").hide();
+            this._createSingleTable([layerSearchResults]);
+        }
+
+        
+        
+        
+        
+    //end   
     });
 });
