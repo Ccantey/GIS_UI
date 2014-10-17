@@ -14,23 +14,23 @@ $(document).ready(function () {
         history: false,
         showOn: 'button'
     });
-    $('.color-button div div').append('<i class="icon-caret-down"></i>'); //  Add arrow	
-	    // Native jQuery-IU Spinner
+    $('.color-button div div').append('<i class="icon-caret-down"></i>'); //  Add arrow 
+        // Native jQuery-IU Spinner
 
     $("#size").spinner({
         max: 10,
         min: 1
     });
-	$('#tree').tree({
-	  // collapseUiIcon: 'glyphicon glyphicon-star',
-	  // expandUiIcon: 'glyphicon glyphicon-star'	  
+    $('#tree').tree({
+      // collapseUiIcon: 'glyphicon glyphicon-star',
+      // expandUiIcon: 'glyphicon glyphicon-star'     
     });
-	
-  $("#menu-close").click(function(e) {
+    
+  $("#menu-close, #menu-close2, #menu-close3, #menu-close4").click(function(e) {
      e.preventDefault();
      $('#menu-toggle').removeClass('tab');
-	 $("#sidebar-wrapper").toggleClass("active");
-	 $('#map-zoom-slider,.esriSimpleSlider,.foot').animate({ 'left': '10px' }, 500, 'easeOutQuad');
+     $("#sidebar-wrapper").toggleClass("active");
+     $('#map-zoom-slider,.esriSimpleSlider,.foot').animate({ 'left': '10px' }, 500, 'easeOutQuad');
    });
  
   $("#menu-toggle").click(function(e) {
@@ -43,72 +43,7 @@ $(document).ready(function () {
   $('.radioset').buttonset();
   $("#progressbar").hide();
   $('.results.multipleBuffer').hide();
-  $('a[data-toggle="tooltip"]').tooltip();
-
-  $(".overlayLayer").change(function () {   
-	//var inputs = dojo.query(".overlayLayer");
-	var inputs = $(".overlayLayer");
-	var visible = [1,27,28,29]; //street and city labels
-	for (var i = 0, il = inputs.length; i < il; i++) {
-		var layerLabel = $(inputs[i]).find("label:first").html();  //To select labels to check, we must nest <label tag> in htm. and somehow select that nested label
-		//console.log('layerLabel: ',layerLabel);
-		var layerCheckState = $(inputs[i]).find("input:first");
-		//console.log('layerCheckState: ',layerCheckState);
-		var layerObject = objectFindByKey(globalMapLayers, 'name', layerLabel);
-		//console.log('layerObject: ',layerObject);
-		if ($(layerCheckState).prop("checked")) {
-			visible.push(layerObject.id);			
-			//console.log(layerObject.id);
-		}
-		else {
-			$(layerCheckState).removeAttr("checked");
-			var elem = $('li.current_sub').prevAll("checked:first");
-			elem.removeClass("checked");
-		}
-	}
-
-	overlayLayer.setVisibleLayers(visible);
-	legend.refresh();
-  });
-
-   $('.utilityLayer,.tree').change(function () {
-      //var inputs = dojo.query(".utilityLayer");
-	  var inputs = $(".utilityLayer");
-      //console.log(inputs);
-	  var visible = [-1];
-	  for (var i = 0, il = inputs.length; i < il; i++) {
-		var layerLabel = $(inputs[i]).find("label:first").html();
-		//console.log('layerLabel: ',layerLabel);
-		var layerCheckState = $(inputs[i]).find("input:first");
-		//console.log('layerCheckState: ',layerCheckState);
-		var layerObject = objectFindByKey(globalMapLayers, 'name', layerLabel);
-		//console.log('layerObject: ',layerObject);
-		if ($(layerCheckState).prop("checked")) {
-			visible.push(layerObject.id);
-			//console.log(layerObject.id);
-			//console.log(visible);
-		}
-	}
-	if (visible.length > 0) {
-		utilityMap.setVisibleLayers(visible);		
-	}
-	else {
-		utilityMap.setVisibleLayers([-1]);
-		map.graphics.clear();
-	}
-	legend.refresh();
-    });	
-
-    function objectFindByKey(array, key, value) {
-        //alert(value);
-        for (var i = 0; i < array.length; i++) {
-		    //alert(array[i].name);
-            if (array[i][key] === value) {
-                return array[i];
-            }
-        }
-        return null;
-    }	
+  $('a[data-toggle="tooltip"]').tooltip();   
 
     //autocomplete
     $("#owner").autocomplete({
@@ -154,8 +89,8 @@ $(document).ready(function () {
                     }
             });
         }
-    });	
-	
+    }); 
+    
     // Tools Tab || navEvents
     $('#tools-tab,.btn-clear').click(function(){
        $('.dDot,.drawLine,.Extent').removeClass('ui-state-active');
@@ -164,17 +99,17 @@ $(document).ready(function () {
        document.getElementById("pid").value = "";
     })
 
-	function updateIdentify() {
+    function updateIdentify() {
         selectedFeatures = { features: [] }; //remove previously selected parcels in results table
         multipleIdentifyLayerName = [];
         map.graphics.clear();
         showFeature(multipleIdentifyStack[parseInt($('#multipleSelect,multipleSelect2').val())]);
         layerTabContent(multipleIdentifyStack[$('#multipleSelect,multipleSelect2').val()], multipleIdentifyLayerName[$('#multipleSelect,multipleSelect2').val()]);
     }
-	$('#multiplePointSelector').click(function () { //multiple selections
-		navEvent('point'); //select by point is the default operationToDo in the tabs section		
+    $('#multiplePointSelector').click(function () { //multiple selections
+        navEvent('point'); //select by point is the default operationToDo in the tabs section       
     });
-	
+    
     $('select#measureUnit').change(function () {
         measureUpdate(measureGeometry);
     });
@@ -201,7 +136,7 @@ $(document).ready(function () {
     });
 
     $('#toolsTab #Buffer').click(function () {
-	    navEvent('buffer');
+        navEvent('buffer');
         //doBuffer();
         $('#search-tab a').removeClass('notice');
     });
@@ -209,7 +144,7 @@ $(document).ready(function () {
     $('#toolsTab .btn-clear').click(function () {
         navEvent('tools clear');
     });
-	
+    
     // Draw Tab
     $('#drawTab .dText').click(function () {
         $('#drawTab .text-row').show();
@@ -238,15 +173,15 @@ $(document).ready(function () {
     $('#drawTab .btn-clear').click(function () {
         navEvent('clearDrawing');
     });
-	$('#searchTab .btn-clear').click(function () {
+    $('#searchTab .btn-clear').click(function () {
         navEvent('clear');
 
-    });	
-	$('#layersTab .btn-clear').click(function () {
+    }); 
+    $('#layersTab .btn-clear').click(function () {
         navEvent('clear');
     });
-	
-	//Provide feedback for matched characters in autocomplete
+    
+    //Provide feedback for matched characters in autocomplete
     $.ui.autocomplete.prototype._renderItem = function( ul, item){
       var term = this.term.split(' ').join('|');
       var re = new RegExp("(" + term + ")", "gi") ;
@@ -255,8 +190,8 @@ $(document).ready(function () {
          .data( "item.autocomplete", item )
          .append( "<a>" + t + "</a>" )
          .appendTo( ul );
-    };	
-	
+    };  
+    
     // Print and Feature Forms
     $('#print').click(function() {
         if(printAreaGraphic != null){
@@ -286,16 +221,16 @@ $(document).ready(function () {
     $('#btn-printArea').click(function () {
         viewPrintArea();
         return false;
-    });		
-	
-	$('.mailOption').click(function () {
+    });     
+    
+    $('.mailOption').click(function () {
         $('#mailLabelBox').show();
     });
-	
-	$('#mailLabelBox .btn-close').click(function () {
+    
+    $('#mailLabelBox .btn-close').click(function () {
         $('#mailLabelBox').hide();
     });
-		
+        
     $("#ownerMail").click(function () {
         $.post('outputs/mailLabelOwner.php', { q: mailParcels }, function (data) {
             var mailUrl = "http://gis.wirapids.org/CityViewer-AMD/outputs/"+"" + data;
@@ -316,9 +251,9 @@ $(document).ready(function () {
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
-	
+    
     $("#search-tab").click(function () {
       $('#search-tab a').removeClass('notice');
-    });	
+    }); 
 
 }); //End $(document).ready()
