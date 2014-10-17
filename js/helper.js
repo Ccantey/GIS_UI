@@ -1,44 +1,5 @@
 $(document).ready(function () {
-
-    $('#searchTab  .btn').click(function () {
-        $('.results.identify').hide();
-        if (this.id == 'ownerGo') {
-		    //alert('dadfs');
-            SearchParcelByAttribute("Owner");
-        }
-        else if (this.id == "addressGo") {
-            SearchParcelByAttribute("Address");
-        }
-        else {
-            SearchParcelByAttribute("PID");
-        }
-    });
-
-    //Autocomplete helper: press enter to complete function			
-	$( "#requestByaddress" ).keypress(function(event) {
-		if(event.keyCode == 13){
-		     RequestByLocation();
-	        //console.log( "Pressed the Enter Key." );
-			};
-	});
-	$( "#owner" ).keypress(function(event) {
-		if(event.keyCode == 13){
-		     SearchParcelByAttribute('Owner');
-	        //console.log( "Pressed the Enter Key." );
-			};
-	});
-	$( "#addresses" ).keypress(function(event) {
-		if(event.keyCode == 13){
-		     SearchParcelByAttribute('Address');
-	        //console.log( "Pressed the Enter Key." );
-			};
-	});
-	$( "#pid" ).keypress(function(event) {
-		if(event.keyCode == 13){
-		     SearchParcelByAttribute('PID');
-	        //console.log( "Pressed the Enter Key." );
-			};
-	});	
+	
 	
     $("#multiptleBufferItem").on('mouseover', 'tr', function (e) {
         tempGraphicLayer.clear();
