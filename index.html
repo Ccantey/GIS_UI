@@ -23,10 +23,11 @@ the page in or out -->
 <script type="text/javascript">
   var path_location = location.pathname.replace(/\/[^/]+$/, '');
   var dojoConfig = {
-  parseOnLoad: true,
-  paths: {
-    config: path_location,
-    app: 	path_location + '/js'
+    parseOnLoad: true,
+    async: true,
+    paths: {
+      config: path_location,
+      app:  path_location + '/js'
   }        
 };
 </script>
@@ -43,7 +44,7 @@ the page in or out -->
 <link rel="stylesheet" type="text/css" href="css/jquery.tree.min.css"/>
 <link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
 <link href="css/evol.colorpicker.css" rel="stylesheet" type="text/css" media="screen"/>  
-<link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />	
+<link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />  
 
 <!-- Custom styles for this app -->
 <link href="css/styles.css" rel="stylesheet">
@@ -54,7 +55,7 @@ the page in or out -->
 <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 <![endif]-->
 
-<script>	
+<script>  
   var initExtent, identifyTask, identifyParams, gsvc;
   var identifyTaskParcel, identifyParamsParcel, params;
   var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
@@ -73,28 +74,55 @@ the page in or out -->
   var map = null;
   var toolbar = null;
   var symbols = {};
-  var printTask = null;	  
+  var printTask = null;   
   var ctxMenuForGraphics, ctxMenuForMap;
   var printAreaGraphic = null;
   var globalMapLayers = {};
 
-  require(["dojo/dom", "dojo/on", "dojo/query", "dojo/_base/connect", "esri/Color", "esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/toolbars/navigation", "esri/tasks/query", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Geometry", "esri/geometry/Extent", "esri/SpatialReference"],
-           function(dom, on, query, connect, Color, domUtils, Map, config, identification, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, Query, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+  require(["esri/urlUtils", "dojo/dom", "dojo/on", "dojo/query", "dojo/_base/connect", "esri/Color", "esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/checktree", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/toolbars/navigation", "esri/tasks/query", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Geometry", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
+           function(urlUtils, dom, on, query, connect, Color, domUtils, Map, config, identification, checktree, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, Query, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
+
+            urlUtils.addProxyRule({
+                urlPrefix: "http://gis.wirapids.org",
+                proxyUrl: "http://gis.wirapids.org/proxy/proxy.php"
+            });
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
-                extent: initExtent	
+                extent: initExtent  
              }); 
              
+
+            //overlayLayer.url = config.mapServices.dynamic;
+            //utilityMap.url = config.mapServices.dynamic;
             gsvc = new GeometryService(config.helperServices.geometry); //identification, doBuffer, measureUpdate
             printTask = new PrintTask(config.helperServices.print);
 
             // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
             on(map, "load", function(){
-              editToolbar = new Edit(map);
-              on(map, "Click", function (evt) {
-                editToolbar.deactivate();
-              });
+                editToolbar = new Edit(map);
+                on(map, "Click", function (evt) {
+                  editToolbar.deactivate();
+                });
+
+                legendLayers.push({ layer: utilityMap, title: "Legend" });
+                legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[0,1,2,3,27, 28, 29, 31]});
+                legend = new Legend({
+                  map:map,
+                  layerInfos:legendLayers,
+                  autoUpdate: true,
+                },"legendDiv");
+                legend.startup();
+
+                var treeLegend = new checktree();
+                var utilities = $(".overlayLayer, .utilityLayer, .tree");
+                var basemaplayers = $(".overlayLayer");
+                on(utilities, 'change', function(){
+                      treeLegend._treeGetUtilityLayers();
+                } );
+                on(basemaplayers, 'change', function(){
+                    treeLegend._treeGetOverlayLayers();
+                } );
             });
 
             basemap = new ArcGISTiledMapServiceLayer(config.mapServices.vector); 
@@ -125,11 +153,11 @@ the page in or out -->
             on(map, "extent-change", function (initExtent){
                 changePrintGraphic(); //move print box if its on.
                 var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
-                var flag = false;	
+                var flag = false; 
                 //set a buffer to make the max extent a slightly bigger to void minor differences
                 //the map unit for this case is meter. 
                 var buffer = 25000;
-				
+        
                 var onLoadHandle = on(basemap, "update", function(){
                     onLoadHandle.remove();
                     if(initExtent.extent.xmin < maxExtent.xmin-buffer) {
@@ -153,12 +181,12 @@ the page in or out -->
                         flag = true;
                     }
                     if (flag === true) {
-                        map.setExtent(adjustedEx);				
+                        map.setExtent(adjustedEx);        
                     }
                     flag = false;
-                });	
+                }); 
                 
-				var currentScale=map.getScale();
+                var currentScale=map.getScale();
                 if(currentScale > 4800){
                     $("#AddLabels, #DimLabels, #PidLabels").prop('indeterminate', true).change();
                     $("#AddLabels, #DimLabels, #PidLabels").prop('disabled', true).change();
@@ -171,16 +199,18 @@ the page in or out -->
                 if (currentScale > 9600){
                     $("#Contours, #Adraw").prop('indeterminate', true).change();
                     $("#Contours, #Adraw").prop('disabled', true).change();
-                    $("#Contours, #Adraw").parent().css("color", "#777")		
+                    $("#Contours, #Adraw").parent().css("color", "#777")    
                 }else{
                     $("#Contours, #Adraw").prop('indeterminate', false).change();
                     $("#Contours, #Adraw").prop('disabled', false).change();
-                    $("#Contours, #Adraw").parent().css("color", "#FFF")			  
-                }			 			
+                    $("#Contours, #Adraw").parent().css("color", "#FFF")        
+                }           
             });
-			on(map, "update-start", function(){
+
+            on(map, "update-start", function(){
                 domUtils.show(loading);
             });
+            
             on(map, "update-end", function(){
                 domUtils.hide(loading);
                 map.disableDoubleClickZoom();
@@ -216,36 +246,68 @@ the page in or out -->
             //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
             iTool.activate(iTool._geometryType='point');
             var app = new identification();
-			
-           iTool.on("draw-end", function (evt) {
-               switch (operationToDo){
-               case "identify":
-                   app._identify(evt.geometry);
-                   break;
-               case "selection":
-				   app._drawGraphic(evt.geometry);
-                   break;
-               case "measure":
-                   app._getAreaAndLength(evt.geometry);
-                   break;
-               case "drawing":
-                   app._addDrawingToMap(evt.geometry)
-                   break;
+      
+            iTool.on("draw-end", function (evt) {
+              switch (operationToDo){
+              case "identify":
+                  app._identify(evt.geometry);
+                  break;
+              case "selection":
+                  app._drawGraphic(evt.geometry);
+                  break;
+              case "measure":
+                  app._getAreaAndLength(evt.geometry);
+                  break;
+              case "drawing":
+                  app._addDrawingToMap(evt.geometry)
+                  break;
                }
-           });
+            });
 
-            overlayLayer.url = config.mapServices.dynamic;
-            utilityMap.url = config.mapServices.dynamic;
-			
+            var searchButton = $('#searchTab .btn');
+            on(searchButton, 'click', function(){
+              $('.results.identify').hide();
+              if (this.id == 'ownerGo') {
+              //alert('dadfs');
+                app._searchParcelByAttribute("Owner");
+              } else if (this.id == "addressGo") {
+                app._searchParcelByAttribute("Address");
+              } else {
+                app._searchParcelByAttribute("PID");
+              }
+            });
+
+            var searchBoxes = $('#owner, #addresses, #pid');
+            on(searchBoxes, 'keypress', function(event){
+              if(this.id == 'owner'){
+                  if(event.keyCode == 13){
+                      app._searchParcelByAttribute('Owner');
+                  }
+              } else if (this.id == "addresses") {
+                  if(event.keyCode == 13){
+                      app._searchParcelByAttribute('Address');
+                  }
+              } else if (this.id == "pid") {
+                  if(event.keyCode == 13){
+                      app._searchParcelByAttribute('PID');
+                  }
+              }
+            });
             
-            legendLayers.push({ layer: utilityMap, title: "Legend" });
-            legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[0,1,2,3,27, 28, 29, 31]});
-			console.log(legendLayers);
-            legend = new Legend({
-               map:map,
-               layerInfos:legendLayers
-            },"legendDiv");
-            legend.startup();
+            var bufferButton = dom.byId('#buffer');
+            console.log(bufferButton);
+
+
+
+
+
+
+
+
+      
+            
+
+
             //map.enableScrollWheelZoom();
 
             //esriRequest is a utility method to retrieve data from a web server. Data can be static (stored in a file on the web server), or it can be dynamic (generated on-demand by a web service). esriRequest can handle the following formats: plain txt, xml, json, jsonp
@@ -261,7 +323,7 @@ the page in or out -->
                     globalMapLayers = response.layers;
                 }, function(error) {
                     console.log("Error: ", error.message);
-                });			   
+                });        
 
         });
 </script>
@@ -309,11 +371,12 @@ the page in or out -->
 <a class="tabtext" data-toggle="tab" href="#drawTab">Draw</a>
 </li>
 </ul>
-<a id="menu-close" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
+<!-- <a id="menu-close" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a> -->
 <!--Begin MyTabContent-->
-<div id="myTabContent" class="tab-content">	
+<div id="myTabContent" class="tab-content"> 
 <!--Begin Search Tab Content-->
 <div id="searchTab" class="tab-pane fade  active in">
+<a id="menu-close" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
 <a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
 <div id="searchForm">
 <form class="form-horizontal" role="form">
@@ -368,7 +431,7 @@ the page in or out -->
 </table>
 
 <div class="section-sub-header2">Tax Districts</div>
-<table class="data" id="singleItem2">		
+<table class="data" id="singleItem2">   
 </table> 
 
 <div class="attachments">
@@ -376,18 +439,19 @@ the page in or out -->
 <!-- <div class="progressBar" style="display:none"></div> -->
 </div>                           
 </section>
-<div id="searchfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>		  
+<div id="searchfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>     
 </div><!--searchTab-->
-<!--Begin Layers Tab Content-->		
-<div id="layersTab" class="tab-pane fade "> <!--open-ended <li required for plugin-->		
+<!--Begin Layers Tab Content-->   
+<div id="layersTab" class="tab-pane fade "> <!--open-ended <li required for plugin-->   
     <a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
+  <a id="menu-close2" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
     <div id="tree">
     <!--Checktree appends the closing elements... </li>-->
         <strong id="utilTitle" style="color:#ff6600">Utility Layers</strong> <!--Checktree doesn't work correctly if there are misspells-->
 
         <ul>
             <li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>
-			
+      
                 <ul>
                     <li class="utilityLayer"><input type="checkbox"><label>Sanitary Taps</label>
                     <li class="utilityLayer"><input type="checkbox"><label>Sanitary Manholes</label>
@@ -401,7 +465,7 @@ the page in or out -->
                 </ul>
             <li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
 
-		        <ul>
+            <ul>
                     <li class="utilityLayer"><input type="checkbox"><label>Discharge Point</label>
                     <li class="utilityLayer"><input type="checkbox"><label>Storm Manholes</label>
                     <li class="utilityLayer"><input type="checkbox"><label>Catch Basins</label>
@@ -412,7 +476,7 @@ the page in or out -->
                     <!-- <li class="utilityLayer"><input type="checkbox"><label>Parcels with Storm Permits</label>
                     <li class="utilityLayer"><input type="checkbox"><label>Parcels with Maintenance Agrmts</label> -->
                 </ul>
-				
+        
             <li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A_Drawings</label>
         </ul>
 
@@ -423,40 +487,42 @@ the page in or out -->
         <div class="checkbox">
             <ul>
                 <li class="overlayLayer">
-				    <label>Parcel Dimensions</label>
-                    <input type="checkbox" id="DimLabels">							
+            <label>Parcel Dimensions</label>
+                    <input type="checkbox" id="DimLabels">              
                 </li>
-                <li class="overlayLayer">					
+                <li class="overlayLayer">         
                     <label>Address Labels</label>
-                    <input type="checkbox" id="AddLabels">							
+                    <input type="checkbox" id="AddLabels">              
                 </li>
-                <li class="overlayLayer">					
+                <li class="overlayLayer">         
                     <label>PID Labels</label>
-                    <input type="checkbox" id="PidLabels">							
+                    <input type="checkbox" id="PidLabels">              
                 </li>
-                <li class="overlayLayer">					
+                <li class="overlayLayer">         
                     <label>Zoning Districts</label>
-                    <input type="checkbox" id="Zone">							
+                    <input type="checkbox" id="Zone">             
                 </li>
-                <li class="overlayLayer">					
+                <li class="overlayLayer">         
                     <label>DNR Wetland Inventory</label>
-                    <input type="checkbox" id="DNR">							
+                    <input type="checkbox" id="DNR">              
                 </li>
-                <li class="overlayLayer">					
+                <li class="overlayLayer">         
                     <label>Contours</label>
-                    <input type="checkbox" id="Contours">							
+                    <input type="checkbox" id="Contours">             
                 </li>
-            </ul>	
-        </div>			
+            </ul> 
+        </div>      
     </div>
     <section class="legend-items" id="legendDiv"></section>
 
     <div id="layersfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
-</div>	<!--layersTab-->
+</div>  <!--layersTab-->
 
-<!--Begin toolsTab-->	
+<!--Begin toolsTab--> 
 <div id="toolsTab" class="tab-pane fade">
-<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a></br></br>
+<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
+<a id="menu-close3" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
+</br></br>
 <table class="tools">
 <tr>
 <th>Select From</th>
@@ -490,7 +556,7 @@ the page in or out -->
 <option value="UNIT_STATUTE_MILE">Miles</option>                                           
 </select>
 <button id="Buffer" class="transition btn">Go</button>
-</td>							
+</td>             
 </tr>
 <tr>
 <th>Measure</th>
@@ -518,13 +584,14 @@ the page in or out -->
 <!--<div class="section-sub-header">Click row to zoom to selection</div>-->
 <table class="data" id="multiptleBufferItem">
 <!-- <tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>                              -->
-</table>					   
+</table>             
 </section>
 <div id="toolsfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
 </div> <!--toolstab-->
 <!--Begin drawTab-->
 <div id="drawTab" class="tab-pane fade">
 <a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
+<a id="menu-close4" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
 <table class="tools">
 <tr>
 <th>Shape</th>
@@ -534,7 +601,7 @@ the page in or out -->
 <input type="radio" name="radio" id="dFreeLine"><label for="dFreeLine" class="dFreeLine sprite">Free Line</label>
 <input type="radio" name="radio" id="dFreePoly"><label for="dFreePoly" class="dFreePoly sprite">Free Poly</label>
 <input type="radio" name="radio" id="dText"><label for="dText" class="dText sprite" >Text</label>
-</div>	
+</div>  
 </td>
 </tr>
 <tr class="text-row" style="display:none;">
@@ -574,7 +641,7 @@ the page in or out -->
 
 </div><!--Sidebar wrapper-->
 
-<!-- Begin MAP-->	
+<!-- Begin MAP--> 
 <div id="map" >
 <img id="loading" src="images/loading.gif" style="position:absolute;top:50%;left:50%;z-index:1111;width:32px;height:32px;" > 
 </div>
@@ -587,7 +654,7 @@ the page in or out -->
 </div>
 
 <footer class="foot">
-<section id="watermarks">    		
+<section id="watermarks">       
 <img id ='toggleThis' class="aerialToggle" src="images/Aerial.png" onclick="toggle(this);" alt="Wisconsin Rapids"></a>
 </section>
 </footer>
@@ -600,10 +667,10 @@ the page in or out -->
 <select name="paper" id="paper" onchange="changePrintGraphic()" >
 <option value="A4 Portrait">8.5 x 11 Portrait</option>
 <option value="A4 Landscape">8.5 x 11 Landscape</option>
-<option  value="A3 Portrait" >11 x 17 Portrait</option>				
+<option  value="A3 Portrait" >11 x 17 Portrait</option>       
 <option  value="A3 Landscape"  >11 x 17 Landscape</option>
 <option  value="MAP_ONLY" >Image (jpeg)</option>
-</select>		
+</select>   
 </div>        
 <div id="progressbar" class="progress progress-striped active"> 
 <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 5%"> 
@@ -616,7 +683,7 @@ the page in or out -->
 </form>
 </div>
 
-<!-- MODAL #1: About -->	
+<!-- MODAL #1: About -->  
 <div class="modal fade" id="about" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
@@ -637,14 +704,14 @@ The data that drives this application was produced by the City of Wisconsin Rapi
 
 </div>
 <div class="modal-footer">
-<!-- 			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+<!--      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 <button type="button" class="btn btn-primary">Save changes</button> -->
 </div>
 </div>
 </div>
 </div>
 
-<!-- MODAL #2: Contact -->	
+<!-- MODAL #2: Contact -->  
 <div class="modal fade" id="contact" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
@@ -682,13 +749,13 @@ The data that drives this application was produced by the City of Wisconsin Rapi
 <div class="form-group">
 <div class="col-lg-offset-2 col-lg-10">
 <button type="submit" class="btn btn-default">
-	Send Message
+  Send Message
 </button>
 </div>
 </div>
 </form>
 
-<!-- 		  <div class="modal-footer">
+<!--      <div class="modal-footer">
 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 <button type="button" class="btn btn-primary">Save changes</button>
 </div> -->
@@ -712,10 +779,10 @@ The data that drives this application was produced by the City of Wisconsin Rapi
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 
-<script src="js/bootstrap.min.js"></script>	
+<script src="js/bootstrap.min.js"></script> 
 <script src="js/jquery-ui-1.10.2.min.js"></script>
 <script type="text/javascript" src="js/jquery.tree.min.js"></script>
-<script type="text/javascript" src="js/jquery.selectBoxIt.min.js"></script>	
+<script type="text/javascript" src="js/jquery.selectBoxIt.min.js"></script> 
 <script type="text/javascript" src="js/evol.colorpicker.js"></script>
 <script src="colorbox/jquery.colorbox.js"></script>
 
