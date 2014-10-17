@@ -114,7 +114,7 @@ function navEvent(task) {
             layerCheckState = $(inputs[i]).find("input:first");
             layerCheckState.prop("checked",false);
             layerCheckState.prev().prev().removeClass("checked");
-            console.log(layerCheckState);
+            //console.log(layerCheckState);
         };
         $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
@@ -183,9 +183,9 @@ function navEvent(task) {
         break;
     case "buffer":
         operationToDo = 'buffer';
-		doBuffer();
-		
-		
+        doBuffer();
+        
+        
         // labelling = false;
         // map.disablePan();
         // iTool.activate(iTool._geometryType='point');
@@ -388,100 +388,6 @@ function createCSVFile() {
     $.post('outputs/csvCreate.php', { q: csvInfo }, function (data) {  });
 }
 
-function SearchParcelByAttribute(search) {
-  require(["dojo/dom", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils","config/commonConfig",], function(dom,Query, QueryTask, Graphic, graphicsUtils, config) {
-    map.graphics.clear();
-    var query = new Query();
-    query.outFields = ['*'];
-    query.returnGeometry = true;
-    $(".searchClass").show();
-    switch (search) {
-    case "Owner":
-        query.where = "OwnerName = " + "'" + dom.byId("owner").value + "'";
-        break;
-    case "Address":
-        query.where = "Adddress = " + "'" + dom.byId("addresses").value.replace(/,/g, "") + "'";
-        break;
-    case "PID":
-        query.where = "Parcels.PARCELNO  = " + "'" + dom.byId("pid").value.replace(/,/g, "") + "'";
-        break;
-    }
-    var queryTask = new QueryTask(config.mapServices.dynamic + "/" + config.parcelLayerID);
-    queryTask.execute(query, function (searchFeature) {
-        createSingleTable(searchFeature.features);
-        var i;
-        var j;
-        var graphic;
-        var unionExtent;
-        var extent;
-        var extentParcel;
-        if (search == "Owner" && searchFeature.features.length > 1) { //multiple properties
-            selectedFeatures = searchFeature;
-            var content = "<tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>";
-            for (i = 0, il = searchFeature.features.length; i < il; i++) {
-                attValues = [];
-                graphic = new Graphic(searchFeature.features[i].geometry, symbols.polygon);
-                map.graphics.add(graphic);
-
-                content += "<tr><td >" + searchFeature.features[i].attributes.ParcelID + "</td><td>" + searchFeature.features[i].attributes["OwnerName"] + "</td><td>" + searchFeature.features[i].attributes["BLDG_NUM"] + " " + searchFeature.features[i].attributes["STREETNAME"] + " " + searchFeature.features[i].attributes["ZIP"] + " </td></tr>";
-                mailParcels.push(searchFeature.features[i].attributes.ParcelID); //This may need to be reviewed
-                selectedFeatures.features.push(searchFeature.features[i]);
-
-                for (j = 0; j < attrAll.length; j++) {
-                    attValues.push(searchFeature.features[i].attributes[attrAll[j]]);
-                }
-                if (searchFeature.features.length == 1) {
-                    unionExtent = graphicsUtils.graphicsExtent(allGraphics);
-                    map.setExtent(unionExtent.expand(1.5));
-                } else {
-                    unionExtent = null;
-                    unionExtent = graphicsUtils.graphicsExtent(searchFeature.features);
-                    map.setExtent(unionExtent.expand(1.5));
-                }
-                csvInfo.push(attValues.join(","));
-            }
-            //$(".results.multiple.section-sub-header").html(
-            $("#multiptleItem").html(content);
-            $('.results.multiple').show();
-            //map.setExtent(extentParcel, true);
-
-        } else { //one property
-            showSearchByAttributeResults(searchFeature.features[0]);
-            //console.log(searchFeature.features[0]);
-            $('.results.multiple').hide();
-            $('.results.multipleBuffer').hide();
-            extent = graphicsUtils.graphicsExtent([searchFeature.features[0]]);
-            extentParcel = extent.expand(3);
-            map.setExtent(extentParcel, true);
-            showFeature(searchFeature.features[0]);
-            geometryBuffer.push(searchFeature.features[0].geometry);
-        }
-    });
-  });
-}
-
-function showSearchByAttributeResults(layerSearchResults) {
-    $(".identify .section-sub-header").html("Property Information");
-    $("#singleItem2,.section-sub-header2").show();
-    $('.results.identify').show();
-    geometryBuffer = [layerSearchResults.geometry];
-    var content1 = "";
-    var content2 = "";
-    content1 += "<tr><th> PIN" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.PARCELNO'] + "</td></tr>";
-    content1 += "<tr><th> Property Address" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.Adddress'] + "</td></tr>"; //note misspell
-    content1 += "<tr><th> Owner Name" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.OwnerName'] + "</td></tr>";
-    content1 += "<tr><th> Owner Address" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.MAILADDLN1'] + "</br>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.CITYSTZIP'] + "</td></tr>";
-    content1 += "<tr><th> Area (Acres)" + ":</th><td>" + (layerSearchResults.attributes['Shape.STArea()'] / 43560).toFixed(2) + "</td></tr>";
-    content2 += "<tr><th> School District" + ":</th><td>" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.SCHOOLDIST'] + "</td></tr>";
-    content2 += "<tr><th > Tax Link" + ":</th><td><a style='color:#ff6600' target='_blank' href='" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.TaxLink'] + "'</a>" + "Link" + "</td></tr>";
-    content2 += "<tr><th > Assessor's Link" + ":</th><td><a style='color:#ff6600' target='_blank' href='" + layerSearchResults.attributes['gisWiRapids.LGIM.Parcels.AssesorLink'] + "'</a>" + "Link" + "</td></tr>";
-    $("#singleItem1").html(content1);
-    $("#singleItem2").html(content2);
-    $('.results.multiple').hide();
-    $('.results.identify').show();
-    $("#multipleSelectSelectBoxItContainer").hide();
-    createSingleTable([layerSearchResults]);
-}
 
 function zoomToTableSelection(element) {
   require(["esri/graphicsUtils"], function(graphicsUtils) { 
