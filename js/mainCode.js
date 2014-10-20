@@ -181,15 +181,7 @@ function navEvent(task) {
         map.disablePan();
         iTool.activate(iTool._geometryType='point');
         break;
-    case "buffer":
-        operationToDo = 'buffer';
-        doBuffer();
-        
-        
-        // labelling = false;
-        // map.disablePan();
-        // iTool.activate(iTool._geometryType='point');
-        break;
+
     }
 }
 
@@ -263,111 +255,6 @@ function showLocation(location) {
    });  
 }
 
-function doBuffer() { 
-           params.distances = [dojo.byId("distance").value];
-           params.unit = gsvc[dojo.byId("unitBuff").value];           
-           params.outSpatialReference = map.spatialReference;
-           //params.geodesic = true;
-           params.unionResults = true;   
-           params.geometries = geometryBuffer;
-           gsvc.buffer(params, showBuffer);
-           geometryDraw = [];
-}
-
-function showBuffer(features) {
-  require(["esri/graphic","esri/tasks/QueryTask","esri/tasks/query","esri/graphicsUtils", "dojo/_base/array","config/commonConfig"], function(Graphic,QueryTask,Query, graphicsUtils, array,config) {
-    $('.results.multipleBuffer').hide();
-    var bufferSymbol = symbols.buffer;
-    map.graphics.clear();
-    if (features.length > 0) {
-        var graphic = new Graphic(features[0], bufferSymbol);
-        map.graphics.add(graphic);
-        queryTask = new QueryTask(config.mapServices.dynamic + "/" + config.parcelLayerID);
-        var bufferQuery = new Query();
-        bufferQuery.outFields = ["*"]; //mailLabelFields;
-        bufferQuery.returnGeometry = true;
-        bufferQuery.geometry = features[0];
-        queryTask.execute(bufferQuery, function (fset) {
-            var bufferFeatures = fset.features;
-            createTable(bufferFeatures);
-            navEvent('point');
-            if (fset.features.length > 0) {
-                var allGraphics = array.map(fset.features, function (feature) {
-                        return feature;
-                    });
-                unionExtent = graphicsUtils.graphicsExtent(allGraphics);
-                map.setExtent(unionExtent.expand(1.5));
-            }
-        });
-    }
-  });
-}
-
-function measureUpdate(measureGeometry) {
-    var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": " Miles", "UNIT_ACRES": " Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
-
-    if (measureGeometry != null) {
-
-        map.graphics.remove(labelPointGraphic);
-        if (measureGeometry[0].type == 'polygon') {
-            //setup the parameters for the areas and lengths operation
-            var areasAndLengthParams = new esri.tasks.AreasAndLengthsParameters();
-            areasAndLengthParams.lengthUnit = esri.tasks.GeometryService.UNIT_FOOT;
-            areasAndLengthParams.areaUnit = eval("esri.tasks.GeometryService." + dojo.byId("measureUnit").value);
-            areasAndLengthParams.calculationType = 'preserveShape';
-            //console.log("areasAndLengthParams.areaUnit: ", areasAndLengthParams.areaUnit);
-
-
-            gsvc.simplify(measureGeometry, function (simplifiedGeometries) {
-                areasAndLengthParams.polygons = simplifiedGeometries;
-                measureGeometry = simplifiedGeometries;
-                gsvc.labelPoints(simplifiedGeometries, function (labelPoints) {
-                    gsvc.areasAndLengths(areasAndLengthParams, function (result) {
-                        var font = new esri.symbol.Font("13", esri.symbol.Font.STYLE_NORMAL, esri.symbol.Font.VARIANT_NORMAL, esri.symbol.Font.WEIGHT_NORMAL, "Arial");
-                        symbols.textSymbol = new esri.symbol.TextSymbol(((result.areas[0].toFixed(2))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +" "+ labelUnit[dojo.byId("measureUnit").value]).setColor(new dojo.Color([0, 0, 0])).setAlign(esri.symbol.Font.ALIGN_START).setFont(font);
-                        labelPointGraphic = new esri.Graphic(labelPoints[0], symbols.textSymbol);
-
-                        map.graphics.add(labelPointGraphic);
-                    });
-                });
-            });
-        }
-        if (measureGeometry[0].type == 'polyline') {
-            console.log(measureGeometry[0].type);
-
-            var lengthParams = new esri.tasks.LengthsParameters();
-            lengthParams.calculationType = 'preserveShape';
-            lengthParams.lengthUnit = eval("esri.tasks.GeometryService." + dojo.byId("measureUnit").value);
-
-            gsvc.simplify(measureGeometry, function (simplifiedGeometries) {
-                lengthParams.polylines = simplifiedGeometries;
-                var params = new esri.tasks.BufferParameters();
-                params.calculationType = 'preserveShape';
-                params.distances = [100];
-                params.bufferSpatialReference = new esri.SpatialReference({ wkid: 102100 });
-                params.outSpatialReference = map.spatialReference;
-
-                params.unit = eval("esri.tasks.GeometryService.UNIT_FOOT");
-                //console.log(lengthParams.lengthUnit); //params.unit returns "9020" // unit is correct for bufferparam.. 9002 == esrifeet
-                params.unionResults = true;
-                params.geometries = simplifiedGeometries;
-                //console.log(lengthParams);
-                gsvc.buffer(params, function (geometries) {
-                    gsvc.labelPoints(geometries, function (labelPoints) {
-                            //new
-                            gsvc.lengths(lengthParams, function (result) {
-                            var font = new esri.symbol.Font("13", esri.symbol.Font.STYLE_NORMAL, esri.symbol.Font.VARIANT_NORMAL, esri.symbol.Font.WEIGHT_NORMAL, "Arial");
-                            symbols.textSymbol = new esri.symbol.TextSymbol((result.lengths[0].toFixed(2)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + labelUnit[dojo.byId("measureUnit").value]).setColor(new dojo.Color([0, 0, 0])).setAlign(esri.symbol.Font.ALIGN_START).setFont(font);
-                            labelPointGraphic = new esri.Graphic(labelPoints[0], symbols.textSymbol);
-                            map.graphics.add(labelPointGraphic);
-                            });
-                    });
-                });
-            });
-        }
-    }
-}
-
 function toggle(el) {
     if (el.className != "vectorToggle") {
         el.src = 'images/Vector.png';
@@ -403,70 +290,78 @@ function zoomToTableSelection(element) {
   });
 }
 
-function createGraphicsMenu() {
-var ctxMenuForGraphics, ctxMenuForMap;
-require(["dojo/on", "dijit/Menu", "dijit/MenuItem"], function(on, Menu, MenuItem){
-    // Creates right-click context menu for GRAPHICS
-    ctxMenuForGraphics = new Menu({});
-    ctxMenuForGraphics.addChild(new MenuItem({
-        label: "Delete",
-        onClick: function () {
-        //console.log(selected.geometry)
-            if (selected.geometry == measureGeometry) {
-                measureGeometry == null;
-            }
-            graphicLayer.remove(selected);
-        }
-    }));
+// function createGraphicsMenu() {
 
-    ctxMenuForGraphics.startup();
-    on(graphicLayer,"mouse-over", function (evt) {
-        // We'll use this "selected" graphic to enable editing tools
-        // on this graphic when the user click on one of the tools
-        // listed in the menu.
-        selected = evt.graphic;
-        // Let's bind to the graphic underneath the mouse cursor
-        ctxMenuForGraphics.bindDomNode(evt.graphic.getDojoShape().getNode());
-    });
+// var ctxMenuForGraphics, ctxMenuForMap;
+// require(["dojo/on", "dijit/Menu", "dijit/MenuItem"], function(on, Menu, MenuItem){
+    // // Creates right-click context menu for GRAPHICS
+	
+    // ctxMenuForGraphics = new Menu({});
+    // ctxMenuForGraphics.addChild(new MenuItem({
+        // label: "Delete",
+        // onClick: function () {
+		
+        // //console.log(selected.geometry)
+            // if (selected.geometry == measureGeometry) {
+                // measureGeometry == null;
+            // }
+            // graphicLayer.remove(selected);			
+        // }
+    // }));
+    
+    // ctxMenuForGraphics.startup();
+	
+    // on(graphicLayer,"mouse-over", function (evt) {
+        // // We'll use this "selected" graphic to enable editing tools
+        // // on this graphic when the user click on one of the tools
+        // // listed in the menu.
+        // selected = evt.graphic;
+        // // Let's bind to the graphic underneath the mouse cursor
+        // ctxMenuForGraphics.bindDomNode(evt.graphic.getDojoShape().getNode());
+    // });
 
-    on(graphicLayer, "mouse-out", function (evt) {
-        ctxMenuForGraphics.unBindDomNode(evt.graphic.getDojoShape().getNode());
-    });
-  });
-}
+    // on(graphicLayer, "mouse-out", function (evt) {
+        // ctxMenuForGraphics.unBindDomNode(evt.graphic.getDojoShape().getNode());
+    // });
+  // });
+// }
 
-function createMapMenu() {
-    // Creates right-click context menu for map
-    require(["dijit/Menu", "dijit/MenuItem"], function(Menu, MenuItem){
-    ctxMenuForMap = new Menu({
-        onOpen: function (box) {
-            // Lets calculate the map coordinates where user right clicked.
-            // We'll use this to create the graphic when the user clicks
-            // on the menu item to "Add Point"
-            currentLocation = getMapPointFromMenuPosition(box);
-            editToolbar.deactivate();
-        }
-    });
-    });
-}
+// function createMapMenu() {
+    // // Creates right-click context menu for map
+	
+    // require(["dijit/Menu", "dijit/MenuItem"], function(Menu, MenuItem){
+	
+    // ctxMenuForMap = new Menu({
+	
+        // onOpen: function (box) {
+            // // Lets calculate the map coordinates where user right clicked.
+            // // We'll use this to create the graphic when the user clicks
+            // // on the menu item to "Add Point"
+            // currentLocation = getMapPointFromMenuPosition(box);
+            // editToolbar.deactivate();
+        // }
+    // });
+	
+    // });
+// }
 
-function getMapPointFromMenuPosition(box) {
-  require(["esri/geometry/Point"], function(Point) {
-    var x = box.x, y = box.y;
-    switch (box.corner) {
-    case "TR":
-        x += box.w;
-        break;
-    case "BL":
-        y += box.h;
-        break;
-    case "BR":
-        x += box.w;
-        y += box.h;
-        break;
-    }
+// function getMapPointFromMenuPosition(box) {
+  // require(["esri/geometry/Point"], function(Point) {
+    // var x = box.x, y = box.y;
+    // switch (box.corner) {
+    // case "TR":
+        // x += box.w;
+        // break;
+    // case "BL":
+        // y += box.h;
+        // break;
+    // case "BR":
+        // x += box.w;
+        // y += box.h;
+        // break;
+    // }
 
-    var screenPoint = new Point(x - map.position.x, y - map.position.y);
-    return map.toMap(screenPoint);
-});
-}
+    // var screenPoint = new Point(x - map.position.x, y - map.position.y);
+    // return map.toMap(screenPoint);
+// });
+// }
