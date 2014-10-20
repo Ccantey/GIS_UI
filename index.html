@@ -58,7 +58,8 @@ the page in or out -->
 <script>  
   var initExtent, identifyTask, identifyParams, gsvc;
   var identifyTaskParcel, identifyParamsParcel, params;
-  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent;
+  var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent, printOptions;
+  var app, measure;
   var iPoint;
   var A_Drawings;
   var overlayLayer;
@@ -79,9 +80,13 @@ the page in or out -->
   var printAreaGraphic = null;
   var globalMapLayers = {};
 
-  require(["esri/urlUtils", "dojo/dom", "dojo/on", "dojo/query", "dojo/_base/connect", "esri/Color", "esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/checktree", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/toolbars/navigation", "esri/tasks/query", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Geometry", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
-           function(urlUtils, dom, on, query, connect, Color, domUtils, Map, config, identification, checktree, esriRequest, PrintTask, Legend, Draw, Edit, Navigation, Query, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Geometry, Extent, SpatialReference){
-
+  require(["esri/urlUtils", "dojo/dom", "dojo/on", "esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/print", "app/checktree", "app/handlers","app/measurements","esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
+           function(urlUtils, dom, on, domUtils, Map, config, identification, print, checktree, handlers, Measurement,esriRequest, PrintTask, Legend, Draw, Edit, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Extent, SpatialReference){
+		   
+            /*urlUtils.addProxyRule({
+                urlPrefix: "http://gis.wirapids.org",
+                proxyUrl: "http://gis.wirapids.org/proxy/proxy.php"
+            }); */           
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
@@ -96,11 +101,13 @@ the page in or out -->
 
             // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
             on(map, "load", function(){
-                editToolbar = new Edit(map);
-                on(map, "Click", function (evt) {
+/*                editToolbar = new Edit(map);
+                on(map, "click", function (evt) {
                   editToolbar.deactivate();
                 });
-
+                createMapMenu();
+	            createGraphicsMenu();*/
+			  
                 legendLayers.push({ layer: utilityMap, title: "Legend" });
                 legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[0,1,2,3,27, 28, 29, 31]});
                 legend = new Legend({
@@ -143,11 +150,16 @@ the page in or out -->
             overlayLayer.setImageFormat("png32");
             overlayLayer.setVisibleLayers([1,27,28,29]);
             map.addLayer(overlayLayer);
-
+			
+            utilityMap = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, { id: "Utility" });
+            utilityMap.setImageFormat("png32");
+            utilityMap.setVisibleLayers([-1]);
+            map.addLayer(utilityMap);		
+			
             //Keep map in viewer
             maxExtent = map.extent;
             on(map, "extent-change", function (initExtent){
-                changePrintGraphic(); //move print box if its on.
+                printOptions._changePrintGraphic(); //move print box if its on.
                 var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
                 var flag = false; 
                 //set a buffer to make the max extent a slightly bigger to void minor differences
@@ -206,7 +218,7 @@ the page in or out -->
             on(map, "update-start", function(){
                 domUtils.show(loading);
             });
-            
+           
             on(map, "update-end", function(){
                 domUtils.hide(loading);
                 map.disableDoubleClickZoom();
@@ -228,10 +240,7 @@ the page in or out -->
             graphicLayerLabels = new GraphicsLayer();
             map.addLayer(graphicLayerLabels);
 
-            utilityMap = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, { id: "Utility" });
-            utilityMap.setImageFormat("png32");
-            utilityMap.setVisibleLayers([-1]);
-            map.addLayer(utilityMap);
+
 
             //buffer params
             params = new BufferParameters();
@@ -241,8 +250,8 @@ the page in or out -->
             iTool = new Draw(map, { showTooltips: false });
             //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
             iTool.activate(iTool._geometryType='point');
-            var app = new identification();
-      
+            app = new identification();
+            measure = new Measurement();
             iTool.on("draw-end", function (evt) {
               switch (operationToDo){
               case "identify":
@@ -252,7 +261,7 @@ the page in or out -->
                   app._drawGraphic(evt.geometry);
                   break;
               case "measure":
-                  app._getAreaAndLength(evt.geometry);
+                  measure._getAreaAndLength(evt.geometry);
                   break;
               case "drawing":
                   app._addDrawingToMap(evt.geometry)
@@ -260,7 +269,7 @@ the page in or out -->
                }
             });
 
-            var searchButton = $('#searchTab .btn');
+            var searchButton = $('#searchTab button');
             on(searchButton, 'click', function(){
               $('.results.identify').hide();
               if (this.id == 'ownerGo') {
@@ -419,7 +428,7 @@ the page in or out -->
 
 <section class="results identify" style="display:none">
 <div id="append" class="section-header">Results</div>
-<select name="type" id="multipleSelect" class="selectmenu" onchange="updateIdentify(this.value)">       
+<select name="type" id="multipleSelect" class="selectmenu" onchange="app._updateIdentify(this.value);">       
 </select>
 
 <div class="section-sub-header">Property Information</div>
@@ -660,7 +669,7 @@ the page in or out -->
 <form method="post">
 <div class="row"><input type="text" placeholder="Title" value="Title" onclick="this.value = '';" id="title"></div>
 <div class="row">
-<select name="paper" id="paper" onchange="changePrintGraphic()" >
+<select name="paper" id="paper" onchange='printOptions._changePrintGraphic()'>
 <option value="A4 Portrait">8.5 x 11 Portrait</option>
 <option value="A4 Landscape">8.5 x 11 Landscape</option>
 <option  value="A3 Portrait" >11 x 17 Portrait</option>       
@@ -784,11 +793,11 @@ The data that drives this application was produced by the City of Wisconsin Rapi
 
 <!-- Custom JavaScript-->
 <!-- <script src="js/config.js"></script> -->
-<script src="js/app.js"></script>
+<!-- <script src="js/app.js"></script> -->
 <script src="js/mainCode.js"></script>
 <!-- <script src="js/mainCode-Measure.js"></script> -->
-<script src="js/mainCode-Print.js"></script>
-<script src="js/helper.js"></script>
+<!-- <script src="js/mainCode-Print.js"></script> -->
+<!-- <script src="js/helper.js"></script> -->
 
 </body>
 </html>
