@@ -8,7 +8,8 @@ Built with Dojo's AMD loader and Bootstrap to provide RWD.
 Demo 
 ----
 
-[CityViewer](http://gis.wirapids.org/CityViewer-AMD/#)
+[CityViewer](http://gis.wirapids.org/CityViewer-AMD/)
+
 [PDF Instructions](http://gis.wirapids.org/CityViewer-AMD/images/CityViewerManual.pdf) 
 
 Features
