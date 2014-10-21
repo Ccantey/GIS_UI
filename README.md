@@ -11,13 +11,21 @@ http://gis.wirapids.org/CityViewer-AMD/#
 
 Features
 --------
++ Map
+    + Basemap
+    + Aerial
 + Navigation
-- Pan
-- Zoom
-- Search
-- GPS
+  + Pan
+  + Zoom
+  + Zoom to Parcel
+  + GPS
 + Identify
+  + Parcel
+  + Utilities
 + Search
+  + Owner
+  + Address
+  + Parcel No.
 + Measure
 + Buffer
 + Create Mail Labels
