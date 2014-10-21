@@ -12,10 +12,10 @@ http://gis.wirapids.org/CityViewer-AMD/#
 Features
 --------
 + Navigation
-+ *Pan
-+ *Zoom
-+ *Search
-+ *GPS
+- Pan
+- Zoom
+- Search
+- GPS
 + Identify
 + Search
 + Measure
