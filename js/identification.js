@@ -1,14 +1,7 @@
-define(["dojo/Evented","dojo/_base/declare", "dojo/_base/lang", "esri/arcgis/utils", "dojo/dom", "dojo/dom-class", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils", "config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "app/symbols", "dojo/_base/array"], 
-function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryTask, Graphic, graphicsUtils, config, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon, IdentifyTask, IdentifyParameters, symbols,array) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils", "config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/SpatialReference", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "esri/geometry/Extent", "app/symbols", "dojo/_base/array"], 
+function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, config, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, SpatialReference, Polygon, IdentifyTask, IdentifyParameters, Extent, symbols,array) {
     return declare(null, {
-        
-        // Sample function, welcome to AMD!
-        _helloWorld: function (evt) {
-            console.log("Hello World!");
-            console.log("My Map:", this.map);
-            console.log("My event:", this.evt);
-        },
-        
+	
         //doIdentify
         //Public Class
         _identify: function (evt) {
@@ -286,7 +279,8 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             } else {
                 query.returnGeometry = true;
                 if (graphicDraw.geometry.type == "point") {
-                    query.geometry = pointTolerance(map, graphicDraw.geometry, 10);
+                    query.geometry = this._pointTolerance(map, graphicDraw.geometry, 10);
+					console.log(query);
                 } else {
                     query.geometry = graphicDraw.geometry;
                 }
@@ -323,6 +317,18 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                 }));
             }       
         },
+		
+		//pointTolerance
+		//private class
+		_pointTolerance: function (map, point, toleranceInPixel){
+		   console.log(map, point, toleranceInPixel);
+		   //alert('you did it');
+		    var pixelWidth = map.extent.getWidth() / map.width;
+            var toleraceInMapCoords = toleranceInPixel * pixelWidth;			
+            extent = new Extent(point.x - toleraceInMapCoords, point.y - toleraceInMapCoords, point.x + toleraceInMapCoords, point.y + toleraceInMapCoords, map.spatialReference);
+			console.log(extent);
+			return extent;
+		},
         
         //createTable
         //Private Class for a few
