@@ -9,7 +9,6 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
     eval($(this).html());
   });
   
-  
    //initialize plug-ins
   $('select').selectBoxIt();
 
@@ -48,6 +47,22 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
         $("#sidebar-wrapper").toggleClass("active");
         $('#map-zoom-slider,.esriSimpleSlider,.foot').animate({ 'left': '360px' }, 500, 'easeInQuad');	
 	});
+	
+	on(dom.byId('toggleThis'), 'click', (this, function(){
+	    if (this.className == "aerialToggle") {
+            this.src = 'images/Vector.png';
+            this.className = 'vectorToggle';
+            aerialLayer.show();
+            basemap.hide();
+        // overlayLayer.setVisibleLayers([1,27,28,29]);
+        } else {
+            this.src = 'images/Aerial.png';
+            this.className = 'aerialToggle';
+            aerialLayer.hide();
+            basemap.show();
+            // overlayLayer.setVisibleLayers([1,28,29]);
+        }
+	}));
 
 
   $('.radioset').buttonset();
