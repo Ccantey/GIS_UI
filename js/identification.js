@@ -1,10 +1,10 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils", "config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/SpatialReference", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "esri/geometry/Extent", "app/symbols", "dojo/_base/array"], 
-function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, config, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, SpatialReference, Polygon, IdentifyTask, IdentifyParameters, Extent, symbols,array) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils", "config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/SpatialReference", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "esri/geometry/Extent", "app/symbols", "app/measurements","dojo/_base/array"], 
+function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, config, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, SpatialReference, Polygon, IdentifyTask, IdentifyParameters, Extent, symbols, myMeasurements, array) {
     return declare(null, {
 	
         //doIdentify
         //Public Class
-        _identify: function (evt) {
+        identify: function (evt) {
             identifyTask = new IdentifyTask(config.mapServices.dynamic);
 
             identifyParams = new IdentifyParameters();
@@ -17,7 +17,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             identifyParams.mapExtent = map.extent;
             identifyParams.layerIds = utilityMap.visibleLayers.concat(config.identifyLayerAdditional);  //UTILITYMAP
 
-            console.log(identifyParams.layerIds);           
+            //console.log(identifyParams.layerIds);           
             identifyTask.execute(identifyParams).then(lang.hitch(this, function (idResults) { 
                 //console.log(this.idResults); //if utility selected returns object otherwise undefined
                 this._utility(idResults, evt); 
@@ -219,6 +219,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
         //createSingleTable
         //private Class
         _createSingleTable: function(queryFeatures){
+            //console.log('single', queryFeatures[0].attributes);
             selectedFeatures = { features: [] };
             $('.results.multipleBuffer').hide();
             csvInfo = [];
@@ -236,30 +237,31 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                     attValues.push(queryFeatures[i].attributes[attrAll[j]]);
                 }
                 csvInfo.push(attValues.join(","));
+                //console.log(csvInfo);
                 mailParcels.push(queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO']); //this is where single mail label broke down, changed from [0] to PID_NO
                 selectedFeatures.features.push(queryFeatures[i]);
             }
-            createCSVFile();
+            this._createCSVFile();
         },
         
         //drawGraphic
         //Public Class
-        _drawGraphic: function(drawn){
+        drawGraphic: function(drawn){
             //map.enablePan();
             var layerToBuffer = dom.byId("BufferLayer").value;
             if (layerToBuffer == config.parcelLayerID) {
                 var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
-                console.log(queryTask);
+                //console.log(queryTask);
                 var query = new Query();
                 query.outFields = ["*"];
             } else {
                 var queryTask = new QueryTask(config.mapServices.dynamic + "/" + layerToBuffer);
-                console.log(queryTask);
+                //console.log(queryTask);
                 var query = new Query();
                 query.outFields = ["*"];
             }
             //if 'select by drawing'
-            console.log(drawn.type);
+            //console.log(drawn.type);
             switch (drawn.type) { 
             case "point":
                 symbolDraw = symbols.point;
@@ -280,7 +282,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                 query.returnGeometry = true;
                 if (graphicDraw.geometry.type == "point") {
                     query.geometry = this._pointTolerance(map, graphicDraw.geometry, 10);
-					console.log(query);
+					//console.log(query);
                 } else {
                     query.geometry = graphicDraw.geometry;
                 }
@@ -311,6 +313,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                             geometryBuffer.push(currentSelection[i].geometry);
                         }
                         if (layerToBuffer == config.parcelLayerID && currentSelection.length != 0) {
+                            console.log(selectedFeatures.features)
                             this._createTable(selectedFeatures.features);
                         }
                     }
@@ -321,7 +324,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
 		//pointTolerance
 		//private class
 		_pointTolerance: function (map, point, toleranceInPixel){
-		   console.log(map, point, toleranceInPixel);
+		   //console.log(map, point, toleranceInPixel);
 		   //alert('you did it');
 		    var pixelWidth = map.extent.getWidth() / map.width;
             var toleraceInMapCoords = toleranceInPixel * pixelWidth;			
@@ -333,6 +336,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
         //createTable
         //Private Class for a few
         _createTable: function(queryFeatures){
+            //console.log('many', queryFeatures[0].attributes);
             selectedFeatures = { features: [] };
             csvInfo = [];
             //fill/stroke of selected
@@ -342,7 +346,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             for (k in queryFeatures[0].attributes) {
             //var a = k.replace('gisWiRapids.LGIM.Parcels','');
             attrAll.push(k);
-            //console.log(attrAll);
+            //console.log(k);
             }
             csvInfo.push(attrAll.join(","));
             //console.log(csvInfo);
@@ -357,6 +361,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                     attValues.push(queryFeatures[i].attributes[attrAll[j]]);
                 }
                 csvInfo.push(attValues.join(","));
+                //console.log(csvInfo);
                 graphic = new Graphic(queryFeatures[i].geometry, symbols.polygon);
                 map.graphics.add(graphic);
                 content += "<tr><td >" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.PARCELNO'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.OwnerName'] + "</td><td>" + queryFeatures[i].attributes['gisWiRapids.LGIM.Parcels.Adddress'] + "</td></tr>";
@@ -366,20 +371,21 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             $("#multiptleBufferItem").html(content);
             $('.results.multipleBuffer').show();
             $('.results.identify').hide();
-            createCSVFile();
+            this._createCSVFile();
         },
         
    
         
         //addToMapDrawing
         //PublicClass
-        _addDrawingToMap: function(geometry){
+        addDrawingToMap: function(geometry){
         
             symbolStyle = $("#symbolOptions").val();
             switch (geometry.type) {
                 case "point":
                     if (labelling == true) {
-                        this._labelGeom(geometry)
+                        var drawText = new myMeasurements();
+                        drawText._labelGeom(geometry)
                     } else {
                         var style = eval("SimpleMarkerSymbol." + symbolStyle);
                         var size = parseInt($("#size").val() * 5);
@@ -435,7 +441,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
          
         //searchParcelByAttribute(search)
         //Public class
-        _searchParcelByAttribute: function(search){     
+        searchParcelByAttribute: function(search){     
             map.graphics.clear();
             var query = new Query();
             query.outFields = ['*'];
@@ -532,7 +538,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
 		
 		//updateIdentify
 		//Public class
-		_updateIdentify: function(){
+		updateIdentify: function(){
             selectedFeatures = { features: [] }; //remove previously selected parcels in results table
             multipleIdentifyLayerName = [];
             map.graphics.clear();
@@ -542,7 +548,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
 
 		//doBuffer
 		//Public class
-		_doBuffer: function(){
+		doBuffer: function(){
 		    params.distances = [dom.byId("distance").value];
             params.unit = gsvc[dom.byId("unitBuff").value];           
             params.outSpatialReference = map.spatialReference;
@@ -571,7 +577,9 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                 bufferQuery.geometry = features[0];
                 queryTask.execute(bufferQuery).then(lang.hitch( this, function (fset) {
                     var bufferFeatures = fset.features;
+                    console.log(bufferFeatures);
                     this._createTable(bufferFeatures);
+                    //console.log(bufferFeatures);
                     navEvent('point');
                     if (fset.features.length > 0) {
                         var allGraphics = array.map(fset.features, function (feature) {
@@ -582,7 +590,14 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                     }
                 }));
             }
-		}
+		},
+
+        //create CSV file
+        //Private Class
+
+        _createCSVFile: function() {
+            $.post('outputs/csvCreate.php', { q: csvInfo }, function (data) {   });
+        }
         
         
         
