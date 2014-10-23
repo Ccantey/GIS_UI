@@ -129,7 +129,7 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
     });
     
     $('select#measureUnit').change(function () {
-        measure._measureUpdate(measureGeometry);
+        measure.measureUpdate(measureGeometry);
     });
 
     $('#toolsTab #measureLength').click(function () {
@@ -155,7 +155,7 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
 
     $('#toolsTab #Buffer').click(function () {
         navEvent('buffer');
-        app._doBuffer();
+        app.doBuffer();
         $('#search-tab a').removeClass('notice');
     });
 
@@ -209,6 +209,12 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
          .append( "<a>" + t + "</a>" )
          .appendTo( ul );
     };  
+
+/*    $('.ui-helper-hidden-accessible').keydown(function(){
+         $('.ui.autocomplete').css('background-color','#777');
+         $('.ui.autocomplete').css('color','#000');
+
+    })*/
     
     // Print and Feature Forms
     $('#print').click(function() {
@@ -234,7 +240,7 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
 	var printButton = $('#btn-print');
 	var printPreview = $('#btn-printArea');
 	on(printButton, 'click', function(){
-		printOptions._printingLayoutMain();
+		printOptions.printingLayoutMain();
 		$(".progress-bar").animate({
 			width: "80%"
 		}, 2500);
@@ -242,7 +248,7 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
 	});
 	
 	on(printPreview, 'click', function(){
-		printOptions._viewPrintArea();
+		printOptions.viewPrintArea();
 		return false;
 	});
 	
