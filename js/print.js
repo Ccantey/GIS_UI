@@ -4,34 +4,34 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
         
         //viewPrintArea
 		//Public class
-        _viewPrintArea: function () {
+        viewPrintArea: function () {
             reversePreviewExtent = map.extent;
             var screenPoint = map.toScreen(map.extent.getCenter());
 
             switch($("#paper").val()){
                 case "A4 Portrait":
-                    var xmin =  screenPoint.x - 360;
+                    var xmin =  screenPoint.x - 385;
                     var ymin =  screenPoint.y + 421;
-                    var xmax =  screenPoint.x + 360;
+                    var xmax =  screenPoint.x + 385;
                     var ymax =  screenPoint.y - 421;
                 break;
                 case "A4 Landscape":
-                    var xmin =  screenPoint.x - 480;
-                    var ymin =  screenPoint.y + 300;
-                    var xmax =  screenPoint.x + 480;
-                    var ymax =  screenPoint.y - 300;
+                    var xmin =  screenPoint.x - 505;
+                    var ymin =  screenPoint.y + 325;
+                    var xmax =  screenPoint.x + 505;
+                    var ymax =  screenPoint.y - 325;
                 break;
                 case "A3 Portrait":
-                    var xmin =  screenPoint.x - 480;
-                    var ymin =  screenPoint.y + 612;
-                    var xmax =  screenPoint.x + 480;
-                    var ymax =  screenPoint.y - 612;
+                    var xmin =  screenPoint.x - 546;
+                    var ymin =  screenPoint.y + 665;
+                    var xmax =  screenPoint.x + 546;
+                    var ymax =  screenPoint.y - 665;
                 break;
                 case "A3 Landscape":
                     var xmin =  screenPoint.x - 768;
-                    var ymin =  screenPoint.y + 400;
+                    var ymin =  screenPoint.y + 410;
                     var xmax =  screenPoint.x + 768;
-                    var ymax =  screenPoint.y - 400;
+                    var ymax =  screenPoint.y - 410;
                 break;  
             }  
             var pointGraphic1 = map.toMap(new ScreenPoint(xmin,ymin));
@@ -51,11 +51,11 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
         
         //changePrintGraphic
         //Public Class
-		_changePrintGraphic: function(){
+		changePrintGraphic: function(){
 		    if(printAreaGraphic){
                 printAreaGraphic.hide();
                 printAreaGraphic = null;
-                this._viewPrintArea();       
+                this.viewPrintArea();       
             } else {    
                 printAreaGraphic = null;
             }
@@ -63,7 +63,7 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
 		
 		//printingLayoutMain
 		//Public class
-		_printingLayoutMain: function(){
+		printingLayoutMain: function(){
 		    // overlayLayer.url = mapServiceURL;
             // utilityMap.url = mapServiceURL;
             //$("#printOptions").height("130px");
@@ -77,9 +77,9 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
             });
             console.log(ids1);
             // add layers to legend (water/storm/sanitary
-            ids1.push(5); //water
-            ids1.push(12); //Sewer
-            ids1.push(18); //Storm 
+            //ids1.push(5); //water
+            ids1.push(15); //Sewer
+            ids1.push(4); //Storm 
 
             legendLayer1.subLayerIds = ids1;
 
@@ -90,12 +90,23 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
             });
             //ids2.push(34); //zoning
             console.log(ids2);
-            var index= ids2.indexOf(1)
-            ids2.splice(index,1)
-            index= ids2.indexOf(28)
-            ids2.splice(index,1)
-            index= ids2.indexOf(29)
-            ids2.splice(index,1)
+            var index= ids2.indexOf(1);
+            ids2.splice(index,1); //hide streets from legend
+       
+            // index= ids2.indexOf(2);
+            // ids2.splice(index,1);
+
+            // index= ids2.indexOf(3);
+            // ids2.splice(index,1);
+
+            index= ids2.indexOf(27);
+            ids2.splice(index,1); //hide parcel from legend, 1 indicates number of items to remove
+
+            index= ids2.indexOf(28);
+            ids2.splice(index,1); //hide municipal boundary from legend
+
+            index= ids2.indexOf(29);
+            ids2.splice(index,1); //hid hwyshields from legend
             console.log(ids2);
 
             legendLayer2.subLayerIds = ids2;
@@ -148,8 +159,7 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
                 window.open(result.url);
                 //document.execCommand('SaveAs','true',result.url);
                 $("#progressbar").hide();
-                domUtils.hide('loadingPrint');
-                $(".progress-bar").css('width','5%')
+                $(".progress-bar").css('width','5%');
             });
 		}
  
