@@ -150,7 +150,7 @@
 
 					<section class="results identify" style="display:none">
 						<div id="append" class="section-header">Results</div>
-							<select name="type" id="multipleSelect" class="selectmenu" onchange="app._updateIdentify(this.value);">       
+							<select name="type" id="multipleSelect" class="selectmenu" onchange="app.updateIdentify(this.value);">       
 							</select>
 							<div class="section-sub-header">Property Information</div>
 								<table class="data" id="singleItem1"> 
@@ -394,11 +394,9 @@
 		<!--Print options-->
 		<div id="print-box" class="transition form">
 			<form method="post">
+				<div class="row"><input type="text" placeholder="Title" value="Title" onclick="this.value = '';" id="title"></div>
 				<div class="row">
-					<input type="text" placeholder="Title" value="Title" onclick="this.value = '';" id="title">
-				</div>
-				<div class="row"
-					<select name="paper" id="paper" onchange='printOptions._changePrintGraphic()'>
+					<select name="paper" id="paper" onchange='printOptions.changePrintGraphic()'>
 						<option value="A4 Portrait">8.5 x 11 Portrait</option>
 						<option value="A4 Landscape">8.5 x 11 Landscape</option>
 						<option  value="A3 Portrait" >11 x 17 Portrait</option>       
@@ -408,7 +406,7 @@
 				</div>        
 				<div id="progressbar" class="progress progress-striped active"> 
 					<div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 5%"> 
-						<!-- <span class="sr-only">45% Complete</span>  -->
+					<!-- <span class="sr-only">45% Complete</span>  -->
 					</div> 
 				</div>
 				<!--button type="cancel" id="btn-cancel" class="transition btn btn-secondary">Cancel</button-->
