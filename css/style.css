@@ -1,14 +1,37 @@
  html {
-	height: 100%;
-	width: 100%;
-	margin: 0;
-	padding: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   padding-top: 50px;
   height:100%
 }
+
+.modal{
+   overflow: hidden;
+}
+
+::-webkit-scrollbar {
+      width: 15px;
+} /* this targets the default scrollbar (compulsory) */
+::-webkit-scrollbar-track {
+      background-color: #444;
+} /* the new scrollbar will have a flat appearance with the set background color */
+ 
+::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.4);
+} /* this will style the thumb, ignoring the track */
+ 
+::-webkit-scrollbar-button {
+      background-color: #ff6600;
+} /* optionally, you can style the top and the bottom buttons (left and right for horizontal bars) */
+ 
+::-webkit-scrollbar-corner {
+      /* background-color: black; */
+} /* if both the vertical and the horizontal bars appear, then perhaps the right bottom corner also needs to be styled */
 .starter-template {
   padding: 40px 15px;
   text-align: center;
@@ -21,8 +44,8 @@ body {
 
   #legendDiv{
     margin-left:40px;
-	margin-top: 10px;
-	line-height:1.5em;
+  margin-top: 10px;
+  line-height:1.5em;
   }
   .esriLegendServiceLabel{
     color: #ff6600;
@@ -44,6 +67,7 @@ body {
   
   #searchForm{
     padding-top:20px;
+    margin-left: -25px;
   }
   
   #utility-layers{
@@ -51,27 +75,27 @@ body {
   }
   #base-layers{
     color: #fff;
-	padding-left:40px;
+  padding-left:40px;
   }
    #toolsTab{
 
-	padding-left:10px;
+  padding-left:10px;
    }
 
 
   #sidebar-wrapper {
   margin-right: -250px;
-	margin-top: auto;
+  margin-top: auto;
   left: 0;
   width: 350px;
   background: #222;
   height:100%;
-	/*padding-top:2%;*/
+  /*padding-top:2%;*/
   padding-bottom: 100px;
-	border-right-style:solid;
+  border-right-style:solid;
   border-right-width:3px;
   border-right-color:#101010;
-	border-left-style:solid;
+  border-left-style:solid;
   border-left-width:3px;
   border-left-color:#101010;
   position: fixed;
@@ -90,20 +114,31 @@ body {
   
   #cityviewerSMALL{
     display: none;
-	/* color: #ff6600; */
+  /* color: #ff6600; */
   }
+  /* iPad */
+  @media (max-width: 991px) {
+    .modal{
+      overflow: auto;
+    }
+  }
+  /* iPad */
   @media (max-width: 480px) { 
     #cityviewerSMALL{
         display: table;
     }
-	#cityviewer{
+
+  .modal{
+     overflow: auto;
+  }
+  #cityviewer{
          display: none;
     }
-	#sidebar-wrapper {
-	   /*overflow-y: scroll;*/
-	   width: 100%;
+  #sidebar-wrapper {
+     /*overflow-y: scroll;*/
+     width: 100%;
      height:100%;
-	}
+  }
   .logo{
     display:none;
   }
@@ -157,16 +192,16 @@ body {
   #menu-toggle {
     top: 50%;
     left: 0;
-	padding: 30px 15px 30px 15px;
+  padding: 30px 15px 30px 15px;
     position: fixed;
-	border-top-left-radius:0px;
-	border-bottom-left-radius:0px;
+  border-top-left-radius:0px;
+  border-bottom-left-radius:0px;
     z-index: 1;
   }
   .btn-clear{
     /*position: absolute;*/
-	margin-left: 10px;
-	margin-top: 5px;
+  margin-left: 10px;
+  margin-top: 5px;
     color: #aaa;
 }
 
@@ -200,17 +235,17 @@ body {
 a.mailOption{cursor:pointer;}
 
 
-  #menu-close{
+  #menu-close, #menu-close2, #menu-close3, #menu-close4{
   border: none;
-	color: #fff;
-	background-color: transparent;
+  color: #fff;
+  background-color: transparent;
   right:11px;
   position:absolute;
   }
-  #menu-close:hover{
+  #menu-close:hover, #menu-close2:hover, #menu-close3:hover, #menu-close4:hover{
     border: none;
-	/* background-color: #404040; */
-	color: #ff6600;
+  /* background-color: #404040; */
+  color: #ff6600;
   }
 /*utility layers checktree*/
 #tree{
@@ -236,13 +271,13 @@ label{
 
 #utility-close{
     border: none;
-	background-color: transparent;
-	z-index: 9999999999999;
+  background-color: transparent;
+  z-index: 9999999999999;
   }
 #utility-close:hover{
     border: none;
-	/* background-color: #404040; */
-	color: #ff6600;
+  /* background-color: #404040; */
+  color: #ff6600;
   }
 
 
@@ -263,34 +298,34 @@ label{
    #myTabContent{
     color: #aaa;
     background-color: #333;
-	  margin-right:1%;
-	  /* margin-bottom:2px; */
-	  margin-left:1%;
-	  height: 100%;
-	  border: 1px solid #101010;
+    margin-right:1%;
+    /* margin-bottom:2px; */
+    margin-left:1%;
+    height: 100%;
+    border: 1px solid #101010;
     width:98%;
-    overflow-x:auto;
+    overflow-x:hidden;
 
    }
    #myTab{
      /* background-color:#222; */ 
-	 background-color:#222; 
-	 margin-top:5.5%;
+   background-color:#222; 
+   margin-top:5.5%;
 
    }
    
    .tabtext{
      color: #999;
-	 background-color:#404040;
-	 font-weight: bold;
+   background-color:#404040;
+   font-weight: bold;
    }
    
    nav a i[class^="icon-"] {
-	color: #aaa491;
-	display: block;
-	width: 100%;
-	font-size: 36px;
-	margin-bottom: 5px;
+  color: #aaa491;
+  display: block;
+  width: 100%;
+  font-size: 36px;
+  margin-bottom: 5px;
 }
 
    
@@ -351,16 +386,16 @@ table.data th {
 .radioset label span { padding:0 !important; margin:1px 0 0 1px; width:34px; height:34px; display:block; text-indent:-9999em;}
 .radioset label span span { display:none  !important;}
 .radioset label.ui-state-default {
-	width:38px; height:38px; display:block; border:1px solid #ff6600; float:left; margin-right:10px !important;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	background-color: #333;
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#333), to(#333));
-	background-image: -webkit-linear-gradient(top, #333, #333);
-	background-image:    -moz-linear-gradient(#333);
-	background-image:      -o-linear-gradient(top, #333, #333);
-	background-image:         linear-gradient(#333);
+  width:38px; height:38px; display:block; border:1px solid #ff6600; float:left; margin-right:10px !important;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #333;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#333), to(#333));
+  background-image: -webkit-linear-gradient(top, #333, #333);
+  background-image:    -moz-linear-gradient(#333);
+  background-image:      -o-linear-gradient(top, #333, #333);
+  background-image:         linear-gradient(#333);
 }
 .radioset label.ui-state-hover {background:#eaeae3;}
 .radioset label.ui-state-active {border:2px solid #eaeae3; background:#404040;}
@@ -391,58 +426,58 @@ table.tools input, .selectboxit-container {margin-right:5px;}
 
 /* Map tools */
 #map-tools {
-	position: absolute;
-	z-index: 30;
-	top: 75px;
-	right: 8px;
+  position: absolute;
+  z-index: 30;
+  top: 75px;
+  right: 8px;
 }
 #map-tools a {
-	background-color: #333333;
-	color: #AAAAAA;
-	display: block;
-	float: left;
-	padding: 0 12px;
-	font-size: 16px;
-	line-height: 34px;
-	border-left: 1px solid #101010;
-	border-right: 1px solid #101010;
+  background-color: #333333;
+  color: #AAAAAA;
+  display: block;
+  float: left;
+  padding: 0 12px;
+  font-size: 16px;
+  line-height: 34px;
+  border-left: 1px solid #101010;
+  border-right: 1px solid #101010;
 }
 #map-tools a.first {
-	-webkit-border-top-left-radius: 4px;
-	-webkit-border-bottom-left-radius: 4px;
-	-moz-border-radius-topleft: 4px;
-	-moz-border-radius-bottomleft: 4px;
-	border-top-left-radius: 4px;
-	border-bottom-left-radius: 4px;
-	padding: 0 12px 0 16px;
-	border-left: none;
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  -moz-border-radius-topleft: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  padding: 0 12px 0 16px;
+  border-left: none;
 }
 #map-tools a.last {
-	-webkit-border-top-right-radius: 4px;
-	-webkit-border-bottom-right-radius: 4px;
-	-moz-border-radius-topright: 4px;
-	-moz-border-radius-bottomright: 4px;
-	border-top-right-radius: 4px;
-	border-bottom-right-radius: 4px;
-	padding: 0 16px 0 12px;
-	border-right: none;
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  -moz-border-radius-topright: 4px;
+  -moz-border-radius-bottomright: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  padding: 0 16px 0 12px;
+  border-right: none;
 }
 #map-tools a i {
-	/* text-shadow: 1px 1px 1px #333; */
+  /* text-shadow: 1px 1px 1px #333; */
 }
 #map-tools a:hover, #map-tools a.active {
-	background-color: #eee;
-	text-decoration: none;
-	color: #ff6600;
-	/* border: 1px solid #ff6600; */
+  background-color: #eee;
+  text-decoration: none;
+  color: #ff6600;
+  /* border: 1px solid #ff6600; */
 }
 
 #map-zoom-slider,.esriSimpleSlider {
-	position: absolute;
-	z-index: 30;
-	top: 10px;
-	left: 360px;
-	/* display:none; */
+  position: absolute;
+  z-index: 30;
+  top: 10px;
+  left: 360px;
+  /* display:none; */
 }
 
 .aerialToggle{  
@@ -482,54 +517,31 @@ table.tools input, .selectboxit-container {margin-right:5px;}
     position: relative; 
 } 
 
-#layersfooter{
+#layersfooter, #searchfooter, #toolsfooter, #drawfooter{
   bottom: 0;
   height: 122px;
-  left: 90px;
+  left: 97px;
   position: absolute;
-  padding-top: 30px; 
+  padding-top: 40px; 
 
-}
-
-#searchfooter{
-  bottom: 0;
-  height: 122px;
-  left: 90px;
-  position: absolute;
-  padding-top: 30px;
-}
-
-#toolsfooter{
-  bottom: 0;
-  height: 122px;
-  left: 90px;
-  position: absolute;
-  padding-top: 48px;
-}
-#drawfooter{
-  bottom: 0;
-  height: 122px;
-  left: 90px;
-  position: absolute;
-  padding-top: 48px;
 }
 
 .foot{
     z-index:30;
-	position: absolute;
-	bottom: 5px;
-	left:360px;
+  position: absolute;
+  bottom: 5px;
+  left:360px;
 }
 
 body#map-root {
-	/* Start of temporary background will be replaced with a real map */
-	/*background: url(../images/login-background.jpg) no-repeat center center fixed;*/
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
-	/* End of temporary code */	
-	margin-left: 87px;  /* Should match with nav width */
+  /* Start of temporary background will be replaced with a real map */
+  /*background: url(../images/login-background.jpg) no-repeat center center fixed;*/
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  /* End of temporary code */ 
+  margin-left: 87px;  /* Should match with nav width */
 }
 
 .ui-autocomplete {
@@ -545,10 +557,22 @@ body#map-root {
 .ui-autocomplete a{
   color: #666;
 }
-.ui-autocomplete a:hover,.ui-autocomplete a:active{
-  background-color:#777;
-  color: #000;
+
+/*all jquery ui states-but targeting autocompletes*/
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+    background: #777;
+    border: none;
+    color:#000;
+    border-radius:0;
+    font-weight: normal;
 }
+
+/*spin buttons*/
+td .ui-widget-content .ui-state-hover{
+    background: transparent;
+}
+
+
 
 /* Print Box */
 #print-box {
