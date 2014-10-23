@@ -40,14 +40,14 @@ var navEvent;
 function createCSVFile() {
     $.post('outputs/csvCreate.php', { q: csvInfo }, function (data) {  });
 }
-  define(["dojo/ready","esri/urlUtils", "dojo/dom", "dojo/on", "esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/checktree", "app/handlers","app/measurements","app/mapNav", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
-           function(ready, urlUtils, dom, on, domUtils, Map, config, identification, checktree, handlers, Measurement, mapNav, esriRequest, PrintTask, Legend, Draw, Edit, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Extent, SpatialReference){
+  define(["dojo/ready","esri/urlUtils", "dojo/dom", "dojo/on", "dojo/keys","esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/checktree", "app/handlers","app/measurements","esri/sniff", "esri/SnappingManager", "app/mapNav", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
+           function(ready, urlUtils, dom, on, keys, domUtils, Map, config, identification, checktree, handlers, myMeasurement, has, SnappingManager, mapNav, esriRequest, PrintTask, Legend, Draw, Edit, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Extent, SpatialReference){
 		   
 		    ready(function(){
-            /*urlUtils.addProxyRule({
+            urlUtils.addProxyRule({
                 urlPrefix: "http://gis.wirapids.org",
                 proxyUrl: "http://gis.wirapids.org/proxy/proxy.php"
-            }); */           
+            });            
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
@@ -82,10 +82,10 @@ function createCSVFile() {
                 var utilities = $(".overlayLayer, .utilityLayer, .tree");
                 var basemaplayers = $(".overlayLayer");
                 on(utilities, 'change', function(){
-                      treeLegend._treeGetUtilityLayers();
+                      treeLegend.treeGetUtilityLayers();
                 } );
                 on(basemaplayers, 'change', function(){
-                    treeLegend._treeGetOverlayLayers();
+                    treeLegend.treeGetOverlayLayers();
                 } );
             });
 
@@ -120,7 +120,7 @@ function createCSVFile() {
             //Keep map in viewer
             maxExtent = map.extent;
             on(map, "extent-change", function (initExtent){
-                printOptions._changePrintGraphic(); //move print box if its on.
+                printOptions.changePrintGraphic(); //move print box if its on.
                 var adjustedEx = new Extent(initExtent.extent.xmin, initExtent.extent.ymin, initExtent.extent.xmax, initExtent.extent.ymax, new SpatialReference({ wkid:102100 }));
                 var flag = false; 
                 //set a buffer to make the max extent a slightly bigger to void minor differences
@@ -210,20 +210,30 @@ function createCSVFile() {
             //iTool.activate(Draw.POINT); //use _geometryType to make iTool methods global
             iTool.activate(iTool._geometryType='point');
             app = new identification();
-            measure = new Measurement();
+            measure = new myMeasurement();
+            
+            // var snapManager = map.enableSnapping({
+            //   snapKey: has("mac") ? keys.META : keys.CTRL
+            // });
+            // var layerInfos = [{
+            //   layer: [27]
+            // }];
+            // snapManager.setLayerInfos(layerInfos);
+            // console.log(layerInfos);
+
             iTool.on("draw-end", function (evt) {
               switch (operationToDo){
               case "identify":
-                  app._identify(evt.geometry);
+                  app.identify(evt.geometry);
                   break;
               case "selection":
-                  app._drawGraphic(evt.geometry);
+                  app.drawGraphic(evt.geometry);
                   break;
               case "measure":
-                  measure._getAreaAndLength(evt.geometry);
+                  measure.getAreaAndLength(evt.geometry);
                   break;
               case "drawing":
-                  app._addDrawingToMap(evt.geometry)
+                  app.addDrawingToMap(evt.geometry)
                   break;
                }
             });
@@ -233,11 +243,11 @@ function createCSVFile() {
               $('.results.identify').hide();
               if (this.id == 'ownerGo') {
               //alert('dadfs');
-                app._searchParcelByAttribute("Owner");
+                app.searchParcelByAttribute("Owner");
               } else if (this.id == "addressGo") {
-                app._searchParcelByAttribute("Address");
+                app.searchParcelByAttribute("Address");
               } else {
-                app._searchParcelByAttribute("PID");
+                app.searchParcelByAttribute("PID");
               }
             });
 
@@ -245,15 +255,15 @@ function createCSVFile() {
             on(searchBoxes, 'keypress', function(event){
               if(this.id == 'owner'){
                   if(event.keyCode == 13){
-                      app._searchParcelByAttribute('Owner');
+                      app.searchParcelByAttribute('Owner');
                   }
               } else if (this.id == "addresses") {
                   if(event.keyCode == 13){
-                      app._searchParcelByAttribute('Address');
+                      app.searchParcelByAttribute('Address');
                   }
               } else if (this.id == "pid") {
                   if(event.keyCode == 13){
-                      app._searchParcelByAttribute('PID');
+                      app.searchParcelByAttribute('PID');
                   }
               }
             });
