@@ -3,18 +3,18 @@ define(
 function() {
   var config = {
     mapServices:{
-       vector: "http://gis.wirapids.org/arcgis/rest/services/VectorBasemapHybrid/MapServer",
-       dynamic: "http://gis.wirapids.org/arcgis/rest/services/DynamicBasemap/MapServer",
+       vector: "http://Your/arcgis/rest/services/VectorBasemapHybrid/MapServer",
+       dynamic: "http://Your/arcgis/rest/services/DynamicBasemap/MapServer",
        aerial: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"
     },     
     helperServices: {
-       geometry:"http://gis.wirapids.org/arcgis/rest/services/Utilities/Geometry/GeometryServer",
-       print: "http://gis.wirapids.org/arcgis/rest/services/ExportWebMap/GPServer/Export%20Web%20Map"
+       geometry:"http://Your/arcgis/rest/services/Utilities/Geometry/GeometryServer",
+       print: "http://Your/arcgis/rest/services/ExportWebMap/GPServer/Export%20Web%20Map"
     },
 	utilityLayerID:[-1],
 	parcelLayerID: [27],
-	csvUrl: "http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv",
-	mailLink: "https://gis.wirapids.org/CityViewer/outputs/",
+	csvUrl: "http://Your/CityViewer/outputs/parcelInfo.csv",
+	mailLink: "https://Your/CityViewer/outputs/",
 	identifyLayerAdditional:[]
 	
 };
