@@ -1,4 +1,5 @@
 <?php
+/*Email form to gis staff, with erro catch, and confimation*/
 /* Set e-mail recipient */
 $myemail = "ccantey@wirapids.org";
 
@@ -43,7 +44,7 @@ echo '<script type="text/javascript">'
    , 'window.location.replace("http://gis.wirapids.org/CityViewer-secure/");'
    , '</script>'
 ;
-//header('Location: http://gis.wirapids.org/CityViewer-secure/');
+
 exit();
 
 /* Functions we used */
