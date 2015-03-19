@@ -43,11 +43,12 @@ function createCSVFile() {
   define(["dojo/ready","esri/urlUtils", "dojo/dom", "dojo/on", "dojo/keys","esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/checktree", "app/handlers","app/measurements","esri/sniff", "esri/SnappingManager", "app/mapNav", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
            function(ready, urlUtils, dom, on, keys, domUtils, Map, config, identification, checktree, handlers, myMeasurement, has, SnappingManager, mapNav, esriRequest, PrintTask, Legend, Draw, Edit, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Extent, SpatialReference){
 		   
-		    ready(function(){
+           /* Commented out - secure services messes with print services
+           ready(function(){
             urlUtils.addProxyRule({
                 urlPrefix: "http://gis.wirapids.org",
                 proxyUrl: "http://gis.wirapids.org/proxy/proxy.php"
-            });            
+            });          */  
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
