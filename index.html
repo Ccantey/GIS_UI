@@ -45,7 +45,8 @@
 		<link href="css/jquery-ui-1.10.2.custom.css" rel="stylesheet">
 		<link href="css/evol.colorpicker.css" rel="stylesheet" type="text/css" media="screen"/>  
 		<link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />  
-
+         <link href='http://fonts.googleapis.com/css?family=Open+Sans:800,400,600' rel='stylesheet' type='text/css'>
+         <link href='http://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
 		<!-- Custom styles for this app -->
 		<link href="css/styles.css" rel="stylesheet">
 
@@ -56,7 +57,31 @@
 		<![endif]-->
 
 		<script>  
-			require(["app/init"],
+        //exposes user/password to client. Short of login this seems like the best solution to keep services secure
+        require(["esri/request"],
+		 	function(esriRequest){
+		        $.post('php/welcome.php', function (data) {			  
+			    var userInfo = data.split(":");
+			    var userName = userInfo[0];
+				var userPassword = userInfo[1];
+				token = esri.request({
+	                url: "http://gis.wirapids.org/arcgis/tokens/",
+	                content: {
+	                    request: "getToken",
+	                    username: userName,
+	                    password: userPassword
+	                },
+	                handleAs: "text",
+	                load: assignToken,
+	                
+	            });	
+	            function assignToken(){
+                     	token = token.results[0];
+                     }		
+            });
+        });
+
+			require(["app/initApp"],
 				function(init){
 			});
 
@@ -68,14 +93,15 @@
 		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 		<!-- <div class="container"> -->
 			<div class="navbar-header">
-				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewer">Wisconsin Rapids </a>
-				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewerSMALL">Rapids</a>
-				<font class="navbar-brand" style="color:#ff6600">City Viewer</font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
+				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewer" style="font-family: 'Roboto Slab', serif;">Wisconsin Rapids </a>
+				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewerSMALL" style="font-family: 'Roboto Slab', serif;">Rapids</a>
+				<font class="navbar-brand" style="color:#ff6600; font-family:'Roboto Slab', serif;">City Viewer</font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
 			</div>
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li><a href="#about" data-toggle="modal">About</a></li>
-					<li><a href="#contact" data-toggle="modal">Contact</a></li>
+					<li style="font-family: 'Roboto Slab', serif;"><a href="#help" data-toggle="modal">Help</a></li>
+					<li style="font-family: 'Roboto Slab', serif;"><a href="#about" data-toggle="modal">About</a></li>
+					<li style="font-family: 'Roboto Slab', serif;"><a href="#contact" data-toggle="modal">Contact</a></li>
 				</ul>
 			</div>
 		</div>
@@ -96,6 +122,9 @@
 				</li>
 				<li id="draw-tab">
 					<a class="tabtext" data-toggle="tab" href="#drawTab">Draw</a>
+				</li>
+				<li id="results-tab">
+					<a class="tabtext" data-toggle="tab" href="#resultsTab">Results</a>
 				</li>
 			</ul>
 
@@ -137,7 +166,7 @@
 								<label for="inputEmail3" class="col-sm-4 control-label">Parcel No:</label>
 								<div class="col-lg-8">
 									<div class="input-group">
-										<input type="text" name="pid" onclick="this.value = ''" class="form-control autocomplete" id="pid" placeholder="Parcel No.">
+										<input type="text" name="pid" onclick="this.value = ''" class="form-control autocomplete" id="pid" placeholder="Parcel No. ( '34-' )">
 										<span class="input-group-btn">
 											<button id="pidGo" class="btn btn-lg" type="button">Go!</button>
 										</span>
@@ -147,24 +176,10 @@
 						</form>
 
 					</div><!--searchForm-->
+				</br>
+                    <span style='margin-left:4%;color:#6f6a5e'>Click on a parcel or utility feature to identify it</span>
 
-					<section class="results identify" style="display:none">
-						<div id="append" class="section-header">Results</div>
-							<select name="type" id="multipleSelect" class="selectmenu" onchange="app.updateIdentify(this.value);">       
-							</select>
-							<div class="section-sub-header">Property Information</div>
-								<table class="data" id="singleItem1"> 
-								</table>
-							<div class="section-sub-header2">Tax Districts</div>
-								<table class="data" id="singleItem2">   
-								</table> 
-							<div class="attachments">
-								<table class="data" id='viewAttachment' >
-								</table>
-								<!-- <div class="progressBar" style="display:none"></div> -->
-							</div>                           
-					</section>
-					<div id="searchfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>     
+			<div id="searchfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>     
 				</div><!--searchTab-->
 				<!--Begin Layers Tab Content-->   
 				<div id="layersTab" class="tab-pane fade "> <!--open-ended <li required for plugin-->   
@@ -172,7 +187,7 @@
 					<a id="menu-close2" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
 					<div id="tree">
 						<!--Checktree appends the closing elements... </li>-->
-						<strong id="utilTitle" style="color:#ff6600">Utility Layers</strong> <!--Checktree doesn't work correctly if there are misspells-->
+						<span id="utilTitle" style="color:#ff6600">Utility Layers</span> <!--Checktree doesn't work correctly if there are misspells-->
 						<ul>
 							<li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>					  
 								<ul>
@@ -183,26 +198,34 @@
 									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Gravity Main</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Pressurized Mains</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Sewer Lift Stations</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Sub-basins</label>
+									<!-- <li class="utilityLayer"><input type="checkbox"><label>Sanitary Sub-basins</label> -->
 								</ul>
 							<li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
-							<ul>
+							    <ul>
 									<li class="utilityLayer"><input type="checkbox"><label>Discharge Point</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Storm Manholes</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Catch Basins</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Storm Leads</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Storm Gravity Main</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Detention Pond</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Watershed Boundaries</label>
-									<!-- <li class="utilityLayer"><input type="checkbox"><label>Parcels with Storm Permits</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Parcels with Maintenance Agrmts</label> -->
-								</ul>						
-							<li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A_Drawings</label>
+
+							    </ul>	
+							<li class="utilityLayer collapsed"><input type="checkbox"><label>WWLC Water</label>
+							    <ul>
+									<li class="utilityLayer"><input id='test'type="checkbox"><label>Water Manhole</label>
+									<li class="utilityLayer"><input type="checkbox"><label>Fire Hydrant</label>
+									<li class="utilityLayer"><input type="checkbox"><label>Water Network Structure</label>
+									<li class="utilityLayer"><input type="checkbox"><label>Lateral Line</label>
+									<li class="utilityLayer"><input type="checkbox"><label>Water Main</label>
+							    </ul>	
+							<li class="utilityLayer A"><input id="Poles" type="checkbox"><label>WWLC Poles</label>				
+							<li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A-Drawings</label>
+							<li class="utilityLayer A"><input id="PlatIndex" type="checkbox"><label>Plat Map</label>
 						</ul>
 					</div>
 
 					<div id="base-layers">
-						<strong style="color:#ff6600">Basemap Layers</strong>
+						<span style="color:#ff6600">Basemap Layers</span>
 						<div class="checkbox">
 							<ul>
 								<li class="overlayLayer">
@@ -226,6 +249,11 @@
 									<input type="checkbox" id="DNR">              
 								</li>
 								<li class="overlayLayer">         
+									<label>FEMA Flood Zones</label>
+									<input type="checkbox" id="Fema">              
+								</li>
+
+								<li class="overlayLayer">         
 									<label>Contours</label>
 									<input type="checkbox" id="Contours">             
 								</li>
@@ -234,7 +262,7 @@
 					</div>
 					<section class="legend-items" id="legendDiv"></section>
 
-					<div id="layersfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
+					<div id="layersfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>
 				</div>  <!--layersTab-->
 
 				<!--Begin toolsTab--> 
@@ -248,11 +276,12 @@
 							<td>
 								<select id="BufferLayer" class="selectmenu">
 								<!-- Change the buffer feature selection to: -->
-									<option value=27>Parcels</option>  
+									<option value=35>Parcels</option>  
 									<option value="Drawing">Drawing</option>                                           
-									<option value=20>Sanitary Gravity Mains</option>
-									<option value=12>Storm Gravity Mains</option>
-									<option value=11>Water Mains</option>                                                                       
+									<option value=18>Sanitary Gravity Mains</option>
+									<option value=11>Storm Gravity Mains</option>
+									<option value=25>Water Mains</option>
+									<!-- <option value=13>Water Mains</option>  -->
 								</select>
 							</td>
 						</tr>
@@ -297,21 +326,9 @@
 							</td>
 						</tr>
 					</table>
-						<section class="results multipleBuffer">
-						<div class="process-results">
-							<a class="mailOption" >
-								<i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-							<a href="http://gis.wirapids.org/CityViewer-AMD/outputs/parcelInfo.csv" target="_blank">
-								<i class="glyphicon glyphicon-share-alt"></i> Export</a>
-						</div>
-						<div class="section-header">Results</div>
-							<!--<div class="section-sub-header">Click row to zoom to selection</div>-->
-							<table class="data" id="multiptleBufferItem">
-							<!-- <tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>                              -->
-							</table>             
-						</section>
+
 					<div id="toolsfooter">
-						<img class="logo" src="images/watermark2.png" alt="Rapids Logo">
+						<img class="logo" src="images/watermark.png" alt="Rapids Logo">
 					</div>
 				</div> <!--toolstab-->
 				<!--Begin drawTab-->
@@ -366,9 +383,52 @@
 									</td>
 							</tr>
 					</table>
-					<div id="drawfooter"><img class="logo" src="images/watermark2.png" alt="Rapids Logo"></div>
+					<div id="drawfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>
 				</div><!--drawTab-->
+				<!--Begin toolsTab--> 
+				<div id="resultsTab" class="tab-pane fade">
+					<a href="#" class="btn-clear" ><i class="glyphicon glyphicon-remove"></i> Clear</a>
+					<a id="menu-close5" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
+					</br></br>
+					<span id='noselected' style='margin-left:25%;color:#6f6a5e'>No Features Selected</span>
+					<section class="results identify" style="display:none">
+						<div id="append" class="section-header"></div>
+							<select name="type" id="multipleSelect" class="selectmenu" onchange="app.updateIdentify(this.value);">       
+							</select>
+							<div class="section-sub-header">Property Information</div>
+								<table class="data" id="singleItem1"> 
+								</table>
+							<div class="section-sub-header2">Tax Districts</div>
+								<table class="data" id="singleItem2">   
+								</table> 
+							<div class="attachments">
+								<table class="data" id='viewAttachment' >
+								</table>
+								<!-- <div class="progressBar" style="display:none"></div> -->
+							</div>                           
+					</section>
 
+                    <section class="results multipleBuffer">
+						
+						<!-- <div class="section-header">Results</div> -->
+							<!--<div class="section-sub-header">Click row to zoom to selection</div>-->
+							<table class="data" id="multiptleBufferItem">
+							<!-- <tr><th>PID:</th><th>Owner Name:</th><th>Address:</th></tr>                              -->
+							</table> 
+							<div class="process-results">
+							<a class="mailOption" >
+								<i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+							<a href="http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv" target="_blank">
+								<i class="glyphicon glyphicon-share-alt"></i> Export</a>&nbsp;&nbsp;
+							<!-- <a id="printParcels" target="_blank">
+								<i class="glyphicon glyphicon-print"></i> Print</a> -->
+						</div>            
+						</section>
+						
+					<div id="resultsfooter">
+						<img class="logo" src="images/watermark.png" alt="Rapids Logo">
+					</div>
+				</div> <!--Resultstab-->
 			</div><!--MyTabContent-->
 
 		</div><!--Sidebar wrapper-->
@@ -425,14 +485,15 @@
 					</div>
 				<div class="modal-body">
 					<strong>About the map</strong><br>
-					Wisconsin Rapids City Viewer was designed and developed in 2014 by Chris Cantey, GIS Specialist for the City of Wisconsin Rapids under the direction of the Mayor's Office and the City Engineering Department with assistance from the Information Systems Department. <br><br>
-
-					<a href='images/CityViewerManual.pdf' target='_blank'><img src='images/pdf-icon.png'/><strong>Instructions</strong></a><br><br>
+					Wisconsin Rapids City Viewer was designed and developed in 2014 by Chris Cantey, GIS Programmer Analyst for the City of Wisconsin Rapids under the direction of the Mayor's Office and the City Engineering Department with assistance from the Information Systems Department. <br><br>
 
 					<strong>Browser Requirements</strong><br>The map depends upon <a href="https://developers.arcgis.com/javascript/" target="blank">(ArcGIS)</a> JavaScript. The map will run on most versions of Chrome, Firefox, Internet Explorer, and Safari. This application was built on top of the <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> front-end framework to create a browser-agnostic application, meaning this app is available across nearly all browsers and all browser sizes (including mobile).<br><br>
 
 					<strong>Data Acknowledgements</strong><br>
-					The data that drives this application was produced by the City of Wisconsin Rapids and <a href ="http://www.co.wood.wi.us/Departments/PZ/LandRecords.aspx" target="_blank">Wood County GIS</a>. While the data is expected to be the most recent and accurate available, the information on this website is not intended to be served as legal evidence of size, shape, location, or ownership of real estate.<br><br>
+					The data that drives this application was produced by the City of Wisconsin Rapids and <a href ="http://www.co.wood.wi.us/Departments/PZ/LandRecords.aspx" target="_blank">Wood County GIS</a>. <br></br>
+
+					<strong>Disclaimer!</strong><br>
+					<span style="color:#ff6600;font-style:italic">While the data is expected to be the most recent and accurate available, the information on this website is not intended to be served as legal evidence of size, shape, location, or ownership of real estate.</span><br><br>
 
 				</div>
 				<div class="modal-footer">
@@ -486,14 +547,41 @@
 								</div>
 							</div>
 						</form>
-					<!--      <div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-primary">Save changes</button>
-					</div> -->
+
 					</div>
 				</div>
 			</div>
 		</div>
+		<!-- MODAL #3: Help -->  
+		<div class="modal fade" id="help" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="myModalLabel">Help Section</h4>
+					</div>
+				<div class="modal-body">
+					<strong>Instructions</strong><br>
+					
+					Wisconsin Rapids City Viewer documentation. <br><br>
+					<a href='images/CityViewerManual.pdf' target='_blank'><img src='images/pdf-icon.png'/><strong>Manual</strong></a><br><br>
+
+					<strong>Demo</strong><br>
+					A quick demo of City Viewer features, content, and functionality. Video produced by <a href ="http://rccamedia.org/" target="_blank">RCCA Media</a><br><br>
+
+					<a href='https://www.youtube.com/watch?v=X58fjG0u_38&feature=youtu.be' target='_blank'><img src='images/video-icon.png'/><strong>Video</strong></a><br><br>
+
+					
+
+				</div>
+				<div class="modal-footer">
+				<!--      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save changes</button> -->
+				</div>
+				</div>
+			</div>
+		</div>
+
 
 		<div id="mailLabelBox" class="transition form">
 			<a href="#" class="btn-close" title="Close"><i class="glyphicon glyphicon-remove"></i> Close</a>
@@ -516,6 +604,16 @@
 	<script type="text/javascript" src="js/jquery.selectBoxIt.min.js"></script> 
 	<script type="text/javascript" src="js/evol.colorpicker.js"></script>
 	<script src="colorbox/jquery.colorbox.js"></script>
+	<script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-44787950-2', 'auto');
+        ga('send', 'pageview');
+
+    </script>
 
 	</body>
 </html>
