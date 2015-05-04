@@ -1,4 +1,4 @@
-var initExtent, identifyTask, identifyParams, gsvc;
+var initExtent, identifyTask, identifyParams, gsvc, token;
 var identifyTaskParcel, identifyParamsParcel, params;
 var basemap, utilityMap, graphicLayer, graphicLayerLabels, tempGraphicLayer, maxExtent, printOptions;
 var app, measure;
@@ -42,36 +42,26 @@ function createCSVFile() {
 }
   define(["dojo/ready","esri/urlUtils", "dojo/dom", "dojo/on", "dojo/keys","esri/domUtils", "esri/map", "config/commonConfig", "app/identification", "app/checktree", "app/handlers","app/measurements","esri/sniff", "esri/SnappingManager", "app/mapNav", "esri/request", "esri/tasks/PrintTask", "esri/dijit/Legend", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/GeometryService", "esri/tasks/BufferParameters", "esri/dijit/editing/AttachmentEditor", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/FeatureLayer", "esri/layers/GraphicsLayer", "esri/geometry/Extent", "esri/SpatialReference", "dojo/domReady!"],
            function(ready, urlUtils, dom, on, keys, domUtils, Map, config, identification, checktree, handlers, myMeasurement, has, SnappingManager, mapNav, esriRequest, PrintTask, Legend, Draw, Edit, GeometryService, BufferParameters, AttachmentEditor, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, FeatureLayer, GraphicsLayer, Extent, SpatialReference){
-		   
-           /* Commented out - secure services messes with print services
-           ready(function(){
-            urlUtils.addProxyRule({
-                urlPrefix: "http://gis.wirapids.org",
-                proxyUrl: "http://gis.wirapids.org/proxy/proxy.php"
-            });          */  
+       
+        ready(function(){
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
              map = new Map("map", {
                 extent: initExtent  
              }); 
              
-
-            //overlayLayer.url = config.mapServices.dynamic;
-            //utilityMap.url = config.mapServices.dynamic;
-            gsvc = new GeometryService(config.helperServices.geometry); //identification, doBuffer, measureUpdate
-            printTask = new PrintTask(config.helperServices.print);
+            gsvc = new GeometryService(config.helperServices.geometry + "?token=" + token); //identification, doBuffer, measureUpdate
+            printTask = new PrintTask(config.helperServices.print+ "?token=" + token);
+            
 
             // this is comparable to "dojo.connect(map, 'onLoad', function () {" but doesn't do anything yet.
             on(map, "load", function(){
-/*                editToolbar = new Edit(map);
-                on(map, "click", function (evt) {
-                  editToolbar.deactivate();
-                });
-                createMapMenu();
-	            createGraphicsMenu();*/
-			  
+
+              //legend method calls token twice so we have to remove the token from config
+                overlayLayer.url = "http://YourService/MapServer";
+                utilityMap.url = "http://YourService/MapServer";
                 legendLayers.push({ layer: utilityMap, title: "Legend" });
-                legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[0,1,2,3,27, 28, 29, 31]});
+                legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[1,2,3,4,5,28,32,33,34,35,36,38,67]}); //labels, parcels, municipal boundaries, shields, dimensions
                 legend = new Legend({
                   map:map,
                   layerInfos:legendLayers,
@@ -97,27 +87,34 @@ function createCSVFile() {
             map.addLayer(aerialLayer);
             aerialLayer.hide();
             //Add Feature service (A_Drawings/Attachments)
-            A_Drawings = new FeatureLayer("http://gis.wirapids.org/arcgis/rest/services/DynamicBasemap/FeatureServer/24", {
+            A_Drawings = new FeatureLayer("http://YourFeatureService/FeatureServer/29"+ "?token=" + token, {
               mode: FeatureLayer.MODE_ONDEMAND,
               outFields:["*"]
             });
             map.addLayers(A_Drawings);
 
+            PlatIndex = new FeatureLayer("http://YourFeatureService/FeatureServer/28"+ "?token=" + token, {
+              mode: FeatureLayer.MODE_ONDEMAND,
+              outFields:["*"]
+            });
+            map.addLayers(PlatIndex);
+
             attachmentEditor = new AttachmentEditor({}, dom.byId("content"));
             attachmentEditor.startup();
 
             A_Drawings.hide();
+            PlatIndex.hide();
             //Add dynamic map 
-            overlayLayer = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, {id:"Basemap"});
+            overlayLayer = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic+ "?token=" + token, {id:"Basemap"});
             overlayLayer.setImageFormat("png32");
-            overlayLayer.setVisibleLayers([1,27,28,29]);
+            overlayLayer.setVisibleLayers([1,2,4,33,34,35,36,67]); //schools,streets,parks,parcels,boundaries,shields
             map.addLayer(overlayLayer);
-			
-            utilityMap = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic, { id: "Utility" });
+      
+            utilityMap = new ArcGISDynamicMapServiceLayer(config.mapServices.dynamic+ "?token=" + token, { id: "Utility" });
             utilityMap.setImageFormat("png32");
             utilityMap.setVisibleLayers([-1]);
-            map.addLayer(utilityMap);		
-			
+            map.addLayer(utilityMap);   
+      
             //Keep map in viewer
             maxExtent = map.extent;
             on(map, "extent-change", function (initExtent){
@@ -271,7 +268,7 @@ function createCSVFile() {
 
             //esriRequest is a utility method to retrieve data from a web server. Data can be static (stored in a file on the web server), or it can be dynamic (generated on-demand by a web service). esriRequest can handle the following formats: plain txt, xml, json, jsonp
             var layersRequest = esriRequest({
-                url: config.mapServices.dynamic,
+                url: config.mapServices.dynamic+ "?token=" + token,
                 content: { f: "json" },
                 handleAs: "json",
                 callbackParamName: "callback"
@@ -283,6 +280,6 @@ function createCSVFile() {
                 }, function(error) {
                     console.log("Error: ", error.message);
                 });
-				
+        
         }); //end ready
     }); //end require
