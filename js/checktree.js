@@ -2,11 +2,11 @@ define(["esri/dijit/Legend", "dojo/_base/declare"],
 function ( Legend, declare) {
     return declare(null, {
         
-        // Sample function, welcome to AMD!
-        _treeGetOverlayLayers: function () {
+        // Public
+        treeGetOverlayLayers: function () {
             //legend.startup();
             var inputs = $(".overlayLayer");
-            var visible = [1,27,28,29]; //street and city labels
+            var visible = [1,2,4,33,34,35,36,67]; //schools,streets,parks,city labels,parcels,shields
             for (var i = 0, il = inputs.length; i < il; i++) {
                 var layerLabel = $(inputs[i]).find("label:first").html();  //To select labels to check, we must nest <label tag> in htm. and somehow select that nested label
                 //console.log('layerLabel: ',layerLabel);
@@ -30,7 +30,7 @@ function ( Legend, declare) {
         
         //doIdentify
         //Public Class
-        _treeGetUtilityLayers: function () {
+        treeGetUtilityLayers: function () {
             //legend.startup();
             //var inputs = dojo.query(".utilityLayer");
             var inputs = $(".utilityLayer");
