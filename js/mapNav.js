@@ -47,7 +47,7 @@ navEvent = function(task) {
         attValues = [];
         csvInfo = [];
         mailParcels = [];
-        $('#search-tab a').removeClass('notice');
+        // $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
         $('.results.identify').hide();
         $('.results.multipleBuffer').hide();
@@ -55,6 +55,7 @@ navEvent = function(task) {
         //$('#searchfooter, #toolsfooter').css({'position': 'absolute', 'bottom': '7%'});
         $('#drawPoint').prop("checked",true);
         $('.radioset').buttonset('refresh');
+        $('#noselected').show();
         map.enablePan();
         break;
     case 'tools clear':
@@ -71,7 +72,7 @@ navEvent = function(task) {
         attValues = [];
         csvInfo = [];
         mailParcels = [];
-        $('#search-tab a').removeClass('notice');
+        // $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
         $('.results.identify').hide();
         $('.results.multipleBuffer').hide();
@@ -79,6 +80,7 @@ navEvent = function(task) {
         $('#mailLabelBox').hide();
         $('.radioset').buttonset('refresh');
         $('.dDot,.drawLine,.Extent').removeClass('ui-state-active');
+        $('#noselected').show();
         map.enablePan();
         break;
     case 'clearDrawing':
@@ -88,8 +90,9 @@ navEvent = function(task) {
         iTool.activate(iTool._geometryType='point');
         $('.radioset').find(':radio').prop("checked", false);
         $('.radioset').buttonset('refresh');
+        $('#noselected').show();
         map.enablePan();
-        $('#search-tab a').removeClass('notice');
+        // $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
         break;
     case "resetMap":
@@ -107,7 +110,7 @@ navEvent = function(task) {
             layerCheckState.prev().prev().removeClass("checked");
             //console.log(layerCheckState);
         };
-        $('#search-tab a').removeClass('notice');
+        // $('#search-tab a').removeClass('notice');
         $('#menu-toggle').removeClass('tab');
         overlayLayer.setVisibleLayers([-1]); //Resets tab content but does not reset the checkboxes
         utilityMap.setVisibleLayers([-1]);
@@ -128,6 +131,7 @@ navEvent = function(task) {
         $('.results.multiple').hide();
         $('.results.multipleBuffer').hide();
         $('#toggleThis').removeClass('vectorToggle').addClass('aerialToggle').attr('src','images/Aerial.png');
+        $('#noselected').show();
         map.enablePan();
         map.setExtent(initExtent);
         break;
@@ -136,7 +140,7 @@ navEvent = function(task) {
         //if you want to track as the user moves setup navigator.geolocation.watchPostion
         $("#loading").show();
 		console.log(GPS);
-        navigator.geolocation.getCurrentPosition(GPS.zoomToLocation, GPS.locationError);
+        navigator.geolocation.getCurrentPosition(GPS.zoomToLocation, GPS._locationError);
         }
         break;
     case "measureLine":
@@ -152,25 +156,25 @@ navEvent = function(task) {
     case "drawingPolygon":
         operationToDo = 'drawing';
         labelling = false;
-        map.disablePan();
+        //map.disablePan();
         iTool.activate(iTool._geometryType='polygon');
         break;
     case "drawingLine":
         operationToDo = 'drawing';
         labelling = false;
-        map.disablePan();
+        //map.disablePan();
         iTool.activate(iTool._geometryType='polyline');
         break;
     case "drawingPoint":
         operationToDo = 'drawing';
         labelling = false;
-        map.disablePan();
+        //map.disablePan();
         iTool.activate(iTool._geometryType='point');
         break;
     case "drawingText":
         operationToDo = 'drawing';
         labelling = true;
-        map.disablePan();
+        //map.disablePan();
         iTool.activate(iTool._geometryType='point');
         break;
 
