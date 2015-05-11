@@ -1,7 +1,7 @@
 An ArcGIS JavaSCript Application - UI
 =====================================
 
-A responsive UI taylored for municipal GIS applications built with ArcGIS JavaScript API (3.11).
+A responsive User Interface (UI) taylored for municipal GIS applications built with ArcGIS JavaScript API (3.11).
 Built with Dojo's AMD loader and Bootstrap to provide RWD.
 
 
