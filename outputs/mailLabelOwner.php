@@ -12,8 +12,8 @@ $pdf->SetFont('Arial','B',10);
 $pdf->AddPage();
 $pdf->SetAutoPageBreak('0','5');
 
-$serverName = "cowr-fs3.cowr.local\WIRapids_GIS"; //serverName\instanceName
-$connectionInfo = array( "Database"=>"gisWiRapids", "UID"=>"LGIM", "PWD"=>"WiscRapidsGIS");
+$serverName = ""; //serverName\instanceName
+$connectionInfo = array( "Database"=>"", "UID"=>"", "PWD"=>"");
 $conn = sqlsrv_connect( $serverName, $connectionInfo);
 
 if(!$conn )
@@ -25,7 +25,7 @@ $q = $_POST["q"];
 $str = "('" . implode($q,"','") . "')";
 
 
-$sql = "SELECT distinct $mailLabelFieldsString FROM LGIM.PARCEL where ParcelNo in $str";
+$sql = "SELECT distinct $mailLabelFieldsString FROM PARCEL where ParcelNo in $str";
 
 $stmt = sqlsrv_query( $conn, $sql );
 if( $stmt === false) {

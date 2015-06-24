@@ -1,6 +1,6 @@
 <?php
 /* Set e-mail recipient */
-$myemail = "ccantey@wirapids.org";
+$myemail = "";
 
 /* Check all form inputs using check_input function */
 $name = check_input($_POST['inputName'], "Your Name");
@@ -21,7 +21,7 @@ show_error("Invalid e-mail address");
 }
 
 $message = "
-Someone has sent you a message from gis.wirapids.org/CityViewer using the contact form:
+Someone has sent you a message from your.org/CityViewer using the contact form:
 
 Name: $name
 Email: $email
@@ -40,7 +40,7 @@ mail($myemail, $subject, $message, $headers);
 /* Redirect visitor to the thank you page */
 echo '<script type="text/javascript">'
    , 'alert("Your message has been sent to GIS staff. Thank you.");'
-   , 'window.location.replace("http://gis.wirapids.org/CityViewer/");'
+   , 'window.location.replace("http://your.org/CityViewer/");'
    , '</script>'
 ;
 

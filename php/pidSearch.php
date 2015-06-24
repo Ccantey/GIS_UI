@@ -1,7 +1,7 @@
 <?php
 
-$serverName = "cowr-fs3.cowr.local\WIRapids_GIS"; //serverName\instanceName
-$connectionInfo = array( "Database"=>"gisWiRapids", "UID"=>"LGIM", "PWD"=>"WiscRapidsGIS");
+$serverName = ""; //serverName\instanceName
+$connectionInfo = array( "Database"=>"", "UID"=>"", "PWD"=>"");
 $conn = sqlsrv_connect( $serverName, $connectionInfo);
 
 if( !$conn )
@@ -10,7 +10,7 @@ if( !$conn )
 }
 $q = $_GET["term"];
 //$str = str_replace(" ","%",$q);
-$sql = "SELECT TOP 1000 PARCELNO FROM LGIM.PARCEL where PARCELNO LIKE '$q%' AND (CivilDivision = '13' OR CivilDivision = '18' OR CivilDivision = '7' OR CivilDivision = '24' OR CivilDivision = '28' OR CivilDivision = '21' OR CivilDivision = '19' OR CivilDivision = '34' OR CivilDivision = '27' ) ORDER BY PARCELNO ASC"; // 'q% to match only the beginning
+$sql = "SELECT TOP 1000 PARCELNO FROM PARCEL where PARCELNO LIKE '$q%' AND (CivilDivision = '13' OR CivilDivision = '18' OR CivilDivision = '7' OR CivilDivision = '24' OR CivilDivision = '28' OR CivilDivision = '21' OR CivilDivision = '19' OR CivilDivision = '34' OR CivilDivision = '27' ) ORDER BY PARCELNO ASC"; // 'q% to match only the beginning
 
 $stmt = sqlsrv_query( $conn, $sql );
 if( $stmt === false) {

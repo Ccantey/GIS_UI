@@ -10,7 +10,7 @@ Demo
 
 [City Viewer Application](http://gis.wirapids.org/CityViewerLite/)
 
-[PDF Instructions](http://gis.wirapids.org/CityViewer-AMD/images/CityViewerManual.pdf) 
+[PDF Instructions](http://gis.wirapids.org/CityViewer/images/CityViewerManual.pdf) 
 
 Features
 --------

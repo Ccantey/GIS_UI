@@ -46,8 +46,8 @@ function createCSVFile() {
        
         ready(function(){
             // urlUtils.addProxyRule({
-            //     urlPrefix: "http://gis.wirapids.org",
-            //     proxyUrl: "http://gis.wirapids.org/proxy/proxy.php"
+            //     urlPrefix: "http://your.org",
+            //     proxyUrl: "http://your.org/proxy/proxy.php"
             // });            
 
              initExtent = new Extent({"xmin":-10014198.126251305,"ymin":5518475.931924282,"xmax":-9988152.208863167,"ymax":5533954.430152008,spatialReference:{"wkid":102100}});
@@ -56,8 +56,8 @@ function createCSVFile() {
              }); 
              
 
-            //overlayLayer.url = "http://gis.wirapids.org/arcgis/rest/services/SecureDynamicBasemap/MapServer";
-            //utilityMap.url = "http://gis.wirapids.org/arcgis/rest/services/SecureDynamicBasemap/MapServer";
+            //overlayLayer.url = "http://your.org/arcgis/rest/services/SecureDynamicBasemap/MapServer";
+            //utilityMap.url = "http://your.org/arcgis/rest/services/SecureDynamicBasemap/MapServer";
             gsvc = new GeometryService(config.helperServices.geometry + "?token=" + token); //identification, doBuffer, measureUpdate
             printTask = new PrintTask(config.helperServices.print+ "?token=" + token);
             
@@ -72,8 +72,8 @@ function createCSVFile() {
               createGraphicsMenu();*/
 
               //legend method calls token twice so we have to remove the token from config
-                overlayLayer.url = "http://gis.wirapids.org/arcgis/rest/services/CityViewerLiteDynamic/MapServer";
-                utilityMap.url = "http://gis.wirapids.org/arcgis/rest/services/CityViewerLiteDynamic/MapServer";
+                overlayLayer.url = "http://your.org/arcgis/rest/services/CityViewerLiteDynamic/MapServer";
+                utilityMap.url = "http://your.org/arcgis/rest/services/CityViewerLiteDynamic/MapServer";
                 legendLayers.push({ layer: utilityMap, title: "Legend" });
                 legendLayers.push({ layer: overlayLayer, title: "Legend ",hideLayers:[1,2,3,4,5,18,19,20,21,22,24,53]}); //labels, parcels, municipal boundaries, shields, dimensions, City Labels
                 legend = new Legend({
@@ -101,13 +101,13 @@ function createCSVFile() {
             map.addLayer(aerialLayer);
             aerialLayer.hide();
             //Add Feature service (A_Drawings/Attachments)
-            // A_Drawings = new FeatureLayer("http://gis.wirapids.org/arcgis/rest/services/CityViewerDynamic2015WoodParcels/FeatureServer/29"+ "?token=" + token, {
+            // A_Drawings = new FeatureLayer("http://your.org/arcgis/rest/services/CityViewerDynamic2015WoodParcels/FeatureServer/29"+ "?token=" + token, {
             //   mode: FeatureLayer.MODE_ONDEMAND,
             //   outFields:["*"]
             // });
             // map.addLayers(A_Drawings);
 
-            // PlatIndex = new FeatureLayer("http://gis.wirapids.org/arcgis/rest/services/CityViewerDynamic2015WoodParcels/FeatureServer/28"+ "?token=" + token, {
+            // PlatIndex = new FeatureLayer("http://your.org/arcgis/rest/services/CityViewerDynamic2015WoodParcels/FeatureServer/28"+ "?token=" + token, {
             //   mode: FeatureLayer.MODE_ONDEMAND,
             //   outFields:["*"]
             // });
