@@ -1,9 +1,22 @@
-define(["dojo/ready", "dojo/dom", "dojo/on","esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "app/print","app/identification", "esri/graphicsUtils"],
-function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, identification,graphicsUtils ) {
+define(["dojo/ready", "dojo/dom", "dojo/on","esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "app/print","app/identification", "app/measurements","esri/graphicsUtils"],
+function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, identification, myMeasurements, graphicsUtils ) {
   ready(function(){
     // This function won't run until the DOM has loaded and other modules that register
     // have run.
-	
+//if user hits escape key
+$(window).keypress(function(event){
+  if(event.keyCode == 27){
+    navEvent('tools clear');
+    $('#dynamicDistance').html('0 feet');        
+    $('.measureLength').removeClass('ui-state-active');
+    $('#infoWindow').css('visibility','hidden');
+    event.preventDefault();
+    tbActive = false;
+  } else {
+      //event.preventDefault();
+  }
+
+});	
 	
   $('.jquery').each(function() {
     eval($(this).html());
@@ -32,20 +45,24 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
       // collapseUiIcon: 'glyphicon glyphicon-star',
       // expandUiIcon: 'glyphicon glyphicon-star'     
     });
-    
-  $("#menu-close, #menu-close2, #menu-close3, #menu-close4").click(function(e) {
+  $('#menu-toggle').hide();  //initial state
+  $("#menu-close, #menu-close2, #menu-close3, #menu-close4, #menu-close5").click(function(e) {
      e.preventDefault();
      $('#menu-toggle').removeClass('tab');
      $("#sidebar-wrapper").toggleClass("active");
+     $('#menu-toggle').show("slow");
      $('#map-zoom-slider,.esriSimpleSlider,.foot').animate({ 'left': '10px' }, 500, 'easeOutQuad');
+     
    });
     
 
     on(dom.byId('menu-toggle'), 'click', function(e){
         e.preventDefault();
-        $('#menu-toggle').removeClass('notice');
+        // $('#menu-toggle').removeClass('notice');
         $("#sidebar-wrapper").toggleClass("active");
-        $('#map-zoom-slider,.esriSimpleSlider,.foot').animate({ 'left': '360px' }, 500, 'easeInQuad');	
+        $('#menu-toggle').hide("slow");
+        $('#map-zoom-slider,.esriSimpleSlider,.foot').animate({ 'left': '385px' }, 500, 'easeInQuad');
+        
 	});
 	
 	on(dom.byId('toggleThis'), 'click', (this, function(){
@@ -67,6 +84,8 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
 
   $('.radioset').buttonset();
   $("#progressbar").hide();
+  $("#printProgressbar").hide();
+  //$("#printParcelProgressbar").hide();
   $('.results.multipleBuffer').hide();
   $('a[data-toggle="tooltip"]').tooltip();   
 
@@ -80,8 +99,20 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
                 data: request,
                 type: "GET",
                 success: function (data) {
-                    response(data);
-                }
+                    if(!data.length){
+                        var result = [
+                            {
+                                label: 'No matches found', 
+                                value: response.term
+                            }
+                        ];
+                        response(result);
+                    }
+                      else{
+                         // normal response
+                         response(data);
+                       }
+                    }
             });
         }
     });
@@ -95,14 +126,26 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
                 data: request,
                 type: "GET",
                 success: function (data) {
-                    response(data);
-                }
+                    if(!data.length){
+                        var result = [
+                            {
+                                label: 'No matches found', 
+                                value: response.term
+                            }
+                        ];
+                        response(result);
+                    }
+                      else{
+                         // normal response
+                         response(data);
+                       }
+                    }
             });
         }
     });
 
     $("#pid").autocomplete({
-        minLength: 4,
+        minLength: 2,
         source: function (request, response) {
             $.ajax({
                 url: "php/pidSearch.php",
@@ -110,7 +153,19 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
                 data: request,
                 type: "GET",
                 success: function (data) {
-                    response(data);
+                    if(!data.length){
+                        var result = [
+                            {
+                                label: 'No matches found', 
+                                value: response.term
+                            }
+                        ];
+                        response(result);
+                    }
+                      else{
+                         // normal response
+                         response(data);
+                       }
                     }
             });
         }
@@ -135,6 +190,10 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
     $('#toolsTab #measureLength').click(function () {
         $('#toolsTab #measureUnit').html('<option value="UNIT_FOOT">Feet</option><option value="UNIT_STATUTE_MILE">Miles</option>');
         $('#measureUnit').selectBoxIt('enable').selectBoxIt('refresh');
+        dynamicMeasure = new myMeasurements();
+        map.on("click", dynamicMeasure.grabStartingPoint);
+        tbActive = true;
+        map.on("mouse-move", dynamicMeasure.calcDistance);
         navEvent('measureLine');
     });
     $('#toolsTab #measureArea').click(function () {
@@ -156,7 +215,7 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
     $('#toolsTab #Buffer').click(function () {
         navEvent('buffer');
         app.doBuffer();
-        $('#search-tab a').removeClass('notice');
+        // $('#search-tab a').removeClass('notice');
     });
 
     $('#toolsTab .btn-clear').click(function () {
@@ -198,6 +257,11 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
     $('#layersTab .btn-clear').click(function () {
         navEvent('clear');
     });
+    $('#resultsTab .btn-clear').click(function () {
+        navEvent('clear');
+        $('#mailLabelBox').hide();
+        //$('#printParcelBox').hide();
+    });
     
     //Provide feedback for matched characters in autocomplete
     $.ui.autocomplete.prototype._renderItem = function( ul, item){
@@ -225,7 +289,17 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
         }else{
             printAreaGraphic = null;
         }
+      
         $('#print-box').toggle();
+        // if ($('#print-box').is(":visible")){
+        //     $('#print-box').hide();
+        // } else { $('#print-box').show(); }
+
+        // if ($('#printParcelBox').is(":visible")){
+        //     $('#printParcelBox').hide();
+        //     $('#print-box').hide();
+        // } else { }
+
         //$('select').selectBoxIt('refresh');
         $(this).toggleClass('active');
     });
@@ -251,56 +325,80 @@ function(ready, dom, on, SimpleFillSymbol, SimpleLineSymbol, Color, print, ident
 		printOptions.viewPrintArea();
 		return false;
 	});
+
+    // //parcel printouts
+    // printParcelOptions = new print();
+    // var printParcelButton = $('#btn-printParcel');
+    // var printParcelPreview = $('#btn-printParcelArea');
+    // on(printParcelButton, 'click', function(){
+    //     printParcelOptions.printingParcelsMain();
+    //     $(".progress-bar").animate({
+    //         width: "80%"
+    //     }, 2500);
+    //     return false;
+    // });
+    
+    // on(printParcelPreview, 'click', function(){
+    //     printParcelOptions.viewPrintArea();
+    //     return false;
+    // });
+    
 	
     $('.mailOption').click(function () {
         $('#mailLabelBox').show();
     });
     
-    $('#mailLabelBox .btn-close').click(function () {
-        $('#mailLabelBox').hide();
-    });
-        
+    // $('#printParcels').click(function () {
+    //     $('#printParcelBox').show();
+    // });
+    
     $("#ownerMail").click(function () {
         $.post('outputs/mailLabelOwner.php', { q: mailParcels }, function (data) {
-            var mailUrl = "http://gis.wirapids.org/CityViewer-AMD/outputs/"+"" + data;
+            var mailUrl = "http://gis.wirapids.org/CityViewerLite/outputs/"+"" + data;
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
 
     $("#residentMail").click(function () {
         $.post('outputs/mailLabelResident.php', { q: mailParcels }, function (data) {
-            var mailUrl = "http://gis.wirapids.org/CityViewer-AMD/outputs/" + "" + data;
+            var mailUrl = "http://gis.wirapids.orgCityViewerLite/outputs/" + "" + data;
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
 
     $("#bothMail").click(function () {
         $.post('outputs/mailLabelBoth.php', { q: mailParcels }, function (data) {
-            var mailUrl = "http://gis.wirapids.org/CityViewer-AMD/outputs/" + "" + data;
+            var mailUrl = "http://gis.wirapids.org/CityViewerLite/outputs/" + "" + data;
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
     
-    $("#search-tab").click(function () {
-      $('#search-tab a').removeClass('notice');
-    }); 
+    // $("#search-tab").click(function () {
+    //   $('#search-tab a').removeClass('notice');
+    // }); 
 $("#multiptleBufferItem").on('mouseover', 'tr', function (e) {
         tempGraphicLayer.clear();
+        $("#multiptleBufferItem").css("cursor","pointer");
         //Changed the fill
         var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-												new Color([0, 0, 0]), 2), new dojo.Color([255, 0, 0, 0.7]));
+												new Color([0, 0, 0]), 2), new Color([255, 0, 0, 0.7]));
         var row = $(this).parent().children().index($(this));		
         var zoomGraphic = selectedFeatures.features[row];
         zoomGraphic.setSymbol(sfs);
         tempGraphicLayer.add(zoomGraphic);
     });
 
-    $("#multiptleBufferItem,#multipleItem").on('mouseout', 'tr', function (e) {
+    $("#multiptleBufferItem").on('mouseout', 'tr', function (e) {
         tempGraphicLayer.clear();
     });
 
-    $("#multiptleItem").on('click', 'tr', function (e) {
+
+    // if multiple items in table, click to zoom
+    multipleParcels = new identification();
+    $("#multiptleBufferItem").on('click', 'tr', function (e) {
+        $('#multipleSelectSelectBoxItContainer').hide();
         tempGraphicLayer.clear();
+        map.graphics.clear();
         //Changed the fill
         var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
 												new Color([0, 0, 0]), 2), new Color([255, 0, 0]));
@@ -311,19 +409,16 @@ $("#multiptleBufferItem").on('mouseover', 'tr', function (e) {
         map.setExtent(extentParcel, true);
         zoomGraphic.setSymbol(sfs);
         tempGraphicLayer.add(zoomGraphic);
-        doneIdentifyParcel(zoomGraphic);
-    });
-
-	$("#multiptleItem").on('mouseover', 'tr', function (e) {
-        tempGraphicLayer.clear();
-        //Changed the fill
-        var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-												new Color([0, 0, 0]), 2), new Color([255, 0, 0, 0.7]));
-        var row = $(this).parent().children().index($(this));
-		console.log(row);
-        var zoomGraphic = selectedFeatures.features[row];
-        zoomGraphic.setSymbol(sfs);
-        tempGraphicLayer.add(zoomGraphic);
+        zoomGraphic.attributes['ParcelID'] = zoomGraphic.attributes.PARCELNO;
+        var citySplit = zoomGraphic.attributes.CITYSTZIP.split(' WI ');
+        //console.log(citySplit);
+        zoomGraphic.attributes['Municipality'] = citySplit[0];
+        zoomGraphic.attributes['Address'] = zoomGraphic.attributes.Adddress;
+        zoomGraphic.attributes['Owner Name'] = zoomGraphic.attributes.OwnerName;
+        //console.log(typeof(zoomGraphic.attributes['SHAPE.STArea()']));
+        zoomGraphic.attributes['Shape.STArea()'] = zoomGraphic.attributes['SHAPE.STArea()'];
+        zoomGraphic.attributes['Assesor Link'] = zoomGraphic.attributes.AssesorLink;
+        multipleParcels._doneIdentifyParcel(zoomGraphic);
     });
 
     $('#map-tools .middle').click(function () {
@@ -365,33 +460,6 @@ $("#multiptleBufferItem").on('mouseover', 'tr', function (e) {
 
     $("#multiptleBufferItem,#multipleItem").on('mouseout', 'tr', function (e) {
         tempGraphicLayer.clear();
-    });
-
-    $("#multiptleItem").on('click', 'tr', function (e) {
-        tempGraphicLayer.clear();
-        //Changed the fill
-        var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-												new Color([0, 0, 0]), 2), new Color([255, 0, 0]));
-        var row = $(this).parent().children().index($(this));
-        var zoomGraphic = selectedFeatures.features[row];
-        var extent = graphicsUtils.graphicsExtent([zoomGraphic]);
-        var extentParcel = extent.expand(2);
-        map.setExtent(extentParcel, true);
-        zoomGraphic.setSymbol(sfs);
-        tempGraphicLayer.add(zoomGraphic);
-        doneIdentifyParcel(zoomGraphic);
-    });
-
-	$("#multiptleItem").on('mouseover', 'tr', function (e) {
-        tempGraphicLayer.clear();
-        //Changed the fill
-        var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-												new Color([0, 0, 0]), 2), new Color([255, 0, 0, 0.7]));
-        var row = $(this).parent().children().index($(this));
-		console.log(row);
-        var zoomGraphic = selectedFeatures.features[row];
-        zoomGraphic.setSymbol(sfs);
-        tempGraphicLayer.add(zoomGraphic);
     });
 
     $('#map-tools .middle').click(function () {

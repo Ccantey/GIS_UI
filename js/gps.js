@@ -1,5 +1,5 @@
-define(["esri/geometry/webMercatorUtils", "esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/graphic","esri/domUtils", "dojo/_base/declare"], 
-function ( webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils, declare) {
+define(["dojo/_base/lang","esri/geometry/webMercatorUtils", "esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/graphic","esri/domUtils", "dojo/_base/declare"], 
+function ( lang, webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils, declare) {
     return declare(null, {
    
         zoomToLocation: function(position){
@@ -11,10 +11,10 @@ function ( webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils, declare
             graphic = new Graphic(pt, symbol);
             map.graphics.add(graphic);
             domUtils.hide(loading);
-            gpsid = navigation.watchPosition(showLocation, locationError);
+            gpsid = navigator.geolocation.watchPosition(lang.hitch(this, this._showLocation, this._locationError));
 		},
 		
-		showLocation: function(location){
+		_showLocation: function(location){
 		    var pt = webMercatorUtils.geographicToWebMercator(new Point(location.coords.longitude, location.coords.latitude));
             var symbol = new PictureMarkerSymbol("images/bluedot.png", 40, 40);
             if (location.coords.accuracy <= 500) {
@@ -33,14 +33,14 @@ function ( webMercatorUtils, PictureMarkerSymbol,Point,Graphic,domUtils, declare
                 zoomToLocation(location);
                 //map.centerAndZoom(pt, 20);
                 //alert('The positional accuracy of your device is low. Best positional accuracy is obtained with a GPS/Wi-Fi enabled device');
-                navigation.clearWatch(gpsid);
+                navigator.clearWatch(gpsid);
                 //graphic = new Graphic(pt, symbol);
                 //map.graphics.add(graphic);
                 //domUtils.hide(loading);
             }
 		},
 		
-		locationError: function(error){
+		_locationError: function(error){
 		    switch (error.code) {
                 case error.PERMISSION_DENIED:
                 alert("Location not provided");

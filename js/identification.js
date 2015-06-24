@@ -144,6 +144,9 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             var content = '';
             var attributesName;
             if (layerName == 'A-Drawings') {
+                // if($('#sidebar-wrapper').hasClass('active')) {
+                //     $('#menu-toggle').addClass('tab');
+                // }        
                 this._updateTabs();        
                 var objectId;
                 for (attributesName in layerResults.attributes) {
@@ -216,7 +219,9 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             $("#singleItem2,#singleItem5,.section-sub-header2,.searchClass").show();
             $('.results.identify').show();
             $("#viewAttachment").hide();
+            console.log(currentProperty.geometry);
             geometryBuffer = [currentProperty.geometry];
+
             var layerResults = currentProperty;
             //console.log(layerResults);
             this._showFeature(currentProperty);
@@ -390,7 +395,6 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             attrAll.push(k);
             //console.log(k);
             }
-
             csvInfo.push(attrAll.join(","));
             //console.log(csvInfo);
             var content = "";
@@ -400,13 +404,14 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             var graphic;
             for (i = 0, il = queryFeatures.length; i < il; i++) {
                 attValues = [];
-                for (j = 0; j < attrAll.length; j++) {
+                for (j = 0; j < attrAll.length; j++) {                    
                     attValues.push(queryFeatures[i].attributes[attrAll[j]]);
                 }
                 //Wood county changed their owner name to: Last, First which beefs our csv, must replace commas
                 if (typeof(attValues[5]) === "string"){
                         attValues[5] = attValues[5].replace(/,/g," - ");                        
                 } else {}
+                //console.log(attValues[5]);
                 csvInfo.push(attValues.join(","));
                 //console.log(csvInfo);
                 graphic = new Graphic(queryFeatures[i].geometry, symbols.polygon);
@@ -480,7 +485,9 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                     symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
                 break;
             }
-
+            //drawingTool.deactivate();
+            //map.enablePan();
+            //$("#radioDraw input").attr("checked", false).button("refresh");
             map.enablePan();
         },
         
@@ -539,7 +546,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                         }
                         csvInfo.push(attValues.join(","));
                     }
-
+                    //$(".results.multiple.section-sub-header").html(
                     $("#multiptleBufferItem").html(content);
                     $('.results.multipleBuffer').show();
                     //map.setExtent(extentParcel, true);
@@ -547,7 +554,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
 
                 } else { //one property
                     this._showSearchByAttributeResults(searchFeature.features[0]);
-                    //console.log(searchFeature.features[0]);
+                    
                     $('.results.multiple').hide();
                     $('.results.multipleBuffer').hide();
                     extent = graphicsUtils.graphicsExtent([searchFeature.features[0]]);
@@ -555,6 +562,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
                     map.setExtent(extentParcel, true);
                     this._showFeature(searchFeature.features[0]);
                     geometryBuffer.push(searchFeature.features[0].geometry);
+
                 }
             }));      
         },

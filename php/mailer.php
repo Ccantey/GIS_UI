@@ -1,5 +1,4 @@
 <?php
-/*Email form to gis staff, with erro catch, and confimation*/
 /* Set e-mail recipient */
 $myemail = "ccantey@wirapids.org";
 
@@ -41,7 +40,7 @@ mail($myemail, $subject, $message, $headers);
 /* Redirect visitor to the thank you page */
 echo '<script type="text/javascript">'
    , 'alert("Your message has been sent to GIS staff. Thank you.");'
-   , 'window.location.replace("http://gis.wirapids.org/CityViewer-secure/");'
+   , 'window.location.replace("http://gis.wirapids.org/CityViewer/");'
    , '</script>'
 ;
 

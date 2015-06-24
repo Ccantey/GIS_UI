@@ -1,11 +1,11 @@
-define(["dojo/Evented","dojo/_base/declare", "dojo/_base/lang", "esri/arcgis/utils", "dojo/dom", "dojo/dom-class", "dojo/on", "esri/tasks/query", "esri/tasks/QueryTask","esri/graphic", "esri/graphicsUtils", "config/commonConfig", "esri/symbols/SimpleMarkerSymbol","esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters", "app/symbols"], 
-function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryTask, Graphic, graphicsUtils, config, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon, IdentifyTask, IdentifyParameters, symbols) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "esri/graphic", "esri/symbols/Font", "esri/symbols/TextSymbol", "esri/Color", "esri/tasks/AreasAndLengthsParameters", "esri/tasks/LengthsParameters", "esri/tasks/GeometryService", "esri/SpatialReference", "esri/tasks/BufferParameters", "esri/geometry/Polygon", "esri/geometry/Polyline","esri/geometry/geometryEngine","app/symbols"], 
+function ( declare, lang, dom, Graphic, Font, TextSymbol, Color, AreasAndLengthsParameters, LengthsParameters, GeometryService, SpatialReference, BufferParameters, Polygon, Polyline,geometryEngine,symbols) {
     return declare(null, {
         
        
         //getAreaAndLength
         //Public class
-        _getAreaAndLength: function(geometry){
+        getAreaAndLength: function(geometry){
             var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": "Miles", "UNIT_ACRES": "Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
 
             if (geometry.type == 'polygon') {
@@ -30,15 +30,17 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                         });
                     });
                 });
+            navEvent('defaultIdentify');
             }
             if (geometry.type == 'polyline') {
                 measureGraphic = map.graphics.add(new Graphic(geometry, symbols.polyline));
+                tbActive = false;
                 var lengthParams = new LengthsParameters();
         
                 lengthParams.lengthUnit = GeometryService.UNIT_FOOT;
-                console.log("lengthParams.areaUnit: ", lengthParams.lengthUnit); //==9002
+                //console.log("lengthParams.areaUnit: ", lengthParams.lengthUnit); //==9002
                 lengthParams.lengthUnit = eval("GeometryService." + dom.byId("measureUnit").value);
-                console.log("lengthParams.areaUnit: ", lengthParams.lengthUnit); //==undefined
+                //console.log("lengthParams.areaUnit: ", lengthParams.lengthUnit); //==undefined
                 lengthParams.calculationType = 'preserveShape';
         
                 var sr = new SpatialReference({ wkid: 102100  });
@@ -61,11 +63,18 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
                                     var textSymbol = new TextSymbol((result.lengths[0].toFixed(2)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + labelUnit[$("#measureUnit").val()], font, new Color("#000000"),"ALIGN_RIGHT");                        
                                     labelPointGraphic = new Graphic(labelPoints[0], textSymbol);
                                     map.graphics.add(labelPointGraphic);
+                                    
+                                    
                                 });
                             });
                         });
                     });            
                 });
+            firstPoint=null;
+            tbActive = false;
+            $('#dynamicDistance').html('0 feet');
+            $('#infoWindow').css('visibility','hidden');
+            navEvent('defaultIdentify');
             }       
         },
         
@@ -104,9 +113,9 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
             });
         },
 		
-		//measureUpdate
+		//measureUpdate changes the units if the select box changes units
 		//public
-		_measureUpdate: function(measureGeometry){
+		measureUpdate: function(measureGeometry){
 		    var labelUnit = { "UNIT_FOOT": " Feet", "UNIT_STATUTE_MILE": " Miles", "UNIT_ACRES": " Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
 
 			if (measureGeometry != null) {
@@ -171,7 +180,38 @@ function ( evented, declare, lang, arcgisUtils, dom, domClass, on, Query, QueryT
 			}
 		
 		
-		}
+		},
+        grabStartingPoint: function (evt) {
+          // if draw toolbar is active, set starting point using last clicked location
+          if (tbActive){
+            $('#infoWindow').css('visibility','visible');
+            firstPoint = evt.mapPoint;
+          }
+        },
+
+        calcDistance: function(evt){
+          $('#infoWindow').css({
+             left:evt.pageX,
+             top:evt.pageY
+          });
+          
+          if (tbActive){
+            var secondPoint = evt.mapPoint;
+            // if toolbar is active and user has already started drawing a line, use the geometryEngine to calculate geodesic distance on the fly
+            if (firstPoint){
+              var sr = {wkid:102100};
+              var lineSeg = new Polyline(sr);
+              lineSeg.addPath([firstPoint, secondPoint]);
+              var lengthUnit = { "UNIT_FOOT": 9003, "UNIT_STATUTE_MILE": 9035, "UNIT_ACRES": " Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
+              var lengthLabel = { "UNIT_FOOT": " feet", "UNIT_STATUTE_MILE": " miles", "UNIT_ACRES": " Acres", "UNIT_SQUARE_FEET": " Sq. Feet", "UNIT_SQUARE_MILES": " Sq. Miles" };
+              //console.log(lengthUnit[dom.byId("measureUnit").value]);
+              howFar = geometryEngine.geodesicLength(lineSeg, lengthUnit[dom.byId("measureUnit").value]); //9003 foot, 9035 mile
+              // round to the nearest whole number
+              howFar = parseFloat(howFar).toFixed(1) + lengthLabel[dom.byId("measureUnit").value];
+              $('#dynamicDistance').html(howFar);
+            } 
+          }
+        }
         
    
 

@@ -1,22 +1,26 @@
 define(
 [],
 function() {
+
+  
+
+
   var config = {
     mapServices:{
-       vector: "http://Your/arcgis/rest/services/VectorBasemapHybrid/MapServer",
-       dynamic: "http://Your/arcgis/rest/services/DynamicBasemap/MapServer",
+       vector: "http://gis.wirapids.org/arcgis/rest/services/VectorBasemap2015/MapServer",
+       dynamic: "http://gis.wirapids.org/arcgis/rest/services/CityViewerLiteDynamic/MapServer",
        aerial: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/"
     },     
     helperServices: {
-       geometry:"http://Your/arcgis/rest/services/Utilities/Geometry/GeometryServer",
-       print: "http://Your/arcgis/rest/services/ExportWebMap/GPServer/Export%20Web%20Map"
+       geometry:"http://gis.wirapids.org/arcgis/rest/services/Utilities/Geometry/GeometryServer",
+       print: "http://gis.wirapids.org/arcgis/rest/services/GeoProcessingServices/ExportWebMap/GPServer/Export%20Web%20Map"// + "?token=" + token
     },
-	utilityLayerID:[-1],
-	parcelLayerID: [27],
-	csvUrl: "http://Your/CityViewer/outputs/parcelInfo.csv",
-	mailLink: "https://Your/CityViewer/outputs/",
-	identifyLayerAdditional:[]
-	
+  utilityLayerID:[-1],
+  parcelLayerID: [21],
+  csvUrl: "http://gis.wirapids.org/CityViewerLite/outputs/parcelInfo.csv",
+  mailLink: "http://gis.wirapids.org/CityViewerLite/outputs/",
+  identifyLayerAdditional:[]
+  
 };
   
   // could use a has() test to optionally populate some global

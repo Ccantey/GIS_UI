@@ -6,7 +6,7 @@ function ( Legend, declare) {
         treeGetOverlayLayers: function () {
             //legend.startup();
             var inputs = $(".overlayLayer");
-            var visible = [1,2,4,33,34,35,36,67]; //schools,streets,parks,city labels,parcels,shields
+            var visible = [1,2,4,18, 19,20,21,22, 53]; //schools,streets,parks,city labels,parcels,shields, city labels
             for (var i = 0, il = inputs.length; i < il; i++) {
                 var layerLabel = $(inputs[i]).find("label:first").html();  //To select labels to check, we must nest <label tag> in htm. and somehow select that nested label
                 //console.log('layerLabel: ',layerLabel);

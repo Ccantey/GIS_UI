@@ -13,8 +13,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 		<!-- Sets the style of the status bar for a web application when in standalone mode -->
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+	<!--Facebook Share customization open graph meta tags-->
+	<meta property="og:image" content="http://gis.wirapids.org/PublicApp/#images/RWD2.png"/>
+	<meta property="og:title" content="Wisconsin Rapids GIS"/>
+	<meta property="og:author" content="Chris Cantey"/>
+	<meta property="og:description" content="Citizen Services maps for the City of Wisconsin Rapids."/>
+	<meta property="og:url" content="http://gis.wirapids.org/CityViewerLite/#"/>
+
 		<meta name="description" content="Municipal GIS">
-		<meta name="author" content="Chris Cantey, GIS developer, City of Wisconsin Rapids">
+		<meta name="author" content="Chris Cantey, GIS Programmer Analyst, City of Wisconsin Rapids">
+
 		<link rel="shortcut icon" href="images/favicon.ico">
 		<link rel="icon" href="images/favicon.ico" type="image/x-icon">
 
@@ -36,8 +46,8 @@
 
 		<!--JavaScript API & Stylesheets-->
 		<!--3.11 works well, but prints the printGraphic-->
-		<script type="text/javascript" src="http://js.arcgis.com/3.11/"></script>
-		<link rel="stylesheet" href="http://js.arcgis.com/3.11/esri/css/esri.css">
+		<script type="text/javascript" src="http://js.arcgis.com/3.13/"></script>
+		<link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css">
 		
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>   
 		<link href="css/jquery.selectBoxIt.css" rel="stylesheet" type="text/css" media="screen"/>
@@ -47,8 +57,10 @@
 		<link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" />  
          <link href='http://fonts.googleapis.com/css?family=Open+Sans:800,400,600' rel='stylesheet' type='text/css'>
          <link href='http://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 		<!-- Custom styles for this app -->
 		<link href="css/styles.css" rel="stylesheet">
+		
 
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>
@@ -57,7 +69,7 @@
 		<![endif]-->
 
 		<script>  
-        //exposes user/password to client. Short of login this seems like the best solution to keep services secure
+
         require(["esri/request"],
 		 	function(esriRequest){
 		        $.post('php/welcome.php', function (data) {			  
@@ -95,7 +107,7 @@
 			<div class="navbar-header">
 				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewer" style="font-family: 'Roboto Slab', serif;">Wisconsin Rapids </a>
 				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewerSMALL" style="font-family: 'Roboto Slab', serif;">Rapids</a>
-				<font class="navbar-brand" style="color:#ff6600; font-family:'Roboto Slab', serif;">City Viewer</font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
+				<font class="navbar-brand" style="color:#ff6600; font-family:'Roboto Slab', serif;">City Viewer <i style="color:#999;font-family: Roboto Slab">Lite</i></font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
 			</div>
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
@@ -178,8 +190,23 @@
 					</div><!--searchForm-->
 				</br>
                     <span style='margin-left:4%;color:#6f6a5e'>Click on a parcel or utility feature to identify it</span>
-
-			<div id="searchfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>     
+<!-- 					<section class="results identify" style="display:none">
+						<div id="append" class="section-header">Results</div>
+							<select name="type" id="multipleSelect" class="selectmenu" onchange="app.updateIdentify(this.value);">       
+							</select>
+							<div class="section-sub-header">Property Information</div>
+								<table class="data" id="singleItem1"> 
+								</table>
+							<div class="section-sub-header2">Tax Districts</div>
+								<table class="data" id="singleItem2">   
+								</table> 
+							<div class="attachments">
+								<table class="data" id='viewAttachment' >
+								</table>
+								<!-- <div class="progressBar" style="display:none"></div>
+							</div>                           
+					</section> -->
+					<div id="searchfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>     
 				</div><!--searchTab-->
 				<!--Begin Layers Tab Content-->   
 				<div id="layersTab" class="tab-pane fade "> <!--open-ended <li required for plugin-->   
@@ -187,8 +214,8 @@
 					<a id="menu-close2" href="#" class="btn btn-default btn-md pull-right toggle"><i class="glyphicon glyphicon-backward"></i></a>
 					<div id="tree">
 						<!--Checktree appends the closing elements... </li>-->
-						<span id="utilTitle" style="color:#ff6600">Utility Layers</span> <!--Checktree doesn't work correctly if there are misspells-->
-						<ul>
+						<span id="utilTitle" style="color:#ff6600">Selectable Layers</span> <!--Checktree doesn't work correctly if there are misspells-->
+<!-- 						<ul>
 							<li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>					  
 								<ul>
 									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Taps</label>
@@ -198,7 +225,7 @@
 									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Gravity Main</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Pressurized Mains</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Sewer Lift Stations</label>
-									<!-- <li class="utilityLayer"><input type="checkbox"><label>Sanitary Sub-basins</label> -->
+
 								</ul>
 							<li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
 							    <ul>
@@ -217,11 +244,28 @@
 									<li class="utilityLayer"><input type="checkbox"><label>Water Network Structure</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Lateral Line</label>
 									<li class="utilityLayer"><input type="checkbox"><label>Water Main</label>
+
 							    </ul>	
 							<li class="utilityLayer A"><input id="Poles" type="checkbox"><label>WWLC Poles</label>				
 							<li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A-Drawings</label>
 							<li class="utilityLayer A"><input id="PlatIndex" type="checkbox"><label>Plat Map</label>
-						</ul>
+						</ul> -->
+				<ul>
+                    <li class="utilityLayer collapsed"><input type="checkbox"><label>Refuse</label>
+                        <ul>                            
+                            <li class="utilityLayer"><input type="checkbox"><label>Compost</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Garbage Routes</label>
+
+                        </ul>
+                    <li class="utilityLayer collapsed"><input type="checkbox"><label>Parks and Trails</label>
+                        <ul>
+                            <li class="utilityLayer"><input type="checkbox"><label>Trails and Paths</label>
+                            <li class="utilityLayer"><input type="checkbox"><label>Parks</label>
+                        </ul>
+                    <li class="utilityLayer A"><input id="Construction" type="checkbox"><label>2015 Construction Projects</label>				
+					<li class="utilityLayer A"><input id="Property" type="checkbox"><label>Developable City Property</label>
+					<li class="utilityLayer A"><input id="Alderman" type="checkbox"><label>Alderman Districts</label>
+                </ul>
 					</div>
 
 					<div id="base-layers">
@@ -229,7 +273,7 @@
 						<div class="checkbox">
 							<ul>
 								<li class="overlayLayer">
-							<label>Parcel Dimensions</label>
+							        <label>Parcel Dimensions</label>
 									<input type="checkbox" id="DimLabels">              
 								</li>
 								<li class="overlayLayer">         
@@ -239,6 +283,10 @@
 								<li class="overlayLayer">         
 									<label>PID Labels</label>
 									<input type="checkbox" id="PidLabels">              
+								</li>
+								<li class="overlayLayer">         
+									<label>Bowhunting Areas</label>
+									<input type="checkbox" id="hunting">             
 								</li>
 								<li class="overlayLayer">         
 									<label>Zoning Districts</label>
@@ -276,11 +324,11 @@
 							<td>
 								<select id="BufferLayer" class="selectmenu">
 								<!-- Change the buffer feature selection to: -->
-									<option value=35>Parcels</option>  
+									<option value=21>Parcels</option>  
 									<option value="Drawing">Drawing</option>                                           
-									<option value=18>Sanitary Gravity Mains</option>
+<!-- 									<option value=18>Sanitary Gravity Mains</option>
 									<option value=11>Storm Gravity Mains</option>
-									<option value=25>Water Mains</option>
+									<option value=25>Water Mains</option> -->
 									<!-- <option value=13>Water Mains</option>  -->
 								</select>
 							</td>
@@ -326,7 +374,18 @@
 							</td>
 						</tr>
 					</table>
+<!-- 						<section class="results multipleBuffer">
+						<div class="process-results">
+							<a class="mailOption" >
+								<i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+							<a href="http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv" target="_blank">
+								<i class="glyphicon glyphicon-share-alt"></i> Export</a>
+						</div>
 
+							<table class="data" id="multiptleBufferItem">
+
+							</table>             
+						</section> -->
 					<div id="toolsfooter">
 						<img class="logo" src="images/watermark.png" alt="Rapids Logo">
 					</div>
@@ -418,7 +477,7 @@
 							<div class="process-results">
 							<a class="mailOption" >
 								<i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-							<a href="http://gis.wirapids.org/CityViewer/outputs/parcelInfo.csv" target="_blank">
+							<a href="http://gis.wirapids.org/CityViewerLite/outputs/parcelInfo.csv" target="_blank">
 								<i class="glyphicon glyphicon-share-alt"></i> Export</a>&nbsp;&nbsp;
 							<!-- <a id="printParcels" target="_blank">
 								<i class="glyphicon glyphicon-print"></i> Print</a> -->
@@ -442,7 +501,8 @@
 		<div id="map-tools">
 			<a href="#" class="first" data-toggle="tooltip" title="Zoom to GPS Location"><i class="glyphicon glyphicon-globe"></i></a>
 			<a href="#" class="middle" data-toggle="tooltip" title="Reset Map"><i class="glyphicon glyphicon-refresh"></i></a>
-			<a href="#" class="last" data-toggle="tooltip" title="Print Map" id="print"><i class="glyphicon glyphicon-print"></i></a>
+			<a href="#" class="middle" data-toggle="tooltip" title="Print Map" id="print"><i class="glyphicon glyphicon-print"></i></a>
+			<span data-toggle="modal" data-target="#share" style="cursor:pointer"><a class="last" data-toggle="tooltip" title="Share Map" id="sharebutton"><i class="glyphicon glyphicon-share"></i></a></span>
 		</div>
 
 		<footer class="foot">
@@ -547,7 +607,10 @@
 								</div>
 							</div>
 						</form>
-
+					<!--      <div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save changes</button>
+					</div> -->
 					</div>
 				</div>
 			</div>
@@ -581,7 +644,45 @@
 				</div>
 			</div>
 		</div>
+		<!-- MODAL #4: About -->  
+		<div class="modal fade" id="share" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="myModalLabel">Share City Viewer on social media!</h4>
+					</div>
+				<div class="modal-body">
+					<a id="FB" title="Share on Facebook" target="_blank" href="http://www.facebook.com/sharer.php?u=http%3A%2F%2Fgis.wirapids.org/CityViewerLite/index.html">
+					<div id="facebookshare">										    
+                            <i class="fa fa-facebook fa-lg fb"></i></span> 
+		                <strong>Share on Facebook</strong>
+					</div>
+					</a>
 
+				    <a id="TW" target="_blank" title="Share on Twitter" href="http://twitter.com/intent/tweet?url=http%3A%2F%2Fgis.wirapids.org/CityViewerLite/index.html&text=City%20Viewer%20mapping%20application%20from%20the%20City%20of%20Wisconsin%20Rapids&hashtags=CityViewer">
+					<div id="twittershare">
+				            <i class="fa fa-twitter fa-lg tw"></i>
+		                <strong>Share on Twitter</strong>
+					</div>
+					</a>
+				</div>
+<!-- 				<div class="modal-footer">
+				     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				
+				</div> -->
+				</div>
+			</div>
+		</div>
+		  <!--social media plugins-->
+<!-- 		  <a id="FB" class="btn-md navbar-toggle" title="Share on Facebook" target="_blank" href="http://www.facebook.com/sharer.php?u=http%3A%2F%2Fgis.wirapids.org/PublicApp/index.html">				    
+                <i class="fa fa-facebook fa-lg fb"></i></span> 
+		  </a>		  
+	
+		  <a id="TW" class="btn-md navbar-toggle" target="_blank" title="Share on Twitter" href="http://twitter.com/share?url=http%3A%2F%2Fgis.wirapids.org/PuplicApp/index.html
+				                                                                           &text=Citizen%20Service%20Maps%20from%20the%20City%20of%20Wisconsin%20Rapids">
+				<i class="fa fa-twitter fa-lg tw"></i>
+		  </a> 	 -->
 
 		<div id="mailLabelBox" class="transition form">
 			<a href="#" class="btn-close" title="Close"><i class="glyphicon glyphicon-remove"></i> Close</a>
@@ -593,6 +694,46 @@
 			</div>   
 		</div>
 
+		<div id="infoWindow" >
+			
+			<div id="dynamicDistance"></div>
+  
+		</div>
+
+<!-- 		<div id="mailLabelBox" class="transition form">
+			<a href="#" class="btn-close" title="Close"><i class="glyphicon glyphicon-remove"></i> Close</a>
+			<div class='mail-header'>Select Mail Recipient:</div>
+			<div class="row">
+				<button id="ownerMail" class="transition btn btn-main">Owner</button>
+				<button id="residentMail" class="transition btn btn-main">Resident</button>
+				<button id="bothMail" class="transition btn btn-main">Both</button>
+			</div>   
+		</div> -->
+
+		<!-- parcel map print box -->
+<!-- 		<div id="printParcelBox" class="transition form">
+			<form method="post">
+
+				<div class="row"><input type="text"  placeholder="Parcel Map" value="Parcel Map" onclick="this.value = '';" id="title"></div>
+				<div class="row">
+					<select name="paper" id="parcelPaper" onchange='printParcelOptions.changePrintGraphic()'>
+						<option value="A4 Portrait Parcels">8.5 x 11 Portrait</option>
+						<option value="A4 Landscape Parcels">8.5 x 11 Landscape</option>
+						<option  value="A3 Portrait Parcels" >11 x 17 Portrait</option>       
+						<option  value="A3 Landscape Parcels"  >11 x 17 Landscape</option>
+						<option  value="MAP_ONLY" >Image (jpeg)</option>
+					</select>   
+				</div>        
+				<div id="printParcelProgressbar" class="progress progress-striped active"> 
+					<div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 5%"> 
+
+					</div> 
+				</div>
+
+				<button type="button" id="btn-printParcelArea" class="transition btn btn-main">Preview</button>
+				<button type="submit" id="btn-printParcel" class="transition btn btn-main">Print</button>        
+			</form>
+		</div -->
 
 	<!-- Bootstrap/jQuery /jQuery-UI core JavaScript
 	================================================== -->

@@ -81,6 +81,12 @@ navEvent = function(task) {
         $('.radioset').buttonset('refresh');
         $('.dDot,.drawLine,.Extent').removeClass('ui-state-active');
         $('#noselected').show();
+
+        firstPoint=null;
+        tbActive = false;
+        $('#dynamicDistance').html('0 feet');
+        $('#infoWindow').css('visibility','hidden');
+        
         map.enablePan();
         break;
     case 'clearDrawing':

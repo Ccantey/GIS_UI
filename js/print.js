@@ -77,9 +77,9 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
             });
             console.log(ids1);
             // add layers to legend (water/storm/sanitary
-            //ids1.push(5); //water
-            ids1.push(15); //Sewer
-            ids1.push(4); //Storm 
+            //ids1.push(); //water
+            ids1.push(7); //Sewer
+            ids1.push(10); //Storm 
 
             legendLayer1.subLayerIds = ids1;
 
@@ -99,13 +99,20 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
             // index= ids2.indexOf(3);
             // ids2.splice(index,1);
 
-            index= ids2.indexOf(27);
-            ids2.splice(index,1); //hide parcel from legend, 1 indicates number of items to remove
-
-            index= ids2.indexOf(28);
+            index= ids2.indexOf(19);
             ids2.splice(index,1); //hide municipal boundary from legend
 
-            index= ids2.indexOf(29);
+            index= ids2.indexOf(20);
+            ids2.splice(index,1); //hide municipal boundary from legend
+
+            index= ids2.indexOf(21);
+            ids2.splice(index,1); //hide parcel from legend, 1 indicates number of items to remove
+
+            index= ids2.indexOf(22);
+            ids2.splice(index,1); //hid hwyshields from legend
+
+
+            index= ids2.indexOf(53);
             ids2.splice(index,1); //hid hwyshields from legend
             console.log(ids2);
 
@@ -155,6 +162,7 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
             var params = new PrintParameters();
             params.map = map;
             params.template = templates[0];
+            console.log('printparams: ', params.map._layers)
             printTask.execute(params, function (result) {
                 window.open(result.url);
                 //document.execCommand('SaveAs','true',result.url);
@@ -162,6 +170,8 @@ function ( domUtils, array, ScreenPoint, SimpleFillSymbol, SimpleLineSymbol, Col
                 $(".progress-bar").css('width','5%');
             });
 		}
+
+      
  
 
 
