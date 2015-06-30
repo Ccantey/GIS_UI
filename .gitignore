@@ -1,0 +1,7 @@
+# don't track these files or this one
+
+*.csv
+*.pdf
+# outputs/*
+outputs/*.txt
+outputs/font/*
