@@ -31,7 +31,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
         //Private Class
         _utility: function (idResults,evt) {
             multipleIdentifyStack = [];
-            multipleIdentifyLayerName = [];
+            multipleIdentifyLayerName = []; 
             
             identifyParamsParcel = new IdentifyParameters();
             identifyParamsParcel.layerIds = [config.parcelLayerID];
@@ -40,41 +40,72 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             identifyParamsParcel.width  = map.width;
             identifyParamsParcel.height = map.height;
             
-            identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic);
+            identifyTaskParcel = new IdentifyTask(config.mapServices.dynamic + "?token=" + token);
             
-            //console.log('idResults[0]',idResults); //utility selected?
+            //A utility is selected
             if (idResults.length > 0) {
                 var options = '';
                 var i = 0;
-                //remove double returns by dividing length by 2
-                for (i =0, il = idResults.length/2; i < il; i++) {
+                for (i =0, il = idResults.length; i < il; i++) {
                     options += '<option value="' + i + '">' + idResults[i].layerName + "</option>";
                     multipleIdentifyStack.push(idResults[i].feature);
                     multipleIdentifyLayerName.push(idResults[i].layerName);
                 }
-                // $('#multipleSelect').html(options);
-                // $('#multipleSelect').selectBoxIt('refresh');
-                //therefore I have to change this condition to greater than 2
-                if (idResults.length > 2) {
-                    console.log(idResults.length);
-                    $('#append').html("RESULTS (" +idResults.length/2+")" );
-                    $('#multipleSelect,multipleSelect2').html(options);
-                    $('#multipleSelect,multipleSelect2').selectBoxIt('refresh');
-                    $("#multipleSelectSelectBoxItContainer").show();
-                    $('.results.multiple').hide();
+                //if multiple features selected sort them to identify duplicates
+                if (idResults.length > 1) {
+                    console.log(idResults);
+                    options = '';
+                    idResults.sort(function (a, b) {
+                        console.log('a: ',a.feature.attributes.OBJECTID,', b: ',b.feature.attributes.OBJECTID); //water mains have overlapping features
+                        if (a.feature.attributes.OBJECTID > b.feature.attributes.OBJECTID ) {
+                            return 1;
+                          }
+                          if (a.feature.attributes.OBJECTID < b.feature.attributes.OBJECTID ) {
+                            return -1;
+                          }
+                          
+                          // a must be equal to b
+                          return 0;
+                        });
+
+                    for(i=0; i<idResults.length - 1; i++){
+                        //if there are duplicates (when the parent level layer checkbox is selected) remove duplicates
+                        if(idResults[i].feature.attributes.OBJECTID == idResults[i+1].feature.attributes.OBJECTID){
+                            //console.log(idResults[i].feature.attributes.OBJECTID,' == ',idResults[i+1].feature.attributes.OBJECTID);
+                            idResults.splice(idResults[i],1);                            
+                            options += '<option value="' + i + '">' + idResults[i].layerName + "</option>";
+
+                        } 
+                        //if there are duplicates (when the parent level layer checkbox is NOT selected)
+                        else{
+                            for (i =0, il = idResults.length; i < il; i++) {
+                                options += '<option value="' + i + '">' + idResults[i].layerName + "</option>";
+                            }
+                        }
+                    }
+                    //if after you've removed duplicates, there is still multiple selected
+                    if (idResults.length > 1) {
+                        $('#append').html("Multiple Features Selected (" +idResults.length+")" );
+                        $('#multipleSelect,multipleSelect2').html(options);
+                        $('#multipleSelect,multipleSelect2').selectBoxIt('refresh');
+                        $("#multipleSelectSelectBoxItContainer").show();
+                        $('.results.multiple').hide();
+                    } else {
+                        $('#append').html("");
+                        $("#multipleSelectSelectBoxItContainer").hide();
+                        $("multipleSelectSelectBoxItArrowContainer").hide();
+                    }
                 } else {
-                    //remove 'Results (x)'
-                    $('#append').html("");
-                    $("#multipleSelectSelectBoxItContainer").hide();
-                    $("multipleSelectSelectBoxItArrowContainer").hide();
+                     $('#append').html("");
+                     $("#multipleSelectSelectBoxItContainer").hide();
+                     $("multipleSelectSelectBoxItArrowContainer").hide();
                 }
                 this._showFeature(multipleIdentifyStack[0]); //utilities selected
                 this._layerTabContent(multipleIdentifyStack[0], multipleIdentifyLayerName[0]);
-                // multipleIdentifyLayerName[0] passes good layer name
             } else {
-                $('#append').html("RESULTS");
+                //parcel selected
+                $('#append').html("");
                 $("#multipleSelectSelectBoxItContainer").hide();
-                $('.results.identify').show();
                 identifyParamsParcel.mapExtent = map.extent;            
                 //identifyParamsParcel.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_ALL;
                 identifyParamsParcel.geometry = evt;
@@ -91,7 +122,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             switch (feature.geometry.type) {
             case "point":
                 var symbol = symbols.point;
-                //console.log(feature);
+                console.log(feature);
                 break;
             case "polyline":
                 var symbol = symbols.polyline;
@@ -107,7 +138,6 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
         //layerTabContent
         //Private Class
         _layerTabContent: function(layerResults, layerName) {
-            console.log(layerName);
             $(".identify .section-sub-header").html(layerName);
             $('.results.identify').show();
             geometryBuffer = [layerResults.geometry];
@@ -394,6 +424,7 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
             $("#multiptleBufferItem").html(content);
             $('.results.multipleBuffer').show();
             $('.results.identify').hide();
+            navEvent('defaultIdentify');
             this._createCSVFile();
         },
         
@@ -588,11 +619,10 @@ function ( declare, lang, dom, on, Query, QueryTask, Graphic, graphicsUtils, con
         //Public class
         updateIdentify: function(){
             selectedFeatures = { features: [] }; //remove previously selected parcels in results table
-            //multipleIdentifyLayerName = [];
+            multipleIdentifyLayerName = [];
             map.graphics.clear();
             this._showFeature(multipleIdentifyStack[parseInt($('#multipleSelect,multipleSelect2').val())]);
-            this._layerTabContent(multipleIdentifyStack[$('#multipleSelect,multipleSelect2').val()], multipleIdentifyLayerName[$('#multipleSelect,multipleSelect2').val()]); 
-            console.log($('#multipleSelect,multipleSelect2').val());
+            this._layerTabContent(multipleIdentifyStack[$('#multipleSelect,multipleSelect2').val()], multipleIdentifyLayerName[$('#multipleSelect,multipleSelect2').val()]);        
         },
 
         //doBuffer

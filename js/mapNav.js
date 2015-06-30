@@ -12,6 +12,7 @@ navEvent = function(task) {
         map.setMapCursor("default");
         iTool.activate(iTool._geometryType='point');
         map.enablePan();
+        $('.clickInstructions').hide();
         $('.radioset').find(':radio').prop("checked", false);
         $('.radioset').buttonset('refresh');
         $('.results.identify').hide();
@@ -21,16 +22,19 @@ navEvent = function(task) {
     case 'point':
         operationToDo = 'selection';
         iTool.activate(iTool._geometryType='point');
+        $('.clickInstructions').hide();
         $("#multipleSelectSelectBoxItContainer").hide();
         break;
     case 'line':
         operationToDo = 'selection';
         iTool.activate(iTool._geometryType='polyline');
+        $('.clickInstructions').show();
         $("#multipleSelectSelectBoxItContainer").hide();
         break;
     case 'polygon':
         operationToDo = 'selection';
         iTool.activate(iTool._geometryType='polygon');
+        $('.clickInstructions').show();
         $("#multipleSelectSelectBoxItContainer").hide();
         break;
     case 'clear':
@@ -48,6 +52,7 @@ navEvent = function(task) {
         csvInfo = [];
         mailParcels = [];
         // $('#search-tab a').removeClass('notice');
+        $('.clickInstructions').hide();
         $('#menu-toggle').removeClass('tab');
         $('.results.identify').hide();
         $('.results.multipleBuffer').hide();
@@ -73,6 +78,7 @@ navEvent = function(task) {
         csvInfo = [];
         mailParcels = [];
         // $('#search-tab a').removeClass('notice');
+        $('.clickInstructions').hide();
         $('#menu-toggle').removeClass('tab');
         $('.results.identify').hide();
         $('.results.multipleBuffer').hide();
@@ -94,6 +100,7 @@ navEvent = function(task) {
         graphicLayerLabels.clear();
         operationToDo = 'identify';
         iTool.activate(iTool._geometryType='point');
+        $('.clickInstructions').hide();
         $('.radioset').find(':radio').prop("checked", false);
         $('.radioset').buttonset('refresh');
         $('#noselected').show();
@@ -131,6 +138,7 @@ navEvent = function(task) {
         attValues = [];
         csvInfo = [];
         mailParcels = [];
+        $('.clickInstructions').hide();
         $('.radioset').find(':radio').prop("checked", false);
         $('.radioset').buttonset('refresh');
         $('.results.identify').hide();
@@ -152,35 +160,39 @@ navEvent = function(task) {
     case "measureLine":
         operationToDo = 'measure';
         measureGeometry = null;
+        $('.clickInstructions').show();
         iTool.activate(iTool._geometryType='polyline');
         break;
     case "measurePolygon":
         operationToDo = 'measure';
         measureGeometry = null;
+        $('.clickInstructions').show();
         iTool.activate(iTool._geometryType='polygon');
         break;
     case "drawingPolygon":
         operationToDo = 'drawing';
         labelling = false;
         //map.disablePan();
+        $('.clickInstructions').show();
         iTool.activate(iTool._geometryType='polygon');
         break;
     case "drawingLine":
         operationToDo = 'drawing';
         labelling = false;
         //map.disablePan();
+        $('.clickInstructions').show();
         iTool.activate(iTool._geometryType='polyline');
         break;
     case "drawingPoint":
         operationToDo = 'drawing';
         labelling = false;
-        //map.disablePan();
+        $('.clickInstructions').hide();
         iTool.activate(iTool._geometryType='point');
         break;
     case "drawingText":
         operationToDo = 'drawing';
         labelling = true;
-        //map.disablePan();
+        $('.clickInstructions').hide();
         iTool.activate(iTool._geometryType='point');
         break;
 

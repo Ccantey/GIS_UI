@@ -105,8 +105,8 @@
 		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 		<!-- <div class="container"> -->
 			<div class="navbar-header">
-				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewer" style="font-family: 'Roboto Slab', serif;">Wisconsin Rapids </a>
-				<a class="navbar-brand" href="http://www.wirapids.org" target="blank" id="cityviewerSMALL" style="font-family: 'Roboto Slab', serif;">Rapids</a>
+				<a class="navbar-brand" href="http://www.your.org" target="blank" id="cityviewer" style="font-family: 'Roboto Slab', serif;">Wisconsin Rapids </a>
+				<a class="navbar-brand" href="http://www.your.org" target="blank" id="cityviewerSMALL" style="font-family: 'Roboto Slab', serif;">Rapids</a>
 				<font class="navbar-brand" style="color:#ff6600; font-family:'Roboto Slab', serif;">City Viewer <i style="color:#999;font-family: Roboto Slab">Lite</i></font> <!-- <font class="navbar-brand" id="cityviewerSMALL">Viewer</font> -->
 			</div>
 			<div class="collapse navbar-collapse">
@@ -190,22 +190,7 @@
 					</div><!--searchForm-->
 				</br>
                     <span style='margin-left:4%;color:#6f6a5e'>Click on a parcel or utility feature to identify it</span>
-<!-- 					<section class="results identify" style="display:none">
-						<div id="append" class="section-header">Results</div>
-							<select name="type" id="multipleSelect" class="selectmenu" onchange="app.updateIdentify(this.value);">       
-							</select>
-							<div class="section-sub-header">Property Information</div>
-								<table class="data" id="singleItem1"> 
-								</table>
-							<div class="section-sub-header2">Tax Districts</div>
-								<table class="data" id="singleItem2">   
-								</table> 
-							<div class="attachments">
-								<table class="data" id='viewAttachment' >
-								</table>
-								<!-- <div class="progressBar" style="display:none"></div>
-							</div>                           
-					</section> -->
+
 					<div id="searchfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>     
 				</div><!--searchTab-->
 				<!--Begin Layers Tab Content-->   
@@ -215,42 +200,7 @@
 					<div id="tree">
 						<!--Checktree appends the closing elements... </li>-->
 						<span id="utilTitle" style="color:#ff6600">Selectable Layers</span> <!--Checktree doesn't work correctly if there are misspells-->
-<!-- 						<ul>
-							<li class="utilityLayer collapsed"><input type="checkbox"><label>Sanitary Sewer</label>					  
-								<ul>
-									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Taps</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Manholes</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Leads</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Abandoned Sanitary Pipe</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Gravity Main</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Sanitary Pressurized Mains</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Sewer Lift Stations</label>
 
-								</ul>
-							<li class="utilityLayer collapsed"><input type="checkbox"><label>Storm Sewer</label>
-							    <ul>
-									<li class="utilityLayer"><input type="checkbox"><label>Discharge Point</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Storm Manholes</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Catch Basins</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Storm Leads</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Storm Gravity Main</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Detention Pond</label>
-
-							    </ul>	
-							<li class="utilityLayer collapsed"><input type="checkbox"><label>WWLC Water</label>
-							    <ul>
-									<li class="utilityLayer"><input id='test'type="checkbox"><label>Water Manhole</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Fire Hydrant</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Water Network Structure</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Lateral Line</label>
-									<li class="utilityLayer"><input type="checkbox"><label>Water Main</label>
-
-							    </ul>	
-							<li class="utilityLayer A"><input id="Poles" type="checkbox"><label>WWLC Poles</label>				
-							<li class="utilityLayer A"><input id="Adraw" type="checkbox"><label>A-Drawings</label>
-							<li class="utilityLayer A"><input id="PlatIndex" type="checkbox"><label>Plat Map</label>
-						</ul> -->
-				<ul>
                     <li class="utilityLayer collapsed"><input type="checkbox"><label>Refuse</label>
                         <ul>                            
                             <li class="utilityLayer"><input type="checkbox"><label>Compost</label>
@@ -320,16 +270,13 @@
 					</br></br>
 					<table class="tools">
 						<tr>
-							<th>Select From</th>
+							<th>Select</th>
 							<td>
 								<select id="BufferLayer" class="selectmenu">
 								<!-- Change the buffer feature selection to: -->
 									<option value=21>Parcels</option>  
 									<option value="Drawing">Drawing</option>                                           
-<!-- 									<option value=18>Sanitary Gravity Mains</option>
-									<option value=11>Storm Gravity Mains</option>
-									<option value=25>Water Mains</option> -->
-									<!-- <option value=13>Water Mains</option>  -->
+
 								</select>
 							</td>
 						</tr>
@@ -347,7 +294,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th>Buffer</th>
+							<th>Select By Buffer</th>
 							<td>
 								<input type="text" name="Buffer" value="100" size="3" id="distance">
 									<select id="unitBuff" class="selectmenu">
@@ -374,18 +321,7 @@
 							</td>
 						</tr>
 					</table>
-<!-- 						<section class="results multipleBuffer">
-						<div class="process-results">
-							<a class="mailOption" >
-								<i class="glyphicon glyphicon-envelope"></i> Mail</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-							<a href="http://your.org/CityViewer/outputs/parcelInfo.csv" target="_blank">
-								<i class="glyphicon glyphicon-share-alt"></i> Export</a>
-						</div>
-
-							<table class="data" id="multiptleBufferItem">
-
-							</table>             
-						</section> -->
+                    <span class="clickInstructions" style='color:#6f6a5e'>Double-click to finish drawing</span>
 					<div id="toolsfooter">
 						<img class="logo" src="images/watermark.png" alt="Rapids Logo">
 					</div>
@@ -442,6 +378,7 @@
 									</td>
 							</tr>
 					</table>
+					<span class="clickInstructions" style='color:#6f6a5e'>Double-click to finish drawing</span>
 					<div id="drawfooter"><img class="logo" src="images/watermark.png" alt="Rapids Logo"></div>
 				</div><!--drawTab-->
 				<!--Begin toolsTab--> 
@@ -674,15 +611,7 @@
 				</div>
 			</div>
 		</div>
-		  <!--social media plugins-->
-<!-- 		  <a id="FB" class="btn-md navbar-toggle" title="Share on Facebook" target="_blank" href="http://www.facebook.com/sharer.php?u=http%3A%2F%2Fyour.org/PublicApp/index.html">				    
-                <i class="fa fa-facebook fa-lg fb"></i></span> 
-		  </a>		  
-	
-		  <a id="TW" class="btn-md navbar-toggle" target="_blank" title="Share on Twitter" href="http://twitter.com/share?url=http%3A%2F%2Fyour.org/PuplicApp/index.html
-				                                                                           &text=Citizen%20Service%20Maps%20from%20the%20City%20of%20Wisconsin%20Rapids">
-				<i class="fa fa-twitter fa-lg tw"></i>
-		  </a> 	 -->
+
 
 		<div id="mailLabelBox" class="transition form">
 			<a href="#" class="btn-close" title="Close"><i class="glyphicon glyphicon-remove"></i> Close</a>
@@ -700,40 +629,7 @@
   
 		</div>
 
-<!-- 		<div id="mailLabelBox" class="transition form">
-			<a href="#" class="btn-close" title="Close"><i class="glyphicon glyphicon-remove"></i> Close</a>
-			<div class='mail-header'>Select Mail Recipient:</div>
-			<div class="row">
-				<button id="ownerMail" class="transition btn btn-main">Owner</button>
-				<button id="residentMail" class="transition btn btn-main">Resident</button>
-				<button id="bothMail" class="transition btn btn-main">Both</button>
-			</div>   
-		</div> -->
 
-		<!-- parcel map print box -->
-<!-- 		<div id="printParcelBox" class="transition form">
-			<form method="post">
-
-				<div class="row"><input type="text"  placeholder="Parcel Map" value="Parcel Map" onclick="this.value = '';" id="title"></div>
-				<div class="row">
-					<select name="paper" id="parcelPaper" onchange='printParcelOptions.changePrintGraphic()'>
-						<option value="A4 Portrait Parcels">8.5 x 11 Portrait</option>
-						<option value="A4 Landscape Parcels">8.5 x 11 Landscape</option>
-						<option  value="A3 Portrait Parcels" >11 x 17 Portrait</option>       
-						<option  value="A3 Landscape Parcels"  >11 x 17 Landscape</option>
-						<option  value="MAP_ONLY" >Image (jpeg)</option>
-					</select>   
-				</div>        
-				<div id="printParcelProgressbar" class="progress progress-striped active"> 
-					<div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 5%"> 
-
-					</div> 
-				</div>
-
-				<button type="button" id="btn-printParcelArea" class="transition btn btn-main">Preview</button>
-				<button type="submit" id="btn-printParcel" class="transition btn btn-main">Print</button>        
-			</form>
-		</div -->
 
 	<!-- Bootstrap/jQuery /jQuery-UI core JavaScript
 	================================================== -->

@@ -46,6 +46,7 @@ $(window).keypress(function(event){
       // expandUiIcon: 'glyphicon glyphicon-star'     
     });
   $('#menu-toggle').hide();  //initial state
+  $('.clickInstructions').hide();
   $("#menu-close, #menu-close2, #menu-close3, #menu-close4, #menu-close5").click(function(e) {
      e.preventDefault();
      $('#menu-toggle').removeClass('tab');
@@ -354,21 +355,21 @@ $(window).keypress(function(event){
     
     $("#ownerMail").click(function () {
         $.post('outputs/mailLabelOwner.php', { q: mailParcels }, function (data) {
-            var mailUrl = "http://your.org/CityViewerLite/outputs/"+"" + data;
+            var mailUrl = "http://gis.wirapids.org/CityViewerLite/outputs/"+"" + data;
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
 
     $("#residentMail").click(function () {
         $.post('outputs/mailLabelResident.php', { q: mailParcels }, function (data) {
-            var mailUrl = "http://your.orgCityViewerLite/outputs/" + "" + data;
+            var mailUrl = "http://gis.wirapids.orgCityViewerLite/outputs/" + "" + data;
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
 
     $("#bothMail").click(function () {
         $.post('outputs/mailLabelBoth.php', { q: mailParcels }, function (data) {
-            var mailUrl = "http://your.org/CityViewerLite/outputs/" + "" + data;
+            var mailUrl = "http://gis.wirapids.org/CityViewerLite/outputs/" + "" + data;
             window.open(mailUrl, '_blank', 'width=600,height=600');
         });
     });
